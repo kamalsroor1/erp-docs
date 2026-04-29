@@ -21,10 +21,11 @@
 - **Backend:** `Laravel 11` (في وضع API Mode) مع `Laravel Reverb` للإشعارات اللحظية.
 - **Database:** `PostgreSQL` + `Redis`. الـ PostgreSQL يتيح استخدام `JSONB` لتخزين الخصائص المتغيرة للأجهزة دون المساس بالـ Schema.
 - **Multi-tenancy:**
-  - عزل البيانات (Row Level Isolation): Single Database مع إضافة `tenant_id` وتطبيق Global Scopes لمنع تداخل البيانات.
+  - استخدام حزمة **stancl/tenancy** الجاهزة لإدارة الـ Multi-tenancy بذكاء.
+  - عزل البيانات: **Two-database architecture** (قاعدة مركزية للاشتراكات + قاعدة بيانات للمحلات مع عزل Row Level).
 - **العمل بدون إنترنت (Offline Mode):** في نسخة الـ MVP الأولى سيكون الأوفلاين في وضع **"قراءة فقط" (Read-only)**. وفي الـ v2 سيتم تفعيل الـ Sync الكامل للمبيعات.
 - **ميزة الجرد بالموبايل:** استخدام مكتبات مثل `Vue-qrcode-reader` و `WebAssembly` لتمكين كاميرا الموبايل من قراءة الباركود والسيريال بسرعة البرق.
-- **الواتساب (WhatsApp):** الاعتماد حصرياً على الـ Cloud API الرسمي لتجنب الحظر.
+- **التنبيهات (Notifications):** الاعتماد على **Telegram Bot API** لإرسال الفواتير والتقارير والتنبيهات مجاناً وبسرعة فائقة.
 - **بوابات الدفع (Payment Gateways):** الربط مع Paymob/Fawry في مصر، و Moyasar/Tap في الخليج.
 - **جاهزية الخليج (Gulf Ready):** بناء النظام ليدعم تعدد العملات (SAR, AED, EGP) والربط مع هيئة الزكاة والضريبة والجمارك (ZATCA) في السعودية.
 

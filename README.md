@@ -53,8 +53,8 @@
 
 - **سبب اختيار Laravel Monolith** بدلاً من Microservices (توفير 40% من وقت التطوير).
 - **مقارنة تقنية** مع منافسي السوق (SaaS vs Desktop).
-- **تفاصيل الـ Tech Stack:** Laravel 11 (PHP 8.2+), Vue.js 3, Inertia.js v3.0, PostgreSQL, Redis.
-- **استراتيجية Multi-tenancy:** Single Database + Row Level Isolation.
+- **تفاصيل الـ Tech Stack:** Laravel 11 (PHP 8.2+), Vue.js 3, Inertia.js v3.0, PostgreSQL, Redis, Telegram Bot API.
+- **استراتيجية Multi-tenancy:** **stancl/tenancy** (Dual Database Architecture).
 - **استراتيجية التسعير** والزيادة السنوية المركبة (15%).
 - **Product Roadmap** مقسّم لـ 3 مراحل (MVP → صيانة → أتمتة).
 - **منظومة المنتجات:** E-commerce، HR Module، Integration Layer.

@@ -19,7 +19,7 @@
 - **State Management:** Pinia (لحفظ حالة السلة في POS).
 - **Database:** PostgreSQL (لدعم بيانات JSONB المعقدة).
 - **Real-time:** Laravel Reverb (للإشعارات اللحظية والطلبات).
-- **Multi-tenancy:** Single Database مع `tenant_id` (Row Level Isolation).
+- **Multi-tenancy:** **stancl/tenancy** (Dual Database architecture).
 - **Caching & Queues:** Redis.
 - **Scanning:** WebAssembly + كاميرا المتصفح للجرد السريع.
 - **Infrastructure:** Dockerized setup, AWS or DigitalOcean (Region: Frankfurt or Bahrain for Gulf).
@@ -54,7 +54,7 @@
     - تغليف النظام باستخدام NativePHP أو Tauri لتحسين تجربة الطباعة والسرعة.
 
 ### المرحلة الثالثة: الأتمتة والتوسع
-- **الواتساب (WhatsApp API):** إرسال الفواتير وحالات الصيانة آلياً للعملاء.
+- **تليجرام (Telegram Bot API):** إرسال الفواتير وحالات الصيانة آلياً للعملاء مجاناً.
 - **التجارة الإلكترونية (Mini-Ecommerce):** تحويل المخزن لصفحة عرض أونلاين بضغطة زر.
 - **الربط الضريبي:** ETA (مصر) و ZATCA (السعودية).
 
