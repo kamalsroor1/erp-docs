@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إبراء ERP - دخول النظام</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; }
+        .emerald-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .glass-card { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); border: 2px solid rgba(30, 41, 59, 0.7); }
+        .text-bright { color: #FFFFFF !important; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6 overflow-hidden relative">
+
+    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[150px] -mr-64 -mt-64"></div>
+
+    <div id="app" class="w-full max-w-lg z-10">
+        <div class="glass-card p-16 rounded-[60px] shadow-3xl">
+            <div class="flex flex-col items-center mb-12 text-center">
+                <img src="../Gemini_Generated_Image_44ih5844ih5844ih Whait.png" alt="Logo" class="h-24 w-auto mb-6">
+                <h1 class="text-4xl font-black text-bright tracking-tight leading-none italic">دخول النظام</h1>
+                <p class="text-slate-400 text-lg mt-4 font-bold uppercase tracking-widest italic">مرحباً بك مجدداً في إبراء ERP</p>
+            </div>
+
+            <form @submit.prevent="handleLogin" class="space-y-8">
+                <div class="space-y-3">
+                    <label class="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">البريد الإلكتروني</label>
+                    <input v-model="email" type="email" placeholder="name@company.com" 
+                           class="w-full bg-slate-900 border-2 border-slate-800 rounded-[30px] py-6 px-8 text-xl font-black text-bright focus:border-emerald-500 outline-none transition">
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between mr-2">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest">كلمة المرور</label>
+                    </div>
+                    <input v-model="password" type="password" placeholder="••••••••" 
+                           class="w-full bg-slate-900 border-2 border-slate-800 rounded-[30px] py-6 px-8 text-xl font-black text-bright focus:border-emerald-500 outline-none transition tracking-widest">
+                </div>
+
+                <button type="submit" :disabled="loading" 
+                        class="w-full emerald-gradient text-white py-8 rounded-[35px] font-black text-2xl shadow-3xl shadow-emerald-900/40 hover:scale-[1.02] active:scale-95 transition-all">
+                    <span v-if="!loading">تسجيل الدخول</span>
+                    <div v-else class="h-8 w-8 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+                </button>
+            </form>
+
+            <div class="mt-12 pt-10 border-t border-slate-800/50 text-center">
+                <p class="text-lg text-slate-400 font-bold italic">ليس لديك حساب؟</p>
+                <a href="pricing.html" class="inline-block mt-4 text-xl font-black text-bright hover:text-emerald-400 transition underline decoration-emerald-500 decoration-4 underline-offset-8 italic">
+                    اشترك الآن وابدأ العمل &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted } = Vue;
+        createApp({
+            setup() {
+                const email = ref('');
+                const password = ref('');
+                const loading = ref(false);
+                const handleLogin = () => {
+                    loading.value = true;
+                    setTimeout(() => window.location.href = 'index.html', 1500);
+                };
+                onMounted(() => lucide.createIcons());
+                return { email, password, loading, handleLogin };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
