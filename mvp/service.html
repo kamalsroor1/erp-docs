@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إبراء ERP - مركز الصيانة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; }
+        .sidebar { background-color: #020617; border-left: 2px solid #1E293B; }
+        .card-bg { background-color: #0F172A; border: 2px solid #1E293B; }
+        .emerald-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .blue-gradient { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); }
+        .text-bright { color: #FFFFFF !important; }
+        .text-dim { color: #94A3B8 !important; }
+        .tab-active { border-color: #3B82F6; color: #3B82F6; background-color: rgba(59, 130, 246, 0.05); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <div id="app" class="flex w-full">
+        <!-- القائمة الجانبية -->
+        <aside class="w-64 sidebar flex flex-col hidden md:flex">
+            <div class="p-8 text-center border-b border-slate-800/50 mb-4">
+                <img src="../Gemini_Generated_Image_44ih5844ih5844ih Whait.png" alt="Logo" class="h-14 mx-auto mb-2">
+                <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">مركز الخدمة</span>
+            </div>
+            <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+                <a href="index.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="layout-dashboard" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الرئيسية</span>
+                </a>
+                <a href="pos.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="shopping-cart" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">شاشة البيع</span>
+                </a>
+                <a href="inventory.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="box" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المخزن</span>
+                </a>
+                <a href="crm.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="users" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المبيعات والعملاء</span>
+                </a>
+                <a href="service.html" class="flex items-center px-4 py-3 bg-blue-600/10 text-blue-400 border border-blue-500/20 rounded-xl transition">
+                    <i data-lucide="wrench" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الصيانة</span>
+                </a>
+                <a href="finance.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="wallet" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المالية</span>
+                </a>
+                <a href="reports.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="bar-chart-3" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">التقارير</span>
+                </a>
+                <a href="settings.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="settings" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الإعدادات</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- المحتوى الرئيسي -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-[#020617]">
+            <header class="h-20 border-b-2 border-slate-800 flex items-center justify-between px-10 bg-[#020617] z-20">
+                <h2 class="text-3xl font-black text-bright italic">مركز الصيانة</h2>
+                <button @click="showNewTicketModal = true" class="blue-gradient text-white px-8 py-3 rounded-2xl font-black text-lg shadow-xl shadow-blue-900/20">
+                    <i data-lucide="plus-circle" class="ml-2 inline w-6 h-6"></i>
+                    تذكرة صيانة جديدة
+                </button>
+            </header>
+
+            <!-- التبويبات (حالات الصيانة) -->
+            <div class="px-10 bg-slate-900/30 border-b border-slate-800 flex space-x-2 space-x-reverse overflow-x-auto custom-scrollbar">
+                <button v-for="t in tabs" :key="t.id" @click="activeTab = t.id"
+                        :class="activeTab === t.id ? 'tab-active border-b-2' : 'text-dim border-b-2 border-transparent'"
+                        class="px-8 py-5 font-black text-sm transition-all flex items-center whitespace-nowrap italic uppercase">
+                    <i :data-lucide="t.icon" class="ml-2 w-4 h-4"></i>
+                    {{ t.name }}
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
+                
+                <!-- قائمة تذاكر الصيانة -->
+                <div class="space-y-6">
+                    <div v-for="ticket in filteredTickets" :key="ticket.id" class="card-bg p-8 rounded-[40px] flex items-center justify-between border-slate-800 hover:border-blue-500/30 transition group">
+                        <div class="flex items-center space-x-8 space-x-reverse">
+                            <div class="h-16 w-16 bg-slate-900 border-2 border-slate-800 rounded-3xl flex items-center justify-center text-blue-500 font-black text-xl">#{{ ticket.id }}</div>
+                            <div>
+                                <h4 class="text-2xl font-black text-bright leading-none">{{ ticket.customerName }}</h4>
+                                <div class="flex items-center mt-3 space-x-4 space-x-reverse">
+                                    <span class="text-xs font-black text-dim italic uppercase tracking-widest">{{ ticket.device }}</span>
+                                    <span class="h-1.5 w-1.5 rounded-full bg-slate-700"></span>
+                                    <span class="text-xs font-bold text-blue-400 italic">العطل: {{ ticket.issue }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-12 space-x-reverse">
+                            <div class="text-left">
+                                <p class="text-[10px] font-black text-dim uppercase italic mb-1 tracking-widest">تاريخ التسليم</p>
+                                <p class="text-lg font-black text-bright">{{ ticket.deliveryDate }}</p>
+                            </div>
+                            <span :class="getStatusColor(ticket.status)" class="px-4 py-2 rounded-xl text-xs font-black italic uppercase border border-white/10">
+                                {{ ticket.status }}
+                            </span>
+                            <button class="p-3 bg-slate-800 hover:bg-slate-700 rounded-2xl transition"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- نافذة تذكرة صيانة جديدة (مسار المستخدم) -->
+        <div v-if="showNewTicketModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4">
+            <div class="card-bg w-full max-w-4xl rounded-[60px] p-12 shadow-2xl border-blue-500/30 overflow-y-auto max-h-[95vh] custom-scrollbar">
+                <div class="flex justify-between items-center mb-10 border-b border-slate-800 pb-8">
+                    <h3 class="text-4xl font-black text-bright italic tracking-tighter">فتح تذكرة صيانة جديدة</h3>
+                    <button @click="showNewTicketModal = false" class="text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-8 h-8"></i></button>
+                </div>
+                
+                <form @submit.prevent="saveTicket" class="space-y-10">
+                    <!-- الخطوة 1: بيانات العميل -->
+                    <div class="space-y-6">
+                        <h4 class="text-xl font-black text-blue-400 italic border-r-4 border-blue-500 pr-4">1. بيانات العميل</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">بحث برقم الموبايل</label>
+                                <input type="text" placeholder="01xxxxxxxxx" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-6 text-xl font-black text-bright outline-none focus:border-blue-500 transition">
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">اسم العميل (في حال كان جديد)</label>
+                                <input type="text" placeholder="الاسم الكامل" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-6 text-xl font-black text-bright outline-none focus:border-blue-500 transition">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- الخطوة 2: بيانات الجهاز والعطل -->
+                    <div class="space-y-6">
+                        <h4 class="text-xl font-black text-blue-400 italic border-r-4 border-blue-500 pr-4">2. بيانات الجهاز والعطل</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">الماركة والموديل</label>
+                                <input type="text" placeholder="مثلاً: iPhone 14 Pro" class="w-full bg-[#020617] border-2 border-slate-800 rounded-2xl py-4 px-6 text-lg font-bold text-bright outline-none focus:border-blue-500">
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">السيريال / IMEI</label>
+                                <input type="text" placeholder="الرقم التسلسلي" class="w-full bg-[#020617] border-2 border-slate-800 rounded-2xl py-4 px-6 text-lg font-bold text-bright outline-none focus:border-blue-500">
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">موعد التسليم التقديري</label>
+                                <input type="date" class="w-full bg-[#020617] border-2 border-slate-800 rounded-2xl py-4 px-6 text-lg font-bold text-bright outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">وصف العطل والفحص الظاهري</label>
+                            <textarea placeholder="شرح العطل وتوثيق حالة الجهاز عند الاستلام (مثلاً: كسر في الزاوية)" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-6 text-lg font-bold text-bright outline-none focus:border-blue-500 h-32"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-6 space-x-reverse pt-10 border-t border-slate-800">
+                        <button type="button" @click="showNewTicketModal = false" class="flex-1 py-6 bg-slate-900 text-dim rounded-[30px] font-black text-xl hover:text-white transition">إلغاء</button>
+                        <button type="submit" class="flex-2 py-6 blue-gradient text-white rounded-[30px] font-black text-2xl shadow-2xl shadow-blue-900/40 transition-all hover:scale-[1.02]">
+                            حفظ التذكرة وطباعة الباركود 🖨️
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, watchEffect } = Vue;
+        createApp({
+            setup() {
+                const activeTab = ref('all');
+                const showNewTicketModal = ref(false);
+                const tabs = [
+                    { id: 'all', name: 'كافة التذاكر', icon: 'list' },
+                    { id: 'repair', name: 'قيد الإصلاح', icon: 'wrench' },
+                    { id: 'ready', name: 'جاهز للتسليم', icon: 'check-circle' },
+                    { id: 'delivered', name: 'تم التسليم', icon: 'archive' }
+                ];
+
+                const tickets = ref([
+                    { id: 1050, customerName: 'أحمد علي', device: 'iPhone 13 Pro', issue: 'تغيير شاشة', status: 'قيد الإصلاح', deliveryDate: '2024/05/01' },
+                    { id: 1049, customerName: 'سارة محمود', device: 'Samsung S22', issue: 'سوكت شحن', status: 'جاهز للتسليم', deliveryDate: '2024/04/29' },
+                    { id: 1048, customerName: 'شركة النيل', device: 'iPad Air 4', issue: 'تغيير بطارية', status: 'تم التسليم', deliveryDate: '2024/04/25' }
+                ]);
+
+                const filteredTickets = computed(() => {
+                    if (activeTab.value === 'all') return tickets.value;
+                    const statusMap = { 'repair': 'قيد الإصلاح', 'ready': 'جاهز للتسليم', 'delivered': 'تم التسليم' };
+                    return tickets.value.filter(t => t.status === statusMap[activeTab.value]);
+                });
+
+                const getStatusColor = (status) => {
+                    if (status === 'قيد الإصلاح') return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+                    if (status === 'جاهز للتسليم') return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                    return 'bg-slate-800 text-dim border-slate-700';
+                };
+
+                const saveTicket = () => {
+                    Swal.fire({ 
+                        title: 'تم حفظ التذكرة! 🎟️', 
+                        text: 'تم إرسال رابط التتبع للعميل عبر تليجرام وجاري طباعة ملصق الجهاز.', 
+                        icon: 'success', 
+                        background: '#0F172A', 
+                        color: '#FFFFFF', 
+                        confirmButtonColor: '#3B82F6' 
+                    }).then(() => showNewTicketModal.value = false);
+                };
+
+                onMounted(() => lucide.createIcons());
+                watchEffect(() => setTimeout(() => lucide.createIcons(), 0));
+
+                return { activeTab, tabs, tickets, filteredTickets, showNewTicketModal, getStatusColor, saveTicket };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
