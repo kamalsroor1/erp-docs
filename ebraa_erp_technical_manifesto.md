@@ -14,7 +14,7 @@
 يجب الالتزام بالبساطة مع القابلية للتوسع (Scalability):
 
 - **Backend:** Laravel 11.
-- **Frontend:** Vue.js 3 + Inertia.js v2.0 + Vite.
+- **Frontend:** Vue.js 3 + Inertia.js v3.0 + Vite.
 - **State Management:** Pinia (لحفظ حالة السلة في POS).
 - **Database:** PostgreSQL (لدعم بيانات JSONB المعقدة).
 - **Real-time:** Laravel Reverb (للإشعارات اللحظية والطلبات).
