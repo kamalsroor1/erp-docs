@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إبراء ERP - لوحة تحكم المنصة (Admin)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; }
+        .sidebar { background-color: #020617; border-left: 2px solid #1E293B; }
+        .card-bg { background-color: #0F172A; border: 2px solid #1E293B; }
+        .blue-gradient { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); }
+        .text-bright { color: #FFFFFF !important; }
+        .text-dim { color: #94A3B8 !important; }
+        .tab-active { border-color: #3B82F6; color: #3B82F6; background-color: rgba(59, 130, 246, 0.05); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <div id="app" class="flex w-full">
+        <!-- القائمة الجانبية (Admin Mode) -->
+        <aside class="w-64 sidebar flex flex-col hidden md:flex">
+            <div class="p-8 text-center border-b border-slate-800/50 mb-4">
+                <img src="../Gemini_Generated_Image_44ih5844ih5844ih Whait.png" alt="Logo" class="h-14 mx-auto mb-2">
+                <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">إدارة المنصة v1.0</span>
+            </div>
+            <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+                <a href="#" class="flex items-center px-4 py-3 bg-blue-600/10 text-blue-400 border border-blue-500/20 rounded-xl transition">
+                    <i data-lucide="layout-grid" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg">إحصائيات النظام</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="building-2" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg">إدارة المحلات</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="credit-card" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg">خطط الاشتراك</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="help-circle" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg">الدعم الفني</span>
+                </a>
+                <div class="pt-10">
+                    <a href="index.html" class="flex items-center px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition">
+                        <i data-lucide="log-out" class="ml-3 w-5 h-5"></i>
+                        <span class="font-bold">خروج للمحل</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- المحتوى الرئيسي -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-[#020617]">
+            <header class="h-24 border-b-2 border-slate-800 flex items-center justify-between px-10 bg-[#020617]">
+                <div>
+                    <h2 class="text-3xl font-black text-bright italic">لوحة التحكم العليا (SaaS Admin)</h2>
+                    <p class="text-xs text-dim font-bold mt-1 italic uppercase tracking-widest">مرحباً بك، المدير العام</p>
+                </div>
+                <div class="flex items-center space-x-6 space-x-reverse">
+                    <div class="bg-blue-600/10 px-6 py-3 rounded-2xl border border-blue-500/20 text-center">
+                        <p class="text-[10px] font-black text-dim uppercase">إجمالي الإيرادات</p>
+                        <p class="text-2xl font-black text-blue-400 tracking-tighter">482,000 <span class="text-xs">ج.م</span></p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-10 space-y-12 custom-scrollbar">
+                
+                <!-- 1. إحصائيات سريعة -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div v-for="stat in stats" :key="stat.label" class="card-bg p-8 rounded-[40px] border-slate-800/50 hover:border-blue-500/30 transition">
+                        <p class="text-xs font-black text-dim uppercase tracking-widest mb-2">{{ stat.label }}</p>
+                        <h3 class="text-4xl font-black text-bright">{{ stat.value }}</h3>
+                        <p class="text-[10px] font-bold text-blue-500 mt-2 italic">{{ stat.trend }}</p>
+                    </div>
+                </div>
+
+                <!-- 2. إدارة المحلات (Tenants) -->
+                <div class="space-y-8">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-2xl font-black text-bright italic">آخر المحلات المنضمة</h4>
+                        <button class="px-8 py-3 blue-gradient text-white rounded-xl font-black text-sm shadow-xl shadow-blue-900/20">عرض كافة المشتركين</button>
+                    </div>
+                    <div class="card-bg rounded-[45px] overflow-hidden shadow-2xl">
+                        <table class="w-full text-right">
+                            <thead class="bg-slate-800/50 border-b border-slate-800">
+                                <tr class="text-[10px] text-dim font-black uppercase tracking-[3px]">
+                                    <th class="px-8 py-6">المحل / التاجر</th>
+                                    <th class="px-8 py-6">الباقة</th>
+                                    <th class="px-8 py-6">تاريخ الانضمام</th>
+                                    <th class="px-8 py-6">الحالة</th>
+                                    <th class="px-8 py-6 text-center">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <tr v-for="t in tenants" :key="t.id" class="hover:bg-white/[0.01] transition group">
+                                    <td class="px-8 py-6">
+                                        <div class="font-black text-bright text-lg leading-none">{{ t.name }}</div>
+                                        <div class="text-[10px] text-dim font-bold mt-2 italic ltr text-right">{{ t.domain }}</div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <span class="px-3 py-1 bg-slate-800 rounded-lg text-[10px] font-black text-blue-400 italic">{{ t.plan }}</span>
+                                    </td>
+                                    <td class="px-8 py-6 text-dim font-bold italic text-sm">{{ t.date }}</td>
+                                    <td class="px-8 py-6">
+                                        <span :class="t.status === 'نشط' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'" class="px-3 py-1 rounded-lg text-[10px] font-black">
+                                            {{ t.status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-center">
+                                        <div class="flex items-center justify-center space-x-3 space-x-reverse">
+                                            <button class="p-3 bg-slate-800 hover:bg-blue-600 rounded-xl transition text-dim hover:text-white"><i data-lucide="shield-check" class="w-5 h-5"></i></button>
+                                            <button class="p-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition text-dim"><i data-lucide="edit-2" class="w-5 h-5"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. إدارة الخطط والدعم (إيماء سريع) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div class="card-bg p-10 rounded-[50px] border-blue-500/10">
+                        <h4 class="text-xl font-black text-bright mb-8 italic flex items-center">
+                            <i data-lucide="credit-card" class="ml-3 text-blue-500"></i>
+                            إدارة خطط الاشتراك والأسعار
+                        </h4>
+                        <div class="space-y-4">
+                            <div v-for="p in ['الأساسية', 'الاحترافية', 'المؤسسات']" class="flex justify-between items-center p-5 bg-slate-900 rounded-3xl border border-slate-800">
+                                <span class="font-black text-bright">الباقة {{ p }}</span>
+                                <button class="text-blue-500 font-black text-sm italic underline underline-offset-4">تعديل السعر</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-bg p-10 rounded-[50px] border-red-500/10">
+                        <h4 class="text-xl font-black text-bright mb-8 italic flex items-center">
+                            <i data-lucide="help-circle" class="ml-3 text-red-500"></i>
+                            تذاكر الدعم الفني المعلقة
+                        </h4>
+                        <div class="space-y-4">
+                            <div class="p-5 bg-slate-900 rounded-3xl border border-slate-800 flex justify-between items-center">
+                                <div>
+                                    <p class="font-black text-bright">عطل في طابعة الفرع</p>
+                                    <p class="text-[10px] text-dim mt-1 font-bold italic">محل: إلكترونيات السلام</p>
+                                </div>
+                                <span class="px-3 py-1 bg-red-500/10 text-red-500 text-[10px] font-black rounded-lg">عاجل</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted } = Vue;
+        createApp({
+            setup() {
+                const stats = ref([
+                    { label: 'إجمالي المحلات', value: '1,250', trend: '+15% هذا الشهر' },
+                    { label: 'مشتركين نشطين', value: '840', trend: '+5% هذا الشهر' },
+                    { label: 'إيرادات الشهر', value: '145k', trend: '+22% نمو' },
+                    { label: 'تذاكر الدعم', value: '12', trend: '8 تذاكر مغلقة اليوم' }
+                ]);
+
+                const tenants = ref([
+                    { id: 1, name: 'محل كمال للإلكترونيات', domain: 'kamal.ebraa-erp.com', plan: 'الاحترافية', date: '2024/04/20', status: 'نشط' },
+                    { id: 2, name: 'أولاد علي للهواتف', domain: 'ali-phones.ebraa-erp.com', plan: 'الأساسية', date: '2024/04/18', status: 'نشط' },
+                    { id: 3, name: 'مركز السلام التقني', domain: 'salam.ebraa-erp.com', plan: 'المؤسسات', date: '2024/04/15', status: 'منتهي' }
+                ]);
+
+                onMounted(() => lucide.createIcons());
+                return { stats, tenants };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
