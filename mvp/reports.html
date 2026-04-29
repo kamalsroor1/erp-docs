@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إبراء ERP - التقارير والتحليلات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; }
+        .sidebar { background-color: #020617; border-left: 2px solid #1E293B; }
+        .card-bg { background-color: #0F172A; border: 2px solid #1E293B; }
+        .emerald-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .text-bright { color: #FFFFFF !important; }
+        .text-dim { color: #94A3B8 !important; }
+        .tab-active { border-color: #10B981; color: #10B981; background-color: rgba(16, 185, 129, 0.05); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <div id="app" class="flex w-full">
+        <!-- القائمة الجانبية -->
+        <aside class="w-64 sidebar flex flex-col hidden md:flex">
+            <div class="p-8 text-center border-b border-slate-800/50 mb-4">
+                <img src="../Gemini_Generated_Image_44ih5844ih5844ih Whait.png" alt="Logo" class="h-14 mx-auto mb-2">
+                <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">التحليلات الذكية</span>
+            </div>
+            <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+                <a href="index.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="layout-dashboard" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الرئيسية</span>
+                </a>
+                <a href="pos.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="shopping-cart" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">شاشة البيع</span>
+                </a>
+                <a href="inventory.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="box" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المخزن</span>
+                </a>
+                <a href="crm.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="users" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المبيعات والعملاء</span>
+                </a>
+                <a href="service.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="wrench" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الصيانة</span>
+                </a>
+                <a href="finance.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="wallet" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المالية</span>
+                </a>
+                <a href="reports.html" class="flex items-center px-4 py-3 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-xl transition">
+                    <i data-lucide="bar-chart-3" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">التقارير</span>
+                </a>
+                <a href="settings.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="settings" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الإعدادات</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- المحتوى الرئيسي -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-[#020617]">
+            <header class="h-20 border-b-2 border-slate-800 flex items-center justify-between px-10 sticky top-0 bg-[#020617]/80 backdrop-blur-md z-20">
+                <h2 class="text-3xl font-black text-bright italic">مركز التقارير</h2>
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <button class="px-6 py-2 bg-slate-800 text-white rounded-xl font-black text-xs border border-slate-700">تصدير Excel</button>
+                    <button class="px-6 py-2 bg-slate-800 text-white rounded-xl font-black text-xs border border-slate-700">طباعة PDF</button>
+                </div>
+            </header>
+
+            <!-- التبويبات -->
+            <div class="px-10 bg-slate-900/30 border-b border-slate-800 flex space-x-2 space-x-reverse">
+                <button v-for="t in tabs" :key="t.id" @click="activeTab = t.id"
+                        :class="activeTab === t.id ? 'tab-active border-b-2' : 'text-dim border-b-2 border-transparent'"
+                        class="px-8 py-5 font-black text-sm transition-all flex items-center">
+                    <i :data-lucide="t.icon" class="ml-2 w-4 h-4"></i>
+                    {{ t.name }}
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
+                
+                <!-- 1. تقارير المبيعات -->
+                <div v-if="activeTab === 'sales'" class="space-y-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="card-bg p-8 rounded-[40px] h-[350px]">
+                            <h4 class="text-xl font-black text-bright mb-8 italic">تحليل المبيعات الأسبوعي</h4>
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                        <div class="card-bg p-8 rounded-[40px] flex flex-col justify-between">
+                            <h4 class="text-xl font-black text-bright mb-6 italic">ملخص مبيعات الشهر</h4>
+                            <div class="space-y-6">
+                                <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                                    <span class="font-bold text-dim">إجمالي الفواتير</span>
+                                    <span class="font-black text-bright text-xl">450 فاتورة</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                                    <span class="font-bold text-dim">متوسط قيمة الفاتورة</span>
+                                    <span class="font-black text-emerald-400 text-xl">1,250 ج.م</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-dim">أكثر صنف مبيعاً</span>
+                                    <span class="font-black text-blue-400 text-xl italic">iPhone 15 Pro</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. تقارير المخزون -->
+                <div v-if="activeTab === 'inventory'" class="space-y-8">
+                    <h4 class="text-2xl font-black text-bright italic">تنبيهات نواقص المخزون</h4>
+                    <div class="card-bg rounded-[40px] overflow-hidden">
+                        <table class="w-full text-right">
+                            <thead class="bg-slate-800/50 border-b border-slate-800">
+                                <tr class="text-[10px] text-dim font-black uppercase tracking-[3px]">
+                                    <th class="px-8 py-6">الصنف</th>
+                                    <th class="px-8 py-6">الكمية الحالية</th>
+                                    <th class="px-8 py-6">حد الطلب</th>
+                                    <th class="px-8 py-6">الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <tr v-for="p in lowStock" :key="p.id" class="hover:bg-red-500/[0.02]">
+                                    <td class="px-8 py-6 font-bold text-bright">{{ p.name }}</td>
+                                    <td class="px-8 py-6 font-black text-red-500">{{ p.stock }}</td>
+                                    <td class="px-8 py-6 font-bold text-dim">{{ p.min }}</td>
+                                    <td class="px-8 py-6"><span class="px-3 py-1 bg-red-500/10 text-red-500 text-[10px] font-black rounded-lg">قارب على النفاذ</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. تقارير العملاء -->
+                <div v-if="activeTab === 'customers'" class="space-y-8">
+                    <h4 class="text-2xl font-black text-bright italic">أكثر العملاء شراءً</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div v-for="c in topCustomers" :key="c.id" class="card-bg p-6 rounded-[32px] flex items-center justify-between">
+                            <div class="flex items-center space-x-4 space-x-reverse">
+                                <div class="h-14 w-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 font-black text-xl">{{ c.name[0] }}</div>
+                                <div>
+                                    <p class="font-black text-bright text-lg leading-none">{{ c.name }}</p>
+                                    <p class="text-[10px] font-bold text-dim mt-2 italic">{{ c.orders }} فاتورة صادرة</p>
+                                </div>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-[10px] font-black text-dim uppercase">إجمالي المسحوبات</p>
+                                <p class="text-xl font-black text-emerald-400 leading-none">{{ c.total }} ج.م</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, watchEffect } = Vue;
+        createApp({
+            setup() {
+                const activeTab = ref('sales');
+                const tabs = [
+                    { id: 'sales', name: 'تقارير المبيعات', icon: 'trending-up' },
+                    { id: 'inventory', name: 'حالة المخزون', icon: 'box' },
+                    { id: 'customers', name: 'إحصائيات العملاء', icon: 'users-2' }
+                ];
+
+                const lowStock = ref([
+                    { id: 1, name: 'AirPods Pro Gen 2', stock: 2, min: 10 },
+                    { id: 2, name: 'شاحن أبل 20 وات', stock: 5, min: 15 },
+                    { id: 3, name: 'كابل آيفون Type-C', stock: 8, min: 20 }
+                ]);
+
+                const topCustomers = ref([
+                    { id: 1, name: 'أحمد علي مصطفى', orders: 42, total: '125,400' },
+                    { id: 2, name: 'محمد حسن الشافعي', orders: 28, total: '88,200' },
+                    { id: 3, name: 'شركة النيل للبرمجيات', orders: 15, total: '142,000' }
+                ]);
+
+                onMounted(() => {
+                    lucide.createIcons();
+                    const ctx = document.getElementById('salesChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+                            datasets: [{
+                                label: 'مبيعات (ج.م)',
+                                data: [12000, 15000, 10000, 22000, 18000, 30000, 25000],
+                                backgroundColor: '#10B981',
+                                borderRadius: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                                x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                            }
+                        }
+                    });
+                });
+
+                watchEffect(() => setTimeout(() => lucide.createIcons(), 0));
+
+                return { activeTab, tabs, lowStock, topCustomers };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
