@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إبراء ERP - باقات الاشتراك</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; }
+        .emerald-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .plan-card { transition: all 0.3s; border: 3px solid #1E293B; background-color: #0F172A; }
+        .plan-card:hover { transform: translateY(-15px); border-color: #10B981; box-shadow: 0 40px 80px -15px rgba(16, 185, 129, 0.3); }
+        .featured-plan { border-color: #10B981; }
+    </style>
+</head>
+<body class="p-8 md:p-20 min-h-screen">
+
+    <div id="app" class="max-w-7xl mx-auto">
+        <div class="text-center mb-24">
+            <h1 class="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter italic">اختر باقتك <span class="text-emerald-500">وانطلق</span></h1>
+            <p class="text-slate-400 max-w-2xl mx-auto font-bold text-xl italic">انضم لمئات التجار الذين يثقون في إبراء لإدارة مبيعاتهم وصيانتهم.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div v-for="plan in plans" :key="plan.name" 
+                 class="rounded-[60px] p-12 plan-card flex flex-col h-full relative overflow-hidden"
+                 :class="{'featured-plan': plan.featured}">
+                
+                <div v-if="plan.featured" class="absolute top-0 left-0 w-full py-3 bg-emerald-500 text-white text-xs font-black text-center uppercase tracking-widest italic shadow-lg">الباقة الأكثر مبيعاً</div>
+                
+                <div class="mb-12">
+                    <h3 class="text-3xl font-black text-white mb-4 italic tracking-tighter">{{ plan.name }}</h3>
+                    <p class="text-sm text-slate-400 font-bold italic leading-relaxed">{{ plan.desc }}</p>
+                </div>
+
+                <div class="mb-12 flex items-end">
+                    <span class="text-6xl font-black text-white ml-3 tracking-tighter">{{ plan.monthlyPrice }}</span>
+                    <span class="text-sm font-black text-slate-500 uppercase pb-3 italic">ج.م / شهرياً</span>
+                </div>
+
+                <ul class="space-y-6 mb-16 flex-1">
+                    <li v-for="feat in plan.features" class="flex items-center text-lg font-bold text-white italic">
+                        <i data-lucide="check-circle" class="w-6 h-6 text-emerald-500 ml-4"></i>
+                        {{ feat }}
+                    </li>
+                </ul>
+
+                <button @click="selectPlan(plan)" 
+                        :class="plan.featured ? 'emerald-gradient text-white' : 'bg-slate-800 text-white hover:bg-slate-700'"
+                        class="w-full py-7 rounded-[30px] font-black text-2xl shadow-2xl transition-all active:scale-95">
+                    اشترك الآن
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted } = Vue;
+        createApp({
+            setup() {
+                const plans = ref([
+                    { name: 'الباقة الأساسية', desc: 'للمحلات الصغيرة والبدايات القوية.', monthlyPrice: '450', featured: false, features: ['مستخدم واحد', 'مخزن حتى 500 صنف', 'شاشة مبيعات سريعة', 'دعم تليجرام'] },
+                    { name: 'الباقة الاحترافية', desc: 'للمراكز النشطة التي تطلب تحكم كامل.', monthlyPrice: '850', featured: true, features: ['مستخدمين غير محدودين', 'تتبع السيريالات IMEI', 'نظام الصيانة والتقارير', 'إدارة 3 فروع'] },
+                    { name: 'باقة المؤسسات', desc: 'للشركات وسلاسل الفروع الضخمة.', monthlyPrice: '1500', featured: false, features: ['فروع غير محدودة', 'نظام المسوقين بالعمولة', 'دعم فني VIP 24/7', 'ربط API مخصص'] }
+                ]);
+                const selectPlan = (p) => { localStorage.setItem('selectedPlan', JSON.stringify(p)); window.location.href = 'register.html'; };
+                onMounted(() => lucide.createIcons());
+                return { plans, selectPlan };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
