@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إبراء ERP - شاشة البيع اللحظي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; }
+        .pos-layout { display: grid; grid-template-columns: 1fr 480px; height: calc(100vh - 70px); }
+        .card-bg { background-color: #0F172A; border: 2px solid #1E293B; }
+        .emerald-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .text-bright { color: #FFFFFF !important; }
+        .text-dim { color: #94A3B8 !important; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .search-results { position: absolute; top: 100%; right: 0; left: 0; background: #1E293B; border: 2px solid #334155; border-radius: 24px; margin-top: 12px; z-index: 50; max-height: 400px; overflow-y: auto; box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
+        .stock-flash { animation: flashGreen 0.5s ease-out; }
+        @keyframes flashGreen { 0% { background-color: rgba(16, 185, 129, 0.4); } 100% { background-color: transparent; } }
+    </style>
+</head>
+<body class="overflow-hidden">
+
+    <div id="app">
+        <!-- شريط التنقل العلوي -->
+        <nav class="h-[70px] border-b-2 border-slate-800 bg-[#020617] flex items-center justify-between px-8 z-50 relative">
+            <div class="flex items-center space-x-6 space-x-reverse">
+                <img src="../Gemini_Generated_Image_44ih5844ih5844ih Whait.png" alt="Logo" class="h-10 w-auto">
+                <span class="text-2xl font-black text-bright italic tracking-tighter">إبراء<span class="text-emerald-500">.</span></span>
+            </div>
+            
+            <div class="flex items-center space-x-8 space-x-reverse">
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <span class="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-black rounded-lg border border-emerald-500/20 italic animate-pulse">النظام متصل ✅</span>
+                </div>
+                <a href="index.html" class="flex items-center px-6 py-3 bg-slate-800 hover:bg-slate-700 text-bright rounded-2xl font-black text-sm transition border-2 border-slate-700 shadow-xl">
+                    <i data-lucide="layout-dashboard" class="ml-3 w-5 h-5 text-emerald-500"></i>
+                    الرئيسية
+                </a>
+            </div>
+        </nav>
+
+        <div class="pos-layout" @click="closeSearch">
+            <!-- الجانب الأيمن: الفاتورة والبحث -->
+            <section class="flex flex-col p-8 space-y-8 overflow-hidden border-l-2 border-slate-800">
+                <div class="flex items-center space-x-4 space-x-reverse flex-shrink-0">
+                    <div class="relative flex-1 group" @click.stop>
+                        <i data-lucide="scan-barcode" class="absolute right-6 top-1/2 -translate-y-1/2 text-emerald-500 w-8 h-8"></i>
+                        <input v-model="searchQuery" @input="onSearchInput" ref="mainSearch" placeholder="امسح باركود أو سيريال أو اكتب اسم الصنف..." 
+                               class="w-full bg-[#020617] border-2 border-slate-800 rounded-[35px] py-7 pr-16 pl-8 text-2xl font-black text-bright focus:border-emerald-500 outline-none transition shadow-2xl">
+                        
+                        <!-- نتائج البحث -->
+                        <div v-if="searchResults.length > 0" class="search-results custom-scrollbar p-2">
+                            <div v-for="product in searchResults" :key="product.id" 
+                                 @click="handleSelect(product)"
+                                 class="p-5 border-b border-slate-800/50 hover:bg-emerald-500/10 rounded-2xl cursor-pointer flex justify-between items-center group transition">
+                                <div class="flex flex-col text-right">
+                                    <span class="font-black text-bright text-xl group-hover:text-emerald-400">{{ product.name }}</span>
+                                    <div class="flex items-center mt-1 space-x-2 space-x-reverse">
+                                        <span class="text-[10px] font-black text-dim uppercase tracking-widest">{{ product.category }}</span>
+                                        <span class="text-[10px] font-black text-emerald-500 italic bg-emerald-500/10 px-2 py-0.5 rounded">متاح: {{ product.stock }}</span>
+                                    </div>
+                                </div>
+                                <div class="text-emerald-400 font-black text-2xl tracking-tighter">{{ product.price }} ج.م</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button @click="resetCart" class="p-6 bg-red-500/10 text-red-500 rounded-[30px] border-2 border-red-500/20 hover:bg-red-500 hover:text-white transition shadow-2xl">
+                        <i data-lucide="trash-2" class="w-8 h-8"></i>
+                    </button>
+                </div>
+
+                <!-- جدول الفاتورة -->
+                <div class="flex-1 card-bg rounded-[50px] overflow-hidden flex flex-col shadow-2xl border-slate-800 relative">
+                    <div class="bg-slate-800/30 px-10 py-6 border-b-2 border-slate-800 flex justify-between items-center">
+                        <span class="text-xs font-black text-dim uppercase tracking-[4px] italic">أصناف الفاتورة ({{ cart.length }})</span>
+                        <span class="text-emerald-500 font-black text-sm italic" v-if="cart.length">العملية جاهزة للإتمام 🚀</span>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto custom-scrollbar">
+                        <table class="w-full text-right" v-if="cart.length">
+                            <thead class="bg-slate-900/80 sticky top-0 z-10 border-b border-slate-800">
+                                <tr class="text-[10px] text-dim font-black uppercase tracking-widest">
+                                    <th class="px-10 py-5">الصنف</th>
+                                    <th class="px-10 py-5">السيريال / IMEI</th>
+                                    <th class="px-10 py-5 text-center">الكمية</th>
+                                    <th class="px-10 py-5">السعر</th>
+                                    <th class="px-10 py-5 text-center"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/50">
+                                <tr v-for="(item, index) in cart" :key="index" :class="{'stock-flash': item.justAdded}" class="hover:bg-white/[0.02] transition">
+                                    <td class="px-10 py-6">
+                                        <div class="font-black text-bright text-lg leading-tight">{{ item.name }}</div>
+                                        <div class="text-[10px] text-dim font-bold mt-1 italic">{{ item.category }}</div>
+                                    </td>
+                                    <td class="px-10 py-6">
+                                        <div v-if="item.hasSerials" class="font-mono text-emerald-400 text-sm font-black bg-emerald-500/10 px-4 py-2 rounded-2xl border border-emerald-500/20 inline-block shadow-inner tracking-wider">
+                                            {{ item.selectedSerial }}
+                                        </div>
+                                        <div v-else class="text-xs text-slate-700 font-bold italic">بدون سيريال</div>
+                                    </td>
+                                    <td class="px-10 py-6 text-center">
+                                        <div class="flex items-center justify-center space-x-4 space-x-reverse">
+                                            <button @click="updateQty(index, -1)" class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-dim hover:bg-slate-700 transition">-</button>
+                                            <span class="font-black text-2xl text-bright">{{ item.qty }}</span>
+                                            <button @click="updateQty(index, 1)" class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-dim hover:bg-slate-700 transition">+</button>
+                                        </div>
+                                    </td>
+                                    <td class="px-10 py-6 font-black text-emerald-400 text-2xl tracking-tighter">{{ item.price * item.qty }} ج.م</td>
+                                    <td class="px-10 py-6 text-center">
+                                        <button @click="removeFromCart(index)" class="text-slate-800 hover:text-red-500 transition"><i data-lucide="x-circle" class="w-6 h-6"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div v-else class="h-full flex flex-col items-center justify-center text-slate-800 opacity-20">
+                            <i data-lucide="qr-code" class="w-32 h-32 mb-6"></i>
+                            <p class="text-3xl font-black italic tracking-tighter text-center">امسح باركود المنتج<br>للبدء في عملية البيع</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- الجانب الأيسر: الدفع والعميل -->
+            <aside class="flex flex-col p-10 space-y-10 bg-[#020617] border-r-2 border-slate-800 overflow-y-auto custom-scrollbar">
+                <div class="space-y-4">
+                    <h4 class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1 italic">بيانات العميل (CRM)</h4>
+                    <div class="relative">
+                        <i data-lucide="user" class="absolute right-4 top-1/2 -translate-y-1/2 text-dim"></i>
+                        <input v-model="customerName" type="text" placeholder="عميل نقدي (افتراضي)" class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl py-5 pr-14 pl-6 text-lg font-bold text-bright focus:border-emerald-500 outline-none transition shadow-inner">
+                    </div>
+                </div>
+
+                <div class="flex-1 flex flex-col justify-end space-y-8">
+                    <!-- ملخص الحساب الضخم -->
+                    <div class="card-bg p-10 rounded-[50px] space-y-6 shadow-2xl relative overflow-hidden border-emerald-500/30">
+                        <div class="absolute top-0 right-0 h-2 w-full bg-emerald-500 opacity-30"></div>
+                        <div class="flex justify-between items-center text-dim text-sm font-black italic">
+                            <span>إجمالي الفاتورة</span>
+                            <span>{{ totalAmount }} ج.م</span>
+                        </div>
+                        <div class="flex justify-between items-center text-red-400 text-sm font-black italic">
+                            <span>خصم خاص ({{ discountType === 'perc' ? '%' : 'ج.م' }})</span>
+                            <div class="flex items-center space-x-2 space-x-reverse">
+                                <input v-model="discount" type="number" class="w-24 bg-slate-800 border-none rounded-xl text-left p-2 text-xl font-black outline-none italic text-red-500">
+                                <button @click="discountType = (discountType === 'perc' ? 'fixed' : 'perc')" class="bg-slate-800 p-2 rounded-lg text-xs font-black">{{ discountType === 'perc' ? '%' : 'FIX' }}</button>
+                            </div>
+                        </div>
+                        <div class="pt-8 border-t-2 border-slate-800 flex justify-between items-end">
+                            <div class="flex flex-col text-right">
+                                <span class="text-[10px] font-black text-emerald-500 uppercase tracking-[4px] mb-2 italic">المبلغ المطلوب سداده</span>
+                                <span class="text-7xl font-black text-bright leading-none tracking-tighter">{{ finalAmount }}</span>
+                            </div>
+                            <span class="text-xl font-black text-dim uppercase italic mb-2 tracking-widest">جنية</span>
+                        </div>
+                    </div>
+
+                    <!-- طرق الدفع -->
+                    <div class="space-y-4">
+                        <h4 class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1 italic">طريقة السداد</h4>
+                        <div class="grid grid-cols-2 gap-6">
+                            <button @click="paymentMode = 'cash'" :class="paymentMode === 'cash' ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-800'" class="btn-pos card-bg p-8 rounded-[35px] flex flex-col items-center justify-center space-y-3 border-2 transition shadow-xl">
+                                <i data-lucide="banknote" class="w-10 h-10" :class="paymentMode === 'cash' ? 'text-emerald-400' : 'text-slate-700'"></i>
+                                <span class="font-black text-lg" :class="paymentMode === 'cash' ? 'text-bright' : 'text-dim'">نقدي (Cash)</span>
+                            </button>
+                            <button @click="paymentMode = 'debt'" :class="paymentMode === 'debt' ? 'border-red-500 bg-red-500/10' : 'border-slate-800'" class="btn-pos card-bg p-8 rounded-[35px] flex flex-col items-center justify-center space-y-3 border-2 transition shadow-xl">
+                                <i data-lucide="credit-card" class="w-10 h-10" :class="paymentMode === 'debt' ? 'text-red-400' : 'text-slate-700'"></i>
+                                <span class="font-black text-lg" :class="paymentMode === 'debt' ? 'text-bright' : 'text-dim'">آجل (Credit)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- زر الإتمام النهائي -->
+                    <button @click="finalizeSale" :disabled="!cart.length" 
+                            class="btn-pos emerald-gradient text-white py-10 rounded-[45px] font-black text-4xl shadow-3xl shadow-emerald-900/50 hover:scale-[1.01] transition-all active:scale-95 disabled:opacity-20 flex items-center justify-center">
+                        <i data-lucide="printer" class="ml-6 w-12 h-12"></i>
+                        <span>حفظ وطباعة (F4)</span>
+                    </button>
+                </div>
+            </aside>
+        </div>
+
+        <!-- نافذة السيريال اليدوي -->
+        <div v-if="showSerialModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl flex items-center justify-center z-[100] p-4" @click.stop>
+            <div class="card-bg w-full max-w-xl rounded-[60px] p-12 shadow-[0_0_100px_rgba(16,185,129,0.2)] border-emerald-500/30">
+                <h3 class="text-4xl font-black text-bright mb-4 italic tracking-tighter">سيريال المنتج / IMEI</h3>
+                <p class="text-lg text-dim font-bold mb-10 italic">امسح السيريال الآن لإضافة المنتج للفاتورة:</p>
+                
+                <div class="space-y-6">
+                    <div class="font-black text-bright text-2xl text-center bg-slate-900/50 py-6 rounded-[30px] border border-slate-800">{{ pendingItem.name }}</div>
+                    <div class="relative">
+                        <i data-lucide="hash" class="absolute right-6 top-1/2 -translate-y-1/2 text-emerald-500 w-8 h-8"></i>
+                        <input v-model="manualSerial" @keyup.enter="assignManualSerial" ref="serialInput" type="text" placeholder="اكتب أو امسح السيريال..." 
+                               class="w-full bg-[#020617] border-2 border-slate-700 rounded-[30px] py-6 pr-16 pl-6 text-3xl font-black text-emerald-400 outline-none focus:border-emerald-500 transition shadow-inner ltr tracking-widest uppercase">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-6 mt-12">
+                    <button @click="showSerialModal = false" class="py-6 bg-slate-900 text-dim rounded-[30px] font-black text-xl hover:text-white transition">إلغاء</button>
+                    <button @click="assignManualSerial" :disabled="!manualSerial" class="py-6 emerald-gradient text-white rounded-[30px] font-black text-2xl shadow-xl disabled:opacity-20">تأكيد الإضافة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                const searchQuery = ref('');
+                const customerName = ref('');
+                const discount = ref(0);
+                const discountType = ref('fixed');
+                const paymentMode = ref('cash');
+                const cart = ref([]);
+                const searchResults = ref([]);
+                const showSerialModal = ref(false);
+                const pendingItem = ref(null);
+                const manualSerial = ref('');
+                const serialInput = ref(null);
+                const mainSearch = ref(null);
+
+                const products = [
+                    { id: 1, name: 'iPhone 15 Pro Max - 256GB', category: 'موبايلات', price: 65000, hasSerials: true, stock: 12 },
+                    { id: 2, name: 'Samsung S24 Ultra - 512GB', category: 'موبايلات', price: 58000, hasSerials: true, stock: 5 },
+                    { id: 3, name: 'AirPods Pro Gen 2', category: 'أكسسوارات', price: 8500, hasSerials: true, stock: 18 },
+                    { id: 4, name: 'شاحن أبل 20 وات أصلي', category: 'شواحن', price: 1200, hasSerials: false, stock: 45 },
+                    { id: 5, name: 'كابل آيفون Type-C أصلي', category: 'كابلات', price: 850, hasSerials: false, stock: 100 },
+                    { id: 6, name: 'iPhone 14 Pro - 128GB', category: 'موبايلات', price: 42000, hasSerials: true, stock: 8 },
+                    { id: 7, name: 'Google Pixel 8 Pro', category: 'موبايلات', price: 38000, hasSerials: true, stock: 3 },
+                    { id: 8, name: 'ساعة أبل Ultra 2', category: 'ساعات', price: 35000, hasSerials: true, stock: 4 },
+                    { id: 9, name: 'Samsung Galaxy Buds 3', category: 'أكسسوارات', price: 6500, hasSerials: true, stock: 15 },
+                    { id: 10, name: 'رأس شاحن سامسونج 45 وات', category: 'شواحن', price: 1100, hasSerials: false, stock: 30 },
+                    { id: 11, name: 'شاشة iPhone 13 Pro (Original)', category: 'قطع غيار', price: 9500, hasSerials: false, stock: 5 },
+                    { id: 12, name: 'بطارية iPhone 11 (Taptic)', category: 'قطع غيار', price: 1800, hasSerials: false, stock: 20 },
+                    { id: 13, name: 'جراب سيلكون آيفون 15', category: 'إكسسوارات', price: 450, hasSerials: false, stock: 50 },
+                    { id: 14, name: 'لاصقة حماية شاشة (Privacy)', category: 'إكسسوارات', price: 250, hasSerials: false, stock: 200 },
+                    { id: 15, name: 'Xiaomi Redmi Note 13', category: 'موبايلات', price: 12500, hasSerials: true, stock: 25 },
+                    { id: 16, name: 'Oppo Reno 11 5G', category: 'موبايلات', price: 18000, hasSerials: true, stock: 10 },
+                    { id: 17, name: 'ماوس لاسلكي لوجيتك', category: 'إكسسوارات', price: 1200, hasSerials: false, stock: 15 },
+                    { id: 18, name: 'سماعة بلوتوث JBL Clip 4', category: 'أكسسوارات', price: 3200, hasSerials: true, stock: 7 },
+                    { id: 19, name: 'شاحن سيارة سريع 30 وات', category: 'شواحن', price: 650, hasSerials: false, stock: 40 },
+                    { id: 20, name: 'كارت ميموري 128 جيجا', category: 'إكسسوارات', price: 550, hasSerials: false, stock: 60 }
+                ];
+
+                const onSearchInput = () => {
+                    if (searchQuery.value.trim() === '') { searchResults.value = []; return; }
+                    searchResults.value = products.filter(p => p.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
+                };
+
+                const handleSelect = (product) => {
+                    if (product.hasSerials) {
+                        pendingItem.value = product;
+                        manualSerial.value = '';
+                        showSerialModal.value = true;
+                        nextTick(() => { if(serialInput.value) serialInput.value.focus(); });
+                    } else {
+                        addToCart(product);
+                    }
+                    closeSearch();
+                };
+
+                const assignManualSerial = () => {
+                    if (manualSerial.value.trim() === '') return;
+                    addToCart(pendingItem.value, manualSerial.value);
+                    showSerialModal.value = false;
+                    manualSerial.value = '';
+                    nextTick(() => mainSearch.value.focus());
+                };
+
+                const addToCart = (product, serial = null) => {
+                    const existing = cart.value.find(i => i.id === product.id && i.selectedSerial === serial);
+                    if (existing && !product.hasSerials) {
+                        existing.qty++;
+                        existing.justAdded = true;
+                    } else {
+                        cart.value.push({ ...product, qty: 1, selectedSerial: serial, justAdded: true });
+                    }
+                    setTimeout(() => {
+                        const item = cart.value.find(i => i.id === (existing ? existing.id : product.id) && i.selectedSerial === serial);
+                        if(item) item.justAdded = false;
+                    }, 500);
+                    lucide.createIcons();
+                };
+
+                const updateQty = (index, delta) => { if (cart.value[index].qty + delta > 0) cart.value[index].qty += delta; };
+                const removeFromCart = (index) => { cart.value.splice(index, 1); };
+                const closeSearch = () => { searchQuery.value = ''; searchResults.value = []; };
+                const resetCart = () => { cart.value = []; customerName.value = ''; discount.value = 0; nextTick(() => mainSearch.value.focus()); };
+
+                const totalAmount = computed(() => cart.value.reduce((acc, item) => acc + (item.price * item.qty), 0));
+                const finalAmount = computed(() => {
+                    let res = totalAmount.value;
+                    if (discountType.value === 'perc') res -= (res * (discount.value / 100));
+                    else res -= discount.value;
+                    return Math.max(0, res);
+                });
+
+                const finalizeSale = () => {
+                    Swal.fire({
+                        title: 'تمت العملية بنجاح! 🚀',
+                        text: `إجمالي المبلغ المحصل: ${finalAmount.value} ج.م. جاري الطباعة وإرسال إشعار تليجرام...`,
+                        icon: 'success',
+                        background: '#0F172A',
+                        color: '#FFFFFF',
+                        confirmButtonColor: '#10B981',
+                        buttonsStyling: true,
+                        customClass: { confirmButton: 'px-10 py-4 font-black rounded-2xl' }
+                    }).then(() => resetCart());
+                };
+
+                // اختصارات الكيبورد
+                window.addEventListener('keydown', (e) => {
+                    if (e.key === 'F4') { e.preventDefault(); if(cart.value.length) finalizeSale(); }
+                    if (e.key === 'Escape') { e.preventDefault(); resetCart(); }
+                });
+
+                onMounted(() => {
+                    lucide.createIcons();
+                    mainSearch.value.focus();
+                });
+
+                return { 
+                    searchQuery, customerName, discount, discountType, paymentMode, cart, searchResults,
+                    showSerialModal, pendingItem, manualSerial, serialInput, mainSearch,
+                    onSearchInput, handleSelect, updateQty, removeFromCart, assignManualSerial, closeSearch,
+                    totalAmount, finalAmount, finalizeSale, resetCart
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
