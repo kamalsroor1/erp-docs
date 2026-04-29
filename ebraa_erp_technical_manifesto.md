@@ -13,7 +13,8 @@
 ## 2. الهيكل التقني (Tech Stack)
 يجب الالتزام بالبساطة مع القابلية للتوسع (Scalability):
 
-- **Backend:** Laravel 11.
+- **Backend:** Laravel 11 (Strict Requirement for Inertia v3).
+- **PHP Version:** PHP 8.2+ (Required).
 - **Frontend:** Vue.js 3 + Inertia.js v3.0 + Vite.
 - **State Management:** Pinia (لحفظ حالة السلة في POS).
 - **Database:** PostgreSQL (لدعم بيانات JSONB المعقدة).
