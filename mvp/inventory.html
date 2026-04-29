@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إبراء ERP - إدارة المخزن</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; }
+        .sidebar { background-color: #020617; border-left: 2px solid #1E293B; }
+        .card-bg { background-color: #0F172A; border: 2px solid #1E293B; }
+        .emerald-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .text-bright { color: #FFFFFF !important; }
+        .text-dim { color: #94A3B8 !important; }
+        .tab-active { border-color: #10B981; color: #10B981; background-color: rgba(16, 185, 129, 0.05); }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <div id="app" class="flex w-full">
+        <!-- القائمة الجانبية -->
+        <aside class="w-64 sidebar flex flex-col hidden md:flex">
+            <div class="p-8 text-center border-b border-slate-800/50 mb-4">
+                <img src="../Gemini_Generated_Image_44ih5844ih5844ih Whait.png" alt="Logo" class="h-14 mx-auto mb-2">
+                <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">إدارة متكاملة</span>
+            </div>
+            <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+                <a href="index.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="layout-dashboard" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الرئيسية</span>
+                </a>
+                <a href="pos.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="shopping-cart" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">شاشة البيع</span>
+                </a>
+                <a href="inventory.html" class="flex items-center px-4 py-3 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-xl transition">
+                    <i data-lucide="box" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المخزن</span>
+                </a>
+                <a href="crm.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="users" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المبيعات والعملاء</span>
+                </a>
+                <a href="service.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="wrench" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الصيانة</span>
+                </a>
+                <a href="finance.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="wallet" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المالية</span>
+                </a>
+                <a href="reports.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="bar-chart-3" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">التقارير</span>
+                </a>
+                <a href="settings.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="settings" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الإعدادات</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- المحتوى الرئيسي -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-[#020617]">
+            <header class="h-20 border-b-2 border-slate-800 flex items-center justify-between px-10 bg-[#020617] z-20">
+                <h2 class="text-3xl font-black text-bright italic">إدارة المخزن</h2>
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <button @click="showAddProductModal = true" class="emerald-gradient text-white px-8 py-3 rounded-2xl font-black text-lg shadow-xl shadow-emerald-900/20">
+                        <i data-lucide="plus" class="ml-2 inline w-6 h-6"></i>
+                        إضافة صنف جديد
+                    </button>
+                </div>
+            </header>
+
+            <!-- التبويبات -->
+            <div class="px-10 bg-slate-900/30 border-b border-slate-800 flex space-x-2 space-x-reverse overflow-x-auto custom-scrollbar">
+                <button v-for="t in tabs" :key="t.id" @click="activeTab = t.id"
+                        :class="activeTab === t.id ? 'tab-active border-b-2' : 'text-dim border-b-2 border-transparent'"
+                        class="px-8 py-5 font-black text-sm transition-all flex items-center whitespace-nowrap italic tracking-widest uppercase">
+                    <i :data-lucide="t.icon" class="ml-2 w-4 h-4"></i>
+                    {{ t.name }}
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
+                
+                <!-- المحتوى حسب التبويب المختار (نفس المنطق السابق مع ستايل التباين الجديد) -->
+                <div v-if="activeTab === 'list'" class="space-y-8">
+                    <div class="relative w-full max-w-2xl">
+                        <i data-lucide="search" class="absolute right-6 top-1/2 -translate-y-1/2 text-dim w-6 h-6"></i>
+                        <input v-model="searchQuery" type="text" placeholder="ابحث عن منتج بالاسم أو الباركود..." class="w-full bg-slate-900 border-2 border-slate-800 rounded-[30px] py-6 pr-16 pl-6 text-xl font-bold text-bright outline-none focus:border-emerald-500 transition shadow-inner">
+                    </div>
+
+                    <div class="card-bg rounded-[50px] overflow-hidden shadow-2xl border-slate-800">
+                        <table class="w-full text-right">
+                            <thead class="bg-slate-800/50 border-b border-slate-800">
+                                <tr class="text-[10px] text-dim font-black uppercase tracking-[3px]">
+                                    <th class="px-10 py-6">اسم الصنف</th>
+                                    <th class="px-10 py-6">التصنيف</th>
+                                    <th class="px-10 py-6 text-center">الكمية المتاحة</th>
+                                    <th class="px-10 py-6 text-center text-emerald-400">سعر البيع</th>
+                                    <th class="px-10 py-6">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <tr v-for="p in filteredProducts" :key="p.id" class="hover:bg-white/[0.01] transition">
+                                    <td class="px-10 py-8">
+                                        <div class="font-black text-bright text-xl">{{ p.name }}</div>
+                                        <div class="text-xs text-dim font-bold italic mt-1">{{ p.brand }}</div>
+                                    </td>
+                                    <td class="px-10 py-8">
+                                        <span class="px-4 py-1.5 bg-slate-800 rounded-xl text-xs font-black text-dim border border-slate-700 uppercase">{{ p.category }}</span>
+                                    </td>
+                                    <td class="px-10 py-8 text-center">
+                                        <span :class="p.stock <= 5 ? 'text-red-500' : 'text-bright'" class="text-3xl font-black">{{ p.stock }}</span>
+                                        <span class="text-xs text-dim font-black mr-2 uppercase">وحدة</span>
+                                    </td>
+                                    <td class="px-10 py-8 text-center">
+                                        <span class="text-2xl font-black text-emerald-400 tracking-tighter">{{ p.price }}</span>
+                                        <span class="text-xs text-dim font-black mr-2">ج.م</span>
+                                    </td>
+                                    <td class="px-10 py-8">
+                                        <div class="flex items-center space-x-3 space-x-reverse">
+                                            <button class="p-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition text-dim hover:text-white"><i data-lucide="edit-3" class="w-5 h-5"></i></button>
+                                            <button class="p-3 bg-slate-800 hover:bg-red-900/20 hover:text-red-500 rounded-xl transition text-dim"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 4. الجرد السريع (Stock Take - Mobile Optimized) -->
+                <div v-if="activeTab === 'stocktake'" class="max-w-md mx-auto space-y-8">
+                    <div class="card-bg p-8 rounded-[40px] border-blue-500/30 text-center space-y-6">
+                        <div class="h-24 w-24 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500 mx-auto animate-pulse">
+                            <i data-lucide="scan-barcode" class="w-12 h-12"></i>
+                        </div>
+                        <h4 class="text-2xl font-black text-bright italic">وضع الجرد السريع</h4>
+                        <p class="text-sm text-dim font-bold italic">قم بمسح باركود المنتج لتأكيد وجوده في المخزن وتحديث كميته الحالية.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div v-for="item in stockTakeItems" :key="item.id" 
+                             class="card-bg p-6 rounded-[35px] flex items-center justify-between border-slate-800 hover:border-blue-500/50 transition">
+                            <div class="flex flex-col">
+                                <span class="font-black text-bright text-lg">{{ item.name }}</span>
+                                <span class="text-[10px] font-bold text-dim uppercase italic">الكمية المسجلة: {{ item.stock }}</span>
+                            </div>
+                            <div class="flex items-center space-x-3 space-x-reverse">
+                                <button @click="item.current++" class="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg">+</button>
+                                <span class="text-2xl font-black text-bright w-8 text-center">{{ item.current }}</span>
+                                <button @click="item.current--" class="w-12 h-12 bg-slate-800 text-dim rounded-2xl flex items-center justify-center font-black text-xl">-</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button @click="confirmStockTake" class="w-full py-8 blue-gradient text-white rounded-[35px] font-black text-2xl shadow-2xl shadow-blue-900/40 mt-10">اعتماد جلسة الجرد ✅</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- نافذة إضافة منتج -->
+        <div v-if="showAddProductModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl flex items-center justify-center z-[100] p-4">
+            <div class="card-bg w-full max-w-2xl rounded-[60px] p-12 shadow-2xl border-emerald-500/30">
+                <h3 class="text-4xl font-black text-bright mb-10 italic tracking-tighter">إضافة صنف جديد</h3>
+                <form @submit.prevent="saveProduct" class="space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">اسم الصنف</label>
+                            <input type="text" placeholder="اسم الجهاز أو الصنف" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-6 text-xl font-black text-bright outline-none focus:border-emerald-500 transition shadow-inner">
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">التصنيف</label>
+                            <select class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-6 text-xl font-black text-bright outline-none focus:border-emerald-500 appearance-none italic">
+                                <option>موبايلات</option>
+                                <option>أكسسوارات</option>
+                                <option>شواحن</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-6 bg-slate-900/50 rounded-[30px] border-2 border-slate-800">
+                        <input type="checkbox" id="hasSerial" class="w-6 h-6 rounded-lg border-slate-700 bg-slate-950 text-emerald-500 focus:ring-emerald-500 transition">
+                        <label for="hasSerial" class="mr-4 font-black text-xl text-bright italic cursor-pointer">تفعيل تتبع السيريال / IMEI لهذا المنتج</label>
+                    </div>
+                    <div class="flex space-x-6 space-x-reverse pt-6">
+                        <button type="button" @click="showAddProductModal = false" class="flex-1 py-6 bg-slate-900 text-dim rounded-[30px] font-black text-xl hover:text-white transition">إلغاء</button>
+                        <button type="submit" class="flex-1 py-6 emerald-gradient text-white rounded-[30px] font-black text-2xl shadow-xl shadow-emerald-900/40 transition-all hover:scale-[1.02]">حفظ في المخزن</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, watchEffect } = Vue;
+        createApp({
+            setup() {
+                const activeTab = ref('list');
+                const searchQuery = ref('');
+                const showAddProductModal = ref(false);
+
+                const tabs = [
+                    { id: 'list', name: 'قائمة الأصناف', icon: 'list' },
+                    { id: 'serials', name: 'تتبع السيريالات', icon: 'hash' },
+                    { id: 'purchases', name: 'استلام بضاعة', icon: 'truck' },
+                    { id: 'stocktake', name: 'الجرد السريع', icon: 'scan-barcode' }
+                ];
+
+                const products = ref([
+                    { id: 1, name: 'iPhone 15 Pro Max', brand: 'Apple', category: 'موبايلات', stock: 12, price: '65,000' },
+                    { id: 2, name: 'Samsung S24 Ultra', brand: 'Samsung', category: 'موبايلات', stock: 5, price: '58,000' },
+                    { id: 3, name: 'AirPods Pro Gen 2', brand: 'Apple', category: 'أكسسوارات', stock: 18, price: '8,500' }
+                ]);
+
+                const filteredProducts = computed(() => {
+                    return products.value.filter(p => p.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
+                });
+
+                const saveProduct = () => {
+                    Swal.fire({ title: 'تم الحفظ!', text: 'تم إضافة الصنف الجديد بنجاح.', icon: 'success', background: '#0F172A', color: '#FFFFFF', confirmButtonColor: '#10B981' });
+                    showAddProductModal.value = false;
+                };
+
+                onMounted(() => lucide.createIcons());
+                watchEffect(() => setTimeout(() => lucide.createIcons(), 0));
+
+                const stockTakeItems = ref([
+                    { id: 1, name: 'iPhone 15 Pro Max', stock: 12, current: 12 },
+                    { id: 2, name: 'Samsung S24 Ultra', stock: 5, current: 5 },
+                    { id: 3, name: 'AirPods Pro Gen 2', stock: 18, current: 17 }
+                ]);
+
+                const confirmStockTake = () => {
+                    Swal.fire({
+                        title: 'تم اعتماد الجرد! ✅',
+                        text: 'تم تحديث الكميات في المخزن وإصدار تقرير فروقات الجرد.',
+                        icon: 'success',
+                        background: '#0F172A',
+                        color: '#FFFFFF',
+                        confirmButtonColor: '#3B82F6'
+                    });
+                };
+
+                return { activeTab, tabs, products, searchQuery, filteredProducts, showAddProductModal, saveProduct, stockTakeItems, confirmStockTake };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
