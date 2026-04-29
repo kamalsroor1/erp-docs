@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إبراء ERP - تتبع حالة جهازك</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; }
+        .blue-gradient { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); }
+        .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 2px solid rgba(30, 41, 59, 0.7); }
+        .status-node { position: relative; padding-bottom: 40px; }
+        .status-node::before { content: ''; position: absolute; right: 20px; top: 40px; bottom: 0; width: 4px; background: #1E293B; }
+        .status-node:last-child::before { display: none; }
+        .status-active::before { background: #3B82F6 !important; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6 relative overflow-x-hidden">
+
+    <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -ml-64 -mt-64"></div>
+
+    <div id="app" class="w-full max-w-2xl z-10">
+        <div class="text-center mb-12">
+            <img src="../Gemini_Generated_Image_44ih5844ih5844ih Whait.png" alt="Logo" class="h-16 mx-auto mb-6">
+            <h1 class="text-4xl font-black text-white italic tracking-tighter">تتبع حالة صيانة جهازك</h1>
+            <p class="text-slate-400 font-bold mt-4 italic">أدخل رقم التذكرة أو رقم الموبايل المسجل لمعرفة حالة جهازك الآن.</p>
+        </div>
+
+        <div class="glass-card p-10 md:p-14 rounded-[60px] shadow-3xl">
+            <div v-if="!searchPerformed" class="space-y-8">
+                <div class="relative">
+                    <i data-lucide="ticket" class="absolute right-6 top-1/2 -translate-y-1/2 text-blue-500 w-8 h-8"></i>
+                    <input v-model="ticketId" type="text" placeholder="رقم التذكرة (مثلاً: 1050)" 
+                           class="w-full bg-slate-900 border-2 border-slate-800 rounded-[30px] py-6 pr-18 pl-6 text-2xl font-black text-white outline-none focus:border-blue-500 transition text-center ltr">
+                </div>
+                <button @click="trackDevice" class="w-full blue-gradient text-white py-6 rounded-[30px] font-black text-2xl shadow-2xl shadow-blue-900/40 hover:scale-[1.02] transition">تتبع الآن</button>
+            </div>
+
+            <!-- تفاصيل التتبع -->
+            <div v-else class="space-y-12">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-8">
+                    <div>
+                        <p class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1 italic">نوع الجهاز</p>
+                        <h3 class="text-2xl font-black text-white italic">{{ result.device }}</h3>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1 italic">رقم التذكرة</p>
+                        <h3 class="text-2xl font-black text-blue-500">#{{ result.id }}</h3>
+                    </div>
+                </div>
+
+                <div class="space-y-0">
+                    <div v-for="(step, index) in result.steps" :key="index" 
+                         class="status-node" :class="{'status-active': index < result.currentStep}">
+                        <div class="flex items-start space-x-6 space-x-reverse">
+                            <div class="h-10 w-10 rounded-full flex items-center justify-center z-10"
+                                 :class="index <= result.currentStep ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-600'">
+                                <i :data-lucide="step.icon" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-xl font-black italic" :class="index <= result.currentStep ? 'text-white' : 'text-slate-600'">{{ step.title }}</h4>
+                                <p class="text-sm font-bold text-slate-500 mt-1 italic">{{ step.desc }}</p>
+                                <p v-if="index === result.currentStep" class="text-[10px] font-black text-blue-500 uppercase mt-2 tracking-widest">محدث الآن 🕒</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-8 border-t border-slate-800 flex justify-between items-center">
+                    <button @click="searchPerformed = false" class="text-slate-500 font-black text-sm hover:text-white transition italic underline underline-offset-8">بحث جديد</button>
+                    <div class="text-left">
+                        <p class="text-[10px] font-black text-slate-500 uppercase italic">التكلفة التقديرية</p>
+                        <p class="text-2xl font-black text-emerald-400 tracking-tighter">{{ result.cost }} ج.م</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-12 text-slate-600 text-sm font-black italic">
+            تم التتبع بواسطة نظام إبراء ERP لخدمات الصيانة
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, watchEffect } = Vue;
+        createApp({
+            setup() {
+                const ticketId = ref('');
+                const searchPerformed = ref(false);
+                const result = ref({
+                    id: '1050',
+                    device: 'iPhone 13 Pro',
+                    cost: '2,450',
+                    currentStep: 1,
+                    steps: [
+                        { title: 'استلام الجهاز', desc: 'تم استلام الجهاز وفحصه مبدئياً.', icon: 'clipboard-check' },
+                        { title: 'قيد الإصلاح', desc: 'يقوم الفني حالياً بالعمل على إصلاح العطل.', icon: 'wrench' },
+                        { title: 'جاهز للتسليم', desc: 'انتهت عملية الإصلاح، يمكنك استلام الجهاز.', icon: 'package' },
+                        { title: 'تم التسليم', desc: 'تم تسليم الجهاز للعميل بنجاح.', icon: 'check-circle' }
+                    ]
+                });
+
+                const trackDevice = () => {
+                    if (ticketId.value) {
+                        searchPerformed.value = true;
+                        setTimeout(() => lucide.createIcons(), 0);
+                    }
+                };
+
+                onMounted(() => lucide.createIcons());
+                return { ticketId, searchPerformed, result, trackDevice };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
