@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إبراء ERP - الإعدادات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; }
+        .sidebar { background-color: #020617; border-left: 2px solid #1E293B; }
+        .card-bg { background-color: #0F172A; border: 2px solid #1E293B; }
+        .emerald-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .text-bright { color: #FFFFFF !important; }
+        .text-dim { color: #94A3B8 !important; }
+        .tab-active { border-color: #10B981; color: #10B981; background-color: rgba(16, 185, 129, 0.05); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <div id="app" class="flex w-full">
+        <!-- القائمة الجانبية -->
+        <aside class="w-64 sidebar flex flex-col hidden md:flex">
+            <div class="p-8 text-center border-b border-slate-800/50 mb-4">
+                <img src="../Gemini_Generated_Image_44ih5844ih5844ih Whait.png" alt="Logo" class="h-14 mx-auto mb-2">
+                <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">إعدادات النظام</span>
+            </div>
+            <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+                <a href="index.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="layout-dashboard" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الرئيسية</span>
+                </a>
+                <a href="pos.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="shopping-cart" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">شاشة البيع</span>
+                </a>
+                <a href="inventory.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="box" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المخزن</span>
+                </a>
+                <a href="crm.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="users" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المبيعات والعملاء</span>
+                </a>
+                <a href="service.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="wrench" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الصيانة</span>
+                </a>
+                <a href="finance.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="wallet" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المالية</span>
+                </a>
+                <a href="reports.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="bar-chart-3" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">التقارير</span>
+                </a>
+                <a href="settings.html" class="flex items-center px-4 py-3 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-xl transition">
+                    <i data-lucide="settings" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الإعدادات</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- المحتوى الرئيسي -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-[#020617]">
+            <header class="h-20 border-b-2 border-slate-800 flex items-center justify-between px-10 sticky top-0 bg-[#020617]/80 backdrop-blur-md z-20">
+                <h2 class="text-3xl font-black text-bright italic">الإعدادات والتحكم</h2>
+                <button class="px-8 py-3 emerald-gradient text-white rounded-xl font-black text-sm shadow-xl shadow-emerald-900/20">حفظ كافة التغييرات</button>
+            </header>
+
+            <!-- التبويبات -->
+            <div class="px-10 bg-slate-900/30 border-b border-slate-800 flex space-x-2 space-x-reverse overflow-x-auto custom-scrollbar">
+                <button v-for="t in tabs" :key="t.id" @click="activeTab = t.id"
+                        :class="activeTab === t.id ? 'tab-active border-b-2' : 'text-dim border-b-2 border-transparent'"
+                        class="px-8 py-5 font-black text-sm transition-all flex items-center whitespace-nowrap">
+                    <i :data-lucide="t.icon" class="ml-2 w-4 h-4"></i>
+                    {{ t.name }}
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
+                
+                <!-- 1. إعدادات الفرع واللوجو -->
+                <div v-if="activeTab === 'branch'" class="max-w-4xl space-y-8">
+                    <div class="card-bg p-8 rounded-[40px] space-y-6">
+                        <div class="flex items-center space-x-8 space-x-reverse mb-8">
+                            <div class="h-32 w-32 bg-slate-900 border-2 border-dashed border-slate-800 rounded-[30px] flex flex-col items-center justify-center cursor-pointer hover:border-emerald-500 transition group">
+                                <i data-lucide="upload-cloud" class="text-slate-700 group-hover:text-emerald-500 mb-2"></i>
+                                <span class="text-[10px] font-black text-slate-600">تغيير اللوجو</span>
+                            </div>
+                            <div class="flex-1 space-y-4">
+                                <h4 class="text-xl font-black text-bright">إعدادات الهوية والفرع</h4>
+                                <p class="text-xs text-dim font-bold">هذه البيانات ستظهر في فواتيرك المطبوعة وعلى رابط متجرك.</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-dim uppercase tracking-widest mr-1">اسم المتجر (بالعربية)</label>
+                                <input type="text" value="شركة كمال للإلكترونيات" class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-bright font-bold outline-none focus:border-emerald-500">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-dim uppercase tracking-widest mr-1">رقم الهاتف الأساسي</label>
+                                <input type="text" value="01012345678" class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-bright font-bold outline-none focus:border-emerald-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. صلاحيات الموظفين -->
+                <div v-if="activeTab === 'users'" class="space-y-8">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-2xl font-black text-bright italic">إدارة الموظفين والصلاحيات</h4>
+                        <button class="px-8 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">إضافة موظف جديد</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div v-for="u in users" :key="u.id" class="card-bg p-6 rounded-[32px] flex items-center justify-between border-slate-800">
+                            <div class="flex items-center space-x-4 space-x-reverse">
+                                <div class="h-12 w-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 font-black">{{ u.name[0] }}</div>
+                                <div>
+                                    <p class="font-black text-bright">{{ u.name }}</p>
+                                    <p class="text-[10px] font-black text-emerald-500 uppercase">{{ u.role }}</p>
+                                </div>
+                            </div>
+                            <button class="p-2 text-slate-700 hover:text-white"><i data-lucide="shield-check" class="w-5 h-5"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. ربط تليجرام والطابعات -->
+                <div v-if="activeTab === 'integration'" class="max-w-4xl space-y-8">
+                    <div class="card-bg p-8 rounded-[40px] border-blue-500/20 flex items-center justify-between">
+                        <div class="flex items-center space-x-6 space-x-reverse">
+                            <div class="h-16 w-16 bg-blue-500/10 rounded-3xl flex items-center justify-center text-blue-400"><i data-lucide="send" class="w-8 h-8"></i></div>
+                            <div>
+                                <h4 class="text-xl font-black text-bright">ربط بوت تليجرام (Telegram Bot)</h4>
+                                <p class="text-xs text-dim font-bold mt-1">لتلقي تنبيهات المبيعات وإرسال الفواتير للعملاء آلياً.</p>
+                            </div>
+                        </div>
+                        <button class="px-6 py-3 bg-blue-600/20 text-blue-400 border border-blue-500/30 rounded-xl font-black text-xs">متصل ✅</button>
+                    </div>
+
+                    <div class="card-bg p-8 rounded-[40px] border-slate-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-6 space-x-reverse">
+                            <div class="h-16 w-16 bg-slate-800 rounded-3xl flex items-center justify-center text-slate-400"><i data-lucide="printer" class="w-8 h-8"></i></div>
+                            <div>
+                                <h4 class="text-xl font-black text-bright">إعدادات الطابعة الحرارية</h4>
+                                <p class="text-xs text-dim font-bold mt-1">تنسيق الفواتير وحجم الورق (80mm / 58mm).</p>
+                            </div>
+                        </div>
+                        <button class="px-6 py-3 bg-slate-800 text-white rounded-xl font-black text-xs">إعداد</button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, watchEffect } = Vue;
+        createApp({
+            setup() {
+                const activeTab = ref('branch');
+                const tabs = [
+                    { id: 'branch', name: 'بيانات الفرع واللوجو', icon: 'building-2' },
+                    { id: 'users', name: 'الموظفين والصلاحيات', icon: 'users-2' },
+                    { id: 'integration', name: 'تليجرام والطابعات', icon: 'cpu' },
+                    { id: 'security', name: 'الأمان والنسخ الاحتياطي', icon: 'shield-lock' }
+                ];
+
+                const users = ref([
+                    { id: 1, name: 'كمال سرور', role: 'مدير النظام (Admin)' },
+                    { id: 2, name: 'أحمد علي', role: 'كاشير' },
+                    { id: 3, name: 'محمود سيد', role: 'مسؤول مخزن' }
+                ]);
+
+                onMounted(() => lucide.createIcons());
+                watchEffect(() => setTimeout(() => lucide.createIcons(), 0));
+
+                return { activeTab, tabs, users };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
