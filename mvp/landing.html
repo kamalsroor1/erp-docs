@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إبراء ERP - مستقبل إدارة التجزئة والصيانة في مصر</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; overflow-x: hidden; }
+        .emerald-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .hero-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(2, 6, 23, 0) 70%); z-index: -1; }
+        .feature-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 2px solid #1E293B; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); }
+        .feature-card:hover { transform: translateY(-10px) scale(1.02); border-color: #10B981; box-shadow: 0 40px 80px -20px rgba(16, 185, 129, 0.3); }
+        .text-glow { text-shadow: 0 0 20px rgba(16, 185, 129, 0.5); }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- شريط التنقل العلوي -->
+        <nav class="fixed top-0 w-full z-[100] bg-[#020617]/80 backdrop-blur-xl border-b border-white/5">
+            <div class="max-w-7xl mx-auto px-8 h-24 flex items-center justify-between">
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <img src="../Gemini_Generated_Image_44ih5844ih5844ih Whait.png" alt="Logo" class="h-12 w-auto">
+                    <span class="text-3xl font-black text-white italic tracking-tighter">إبراء<span class="text-emerald-500">.</span></span>
+                </div>
+                <div class="hidden md:flex items-center space-x-10 space-x-reverse font-bold text-sm text-slate-400 italic">
+                    <a href="#features" class="hover:text-emerald-500 transition">المميزات</a>
+                    <a href="pricing.html" class="hover:text-emerald-500 transition">الأسعار</a>
+                    <a href="affiliate_dashboard.html" class="hover:text-emerald-500 transition">برنامج المسوقين</a>
+                </div>
+                <div class="flex items-center space-x-6 space-x-reverse">
+                    <a href="login.html" class="font-black text-white hover:text-emerald-500 transition italic">دخول النظام</a>
+                    <a href="pricing.html" class="emerald-gradient text-white px-8 py-3 rounded-2xl font-black text-sm shadow-2xl shadow-emerald-900/40 hover:scale-[1.05] transition">ابدأ تجربتك المجانية</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- قسم الـ Hero -->
+        <section class="relative pt-52 pb-32 px-8 overflow-hidden">
+            <div class="hero-glow"></div>
+            <div class="max-w-5xl mx-auto text-center space-y-12">
+                <div class="inline-block px-6 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-500 text-sm font-black uppercase tracking-widest italic animate-pulse">
+                    إصدار v2.0 متاح الآن لمحلات الموبايلات والصيانة 🚀
+                </div>
+                <h1 class="text-6xl md:text-9xl font-black text-white leading-none italic tracking-tighter text-glow">
+                    نظام الإدارة <span class="text-emerald-500">الأذكى</span> في مصر
+                </h1>
+                <p class="text-2xl md:text-3xl text-slate-400 font-bold max-w-3xl mx-auto leading-relaxed italic">
+                    وداعاً للورق والتعقيدات. إبراء ERP يمنحك سيطرة كاملة على مبيعاتك، مخزنك، وديون عملائك في أقل من 10 ثوانٍ.
+                </p>
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-8 md:space-x-reverse pt-8">
+                    <a href="pricing.html" class="w-full md:w-auto emerald-gradient text-white px-16 py-8 rounded-[35px] font-black text-3xl shadow-[0_30px_100px_-10px_rgba(16,185,129,0.5)] hover:scale-[1.03] transition">افتح محلك الآن</a>
+                    <a href="#demo" class="w-full md:w-auto bg-slate-900 border-2 border-slate-800 text-white px-16 py-8 rounded-[35px] font-black text-2xl hover:border-emerald-500 transition italic">شاهد عرض توضيحي</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم المميزات -->
+        <section id="features" class="py-32 px-8 bg-slate-950/30">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-24 space-y-4">
+                    <h2 class="text-5xl font-black text-white italic tracking-tighter">لماذا يختار التجار "إبراء"؟</h2>
+                    <p class="text-xl text-slate-500 font-bold italic">تم تصميم النظام ليكون بسيطاً بما يكفي للتشغيل، وقوياً بما يكفي للنمو.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div v-for="feat in features" :key="feat.title" class="feature-card p-12 rounded-[60px] space-y-8">
+                        <div class="h-20 w-20 bg-emerald-500/10 rounded-[30px] flex items-center justify-center text-emerald-500">
+                            <i :data-lucide="feat.icon" class="w-10 h-10"></i>
+                        </div>
+                        <h3 class="text-3xl font-black text-white italic tracking-tighter">{{ feat.title }}</h3>
+                        <p class="text-lg text-slate-400 font-bold leading-relaxed italic">{{ feat.desc }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم الأرقام -->
+        <section class="py-32 px-8 border-y border-white/5">
+            <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+                <div v-for="stat in stats" :key="stat.label">
+                    <h4 class="text-6xl font-black text-emerald-500 mb-2 tracking-tighter">{{ stat.value }}</h4>
+                    <p class="text-sm font-black text-slate-500 uppercase tracking-widest italic">{{ stat.label }}</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- الفوتر -->
+        <footer class="py-32 px-8 border-t border-white/5">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-20">
+                <div class="space-y-8 text-right">
+                    <div class="flex items-center space-x-4 space-x-reverse">
+                        <img src="../Gemini_Generated_Image_44ih5844ih5844ih Whait.png" alt="Logo" class="h-10 w-auto">
+                        <span class="text-2xl font-black text-white italic tracking-tighter">إبراء<span class="text-emerald-500">.</span></span>
+                    </div>
+                    <p class="text-slate-500 font-bold italic leading-relaxed">أول منصة SaaS مصرية مخصصة بالكامل لقطاع التجزئة والصيانة بالإلكترونيات.</p>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <div class="h-12 w-12 bg-slate-900 rounded-xl flex items-center justify-center text-slate-600 hover:text-white transition cursor-pointer"><i data-lucide="facebook"></i></div>
+                        <div class="h-12 w-12 bg-slate-900 rounded-xl flex items-center justify-center text-slate-600 hover:text-white transition cursor-pointer"><i data-lucide="instagram"></i></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-10 md:col-span-2">
+                    <div class="space-y-6">
+                        <h5 class="text-white font-black text-xl italic underline decoration-emerald-500 decoration-4 underline-offset-8 mb-8">المنصة</h5>
+                        <ul class="space-y-4 text-slate-500 font-bold italic">
+                            <li><a href="pricing.html" class="hover:text-emerald-500 transition">باقات الأسعار</a></li>
+                            <li><a href="login.html" class="hover:text-emerald-500 transition">دخول النظام</a></li>
+                            <li><a href="affiliate_dashboard.html" class="hover:text-emerald-500 transition">برنامج المسوقين</a></li>
+                        </ul>
+                    </div>
+                    <div class="space-y-6 text-left">
+                        <h5 class="text-white font-black text-xl italic mb-8">تواصل معنا</h5>
+                        <p class="text-slate-500 font-bold italic">01012345678</p>
+                        <p class="text-slate-500 font-bold italic ltr">support@ebraa-erp.com</p>
+                    </div>
+                </div>
+            </div>
+            <div class="max-w-7xl mx-auto pt-20 mt-20 border-t border-white/5 text-center text-[10px] font-black text-slate-700 uppercase tracking-widest">
+                © 2024 إبراء ERP - كافة الحقوق محفوظة
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted } = Vue;
+        createApp({
+            setup() {
+                const features = ref([
+                    { title: 'نقطة بيع البرق', icon: 'zap', desc: 'أسرع شاشة بيع في مصر، تدعم السيريالات IMEI والباركود في لحظات.' },
+                    { title: 'جرد بلمسة واحدة', icon: 'box', desc: 'إدارة مخزن ذكية تنبهك بالنواقص وتدعم الجرد السريع من موبايلك.' },
+                    { title: 'مركز صيانة ذكي', icon: 'wrench', desc: 'تتبع تذاكر الصيانة، أرسل رابط تتبع للعميل، ووفر وقتك ومجهودك.' }
+                ]);
+                const stats = ref([
+                    { label: 'تاجر مشترك', value: '+1,200' },
+                    { label: 'فاتورة يومية', value: '+50k' },
+                    { label: 'نسبة توفر النظام', value: '99.9%' },
+                    { label: 'توفير في الوقت', value: '75%' }
+                ]);
+                onMounted(() => lucide.createIcons());
+                return { features, stats };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
