@@ -13,8 +13,9 @@
 ## 2. الهيكل التقني (Tech Stack)
 يجب الالتزام بالبساطة مع القابلية للتوسع (Scalability):
 
-- **Backend:** Laravel 11 (API Mode).
-- **Frontend:** Vue.js 3 + Pinia + Vite (SPA).
+- **Backend:** Laravel 11.
+- **Frontend:** Vue.js 3 + Inertia.js v2.0 + Vite.
+- **State Management:** Pinia (لحفظ حالة السلة في POS).
 - **Database:** PostgreSQL (لدعم بيانات JSONB المعقدة).
 - **Real-time:** Laravel Reverb (للإشعارات اللحظية والطلبات).
 - **Multi-tenancy:** Single Database مع `tenant_id` (Row Level Isolation).
@@ -48,6 +49,8 @@
     - لوحة تحكم لإدارة اشتراكات المحلات (SaaS Admin).
 - **نظام الأفلييت (Affiliate):**
     - لوحة للمسوقين لتتبع عملاءهم وعمولاتهم.
+- **تطبيق سطح المكتب (Desktop App):**
+    - تغليف النظام باستخدام NativePHP أو Tauri لتحسين تجربة الطباعة والسرعة.
 
 ### المرحلة الثالثة: الأتمتة والتوسع
 - **الواتساب (WhatsApp API):** إرسال الفواتير وحالات الصيانة آلياً للعملاء.
