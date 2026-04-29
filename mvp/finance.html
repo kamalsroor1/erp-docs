@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إبراء ERP - الإدارة المالية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; }
+        .sidebar { background-color: #020617; border-left: 2px solid #1E293B; }
+        .card-bg { background-color: #0F172A; border: 2px solid #1E293B; }
+        .emerald-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .text-bright { color: #FFFFFF !important; }
+        .text-dim { color: #94A3B8 !important; }
+        .tab-active { border-color: #10B981; color: #10B981; background-color: rgba(16, 185, 129, 0.05); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <div id="app" class="flex w-full">
+        <!-- القائمة الجانبية -->
+        <aside class="w-64 sidebar flex flex-col hidden md:flex">
+            <div class="p-8 text-center border-b border-slate-800/50 mb-4">
+                <img src="../Gemini_Generated_Image_44ih5844ih5844ih Whait.png" alt="Logo" class="h-14 mx-auto mb-2">
+                <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">النظام المالي</span>
+            </div>
+            <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+                <a href="index.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="layout-dashboard" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الرئيسية</span>
+                </a>
+                <a href="pos.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="shopping-cart" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">شاشة البيع</span>
+                </a>
+                <a href="inventory.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="box" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المخزن</span>
+                </a>
+                <a href="crm.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="users" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المبيعات والعملاء</span>
+                </a>
+                <a href="service.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="wrench" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الصيانة</span>
+                </a>
+                <a href="finance.html" class="flex items-center px-4 py-3 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-xl transition">
+                    <i data-lucide="wallet" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المالية</span>
+                </a>
+                <a href="reports.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="bar-chart-3" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">التقارير</span>
+                </a>
+                <a href="settings.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="settings" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الإعدادات</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- المحتوى الرئيسي -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-[#020617]">
+            <header class="h-20 border-b-2 border-slate-800 flex items-center justify-between px-10 sticky top-0 bg-[#020617]/80 backdrop-blur-md z-20">
+                <h2 class="text-3xl font-black text-bright italic">الإدارة المالية والتقارير</h2>
+                <div class="flex items-center space-x-6 space-x-reverse">
+                    <div class="text-left">
+                        <p class="text-[10px] font-black text-dim uppercase tracking-widest">رصيد الخزينة الحالي</p>
+                        <p class="text-2xl font-black text-emerald-400">45,850.00 <span class="text-xs">ج.م</span></p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- التبويبات -->
+            <div class="px-10 bg-slate-900/30 border-b border-slate-800 flex space-x-2 space-x-reverse">
+                <button v-for="t in tabs" :key="t.id" @click="activeTab = t.id"
+                        :class="activeTab === t.id ? 'tab-active border-b-2' : 'text-dim border-b-2 border-transparent'"
+                        class="px-8 py-5 font-black text-sm transition-all flex items-center uppercase tracking-widest">
+                    <i :data-lucide="t.icon" class="ml-2 w-4 h-4"></i>
+                    {{ t.name }}
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-10 space-y-10">
+                
+                <!-- 1. إدارة الخزينة (Cash Drawer) -->
+                <div v-if="activeTab === 'cash'" class="space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="card-bg p-8 rounded-[40px] border-emerald-500/20">
+                            <h4 class="text-xl font-black text-bright mb-6 italic">حركة الخزينة اليوم</h4>
+                            <div class="space-y-4">
+                                <div class="flex justify-between p-4 bg-slate-900 rounded-2xl border border-slate-800">
+                                    <span class="font-bold text-dim">إجمالي المقبوضات</span>
+                                    <span class="font-black text-emerald-400 text-lg">+ 12,450 ج.م</span>
+                                </div>
+                                <div class="flex justify-between p-4 bg-slate-900 rounded-2xl border border-slate-800">
+                                    <span class="font-bold text-dim">إجمالي المدفوعات</span>
+                                    <span class="font-black text-red-500 text-lg">- 3,200 ج.م</span>
+                                </div>
+                            </div>
+                            <button class="w-full mt-8 py-4 emerald-gradient text-white rounded-2xl font-black text-lg shadow-xl shadow-emerald-900/20">إغلاق الخزينة (تصفية اليوم)</button>
+                        </div>
+                        <div class="card-bg p-8 rounded-[40px] border-blue-500/20">
+                            <h4 class="text-xl font-black text-bright mb-6 italic">إضافة حركة يدوية</h4>
+                            <div class="space-y-4">
+                                <input type="number" placeholder="المبلغ" class="w-full bg-[#020617] border-2 border-slate-800 rounded-2xl p-4 text-bright font-black outline-none focus:border-blue-500">
+                                <textarea placeholder="السبب (مثلاً: عجز خزينة، إيداع إضافي)" class="w-full bg-[#020617] border-2 border-slate-800 rounded-2xl p-4 text-bright font-bold outline-none focus:border-blue-500 h-24"></textarea>
+                                <button class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-lg">تأكيد الحركة</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. المصروفات النثرية (Expenses) -->
+                <div v-if="activeTab === 'expenses'" class="space-y-8">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-2xl font-black text-bright italic">سجل المصروفات</h4>
+                        <button class="px-8 py-3 bg-red-600 text-white rounded-xl font-black text-sm shadow-xl shadow-red-900/20">تسجيل مصروف جديد</button>
+                    </div>
+                    <div class="card-bg rounded-[40px] overflow-hidden">
+                        <table class="w-full text-right">
+                            <thead class="bg-slate-800/50 border-b border-slate-800">
+                                <tr class="text-[10px] text-dim font-black uppercase tracking-[3px]">
+                                    <th class="px-8 py-6">المصروف</th>
+                                    <th class="px-8 py-6">التصنيف</th>
+                                    <th class="px-8 py-6">المسؤول</th>
+                                    <th class="px-8 py-6 text-center">المبلغ</th>
+                                    <th class="px-8 py-6">التاريخ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800 text-base">
+                                <tr v-for="e in expenses" :key="e.id" class="hover:bg-white/[0.01]">
+                                    <td class="px-8 py-6 font-bold text-bright">{{ e.title }}</td>
+                                    <td class="px-8 py-6"><span class="px-3 py-1 bg-slate-800 rounded-lg text-xs font-bold text-dim">{{ e.cat }}</span></td>
+                                    <td class="px-8 py-6 font-bold text-dim">{{ e.user }}</td>
+                                    <td class="px-8 py-6 text-center font-black text-red-500">{{ e.amount }} ج.م</td>
+                                    <td class="px-8 py-6 text-dim font-bold italic">{{ e.date }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. التقارير المالية (P&L Statements) -->
+                <div v-if="activeTab === 'reports'" class="space-y-10">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                        <div class="card-bg p-8 rounded-[40px] border-emerald-500/20">
+                            <p class="text-xs font-black text-dim uppercase tracking-widest mb-2">إجمالي الدخل</p>
+                            <h3 class="text-4xl font-black text-emerald-400">120,000</h3>
+                        </div>
+                        <div class="card-bg p-8 rounded-[40px] border-red-500/20">
+                            <p class="text-xs font-black text-dim uppercase tracking-widest mb-2">إجمالي المصروفات</p>
+                            <h3 class="text-4xl font-black text-red-500">45,000</h3>
+                        </div>
+                        <div class="card-bg p-8 rounded-[40px] border-blue-500/20">
+                            <p class="text-xs font-black text-dim uppercase tracking-widest mb-2">صافي الربح</p>
+                            <h3 class="text-4xl font-black text-white">75,000</h3>
+                        </div>
+                    </div>
+                    <!-- P&L Chart -->
+                    <div class="card-bg p-10 rounded-[50px] h-[450px] shadow-2xl border-slate-800">
+                        <h4 class="text-xl font-black text-bright mb-8 italic">تحليل الأرباح والخسائر الشهري</h4>
+                        <div class="h-[300px]">
+                            <canvas id="plChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, watchEffect } = Vue;
+        createApp({
+            setup() {
+                const activeTab = ref('cash');
+                const tabs = [
+                    { id: 'cash', name: 'إدارة الخزينة', icon: 'calculator' },
+                    { id: 'expenses', name: 'المصروفات النثرية', icon: 'receipt' },
+                    { id: 'reports', name: 'قائمة الدخل P&L', icon: 'file-spreadsheet' }
+                ];
+
+                const expenses = ref([
+                    { id: 1, title: 'إيجار المحل - شهر أبريل', cat: 'إيجارات', user: 'كمال سرور', amount: '5,000', date: '2024/04/01' },
+                    { id: 2, title: 'فاتورة الكهرباء والإنترنت', cat: 'مرافق', user: 'محمود سيد', amount: '1,200', date: '2024/04/05' },
+                    { id: 3, title: 'شراء أدوات نظافة وبوفيه', cat: 'نثريات', user: 'أحمد علي', amount: '350', date: '2024/04/10' }
+                ]);
+
+                onMounted(() => {
+                    lucide.createIcons();
+                    const ctx = document.getElementById('plChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'],
+                            datasets: [
+                                { label: 'الأرباح', data: [45000, 52000, 48000, 75000, 68000, 82000], borderColor: '#10B981', tension: 0.4, fill: false },
+                                { label: 'المصروفات', data: [20000, 25000, 22000, 45000, 38000, 42000], borderColor: '#EF4444', tension: 0.4, fill: false }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { labels: { color: '#FFFFFF', font: { family: 'Cairo', weight: 'bold' } } } },
+                            scales: {
+                                y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                                x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                            }
+                        }
+                    });
+                });
+
+                watchEffect(() => setTimeout(() => lucide.createIcons(), 0));
+
+                return { activeTab, tabs, expenses };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
