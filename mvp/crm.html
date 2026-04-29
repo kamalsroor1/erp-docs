@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إبراء ERP - المبيعات والعملاء</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; }
+        .sidebar { background-color: #020617; border-left: 2px solid #1E293B; }
+        .card-bg { background-color: #0F172A; border: 2px solid #1E293B; }
+        .emerald-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .text-bright { color: #FFFFFF !important; }
+        .text-dim { color: #94A3B8 !important; }
+        .tab-active { border-color: #10B981; color: #10B981; background-color: rgba(16, 185, 129, 0.05); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <div id="app" class="flex w-full">
+        <!-- القائمة الجانبية -->
+        <aside class="w-64 sidebar flex flex-col hidden md:flex">
+            <div class="p-8 text-center border-b border-slate-800/50 mb-4">
+                <img src="../Gemini_Generated_Image_44ih5844ih5844ih Whait.png" alt="Logo" class="h-14 mx-auto mb-2">
+                <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">إدارة العملاء</span>
+            </div>
+            <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+                <a href="index.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="layout-dashboard" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الرئيسية</span>
+                </a>
+                <a href="pos.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="shopping-cart" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">شاشة البيع</span>
+                </a>
+                <a href="inventory.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="box" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المخزن</span>
+                </a>
+                <a href="crm.html" class="flex items-center px-4 py-3 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-xl transition">
+                    <i data-lucide="users" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المبيعات والعملاء</span>
+                </a>
+                <a href="service.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="wrench" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الصيانة</span>
+                </a>
+                <a href="finance.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="wallet" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">المالية</span>
+                </a>
+                <a href="reports.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="bar-chart-3" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">التقارير</span>
+                </a>
+                <a href="settings.html" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
+                    <i data-lucide="settings" class="ml-3 w-5 h-5"></i>
+                    <span class="font-bold text-lg text-bright">الإعدادات</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- المحتوى الرئيسي -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-[#020617]">
+            <header class="h-20 border-b-2 border-slate-800 flex items-center justify-between px-10 bg-[#020617]">
+                <h2 class="text-3xl font-black text-bright italic">المبيعات والعملاء</h2>
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <button class="px-6 py-2 bg-slate-800 text-white rounded-xl font-black text-xs border border-slate-700">تصدير التقارير</button>
+                </div>
+            </header>
+
+            <!-- التبويبات -->
+            <div class="px-10 bg-slate-900/30 border-b border-slate-800 flex space-x-2 space-x-reverse overflow-x-auto">
+                <button v-for="t in tabs" :key="t.id" @click="activeTab = t.id"
+                        :class="activeTab === t.id ? 'tab-active border-b-2' : 'text-dim border-b-2 border-transparent'"
+                        class="px-8 py-5 font-black text-sm transition-all flex items-center whitespace-nowrap italic uppercase">
+                    <i :data-lucide="t.icon" class="ml-2 w-4 h-4"></i>
+                    {{ t.name }}
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
+                
+                <!-- 1. سجل الفواتير (Sales Ledger) -->
+                <div v-if="activeTab === 'sales'" class="space-y-8">
+                    <div class="flex justify-between items-center">
+                        <div class="relative w-96">
+                            <i data-lucide="search" class="absolute right-4 top-1/2 -translate-y-1/2 text-dim"></i>
+                            <input v-model="searchSales" type="text" placeholder="ابحث برقم الفاتورة أو اسم العميل..." class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl py-3 pr-12 pl-4 text-bright font-bold outline-none focus:border-emerald-500 transition">
+                        </div>
+                    </div>
+                    <div class="card-bg rounded-[40px] overflow-hidden shadow-2xl">
+                        <table class="w-full text-right">
+                            <thead class="bg-slate-800/50 border-b border-slate-800">
+                                <tr class="text-[10px] text-dim font-black uppercase tracking-[3px]">
+                                    <th class="px-8 py-6">رقم الفاتورة</th>
+                                    <th class="px-8 py-6">العميل</th>
+                                    <th class="px-8 py-6 text-center">المبلغ</th>
+                                    <th class="px-8 py-6">نوع الدفع</th>
+                                    <th class="px-8 py-6">التاريخ</th>
+                                    <th class="px-8 py-6">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <tr v-for="s in sales" :key="s.id" class="hover:bg-white/[0.01]">
+                                    <td class="px-8 py-6 font-black text-bright">#{{ s.id }}</td>
+                                    <td class="px-8 py-6 font-bold text-bright">{{ s.customer }}</td>
+                                    <td class="px-8 py-6 text-center font-black text-emerald-400 text-lg">{{ s.total }} ج.م</td>
+                                    <td class="px-8 py-6">
+                                        <span :class="s.type === 'نقدي' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'" class="px-3 py-1 rounded-lg text-[10px] font-black uppercase">
+                                            {{ s.type }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-dim font-bold italic">{{ s.date }}</td>
+                                    <td class="px-8 py-6">
+                                        <button class="p-2 text-slate-700 hover:text-white"><i data-lucide="printer" class="w-5 h-5"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 2. إدارة المرتجعات (Returns) -->
+                <div v-if="activeTab === 'returns'" class="space-y-10">
+                    <div v-if="!invoiceFound" class="bg-red-500/5 border-2 border-dashed border-red-500/20 p-20 rounded-[60px] text-center flex flex-col items-center">
+                        <i data-lucide="rotate-ccw" class="w-16 h-16 text-red-500/50 mb-6"></i>
+                        <h3 class="text-3xl font-black text-bright italic mb-4">إدارة المرتجعات والتبديل</h3>
+                        <p class="text-lg text-dim font-bold italic mb-8">أدخل رقم الفاتورة للبدء في عملية الإرجاع</p>
+                        <div class="flex space-x-4 space-x-reverse w-full max-w-md">
+                            <input v-model="invoiceSearchId" type="text" placeholder="رقم الفاتورة (مثلاً: 8842)" class="flex-1 bg-slate-900 border-2 border-slate-800 rounded-2xl py-4 px-6 text-bright font-black text-center outline-none focus:border-red-500">
+                            <button @click="searchInvoice" class="px-8 py-4 bg-red-600 text-white rounded-2xl font-black">بحث</button>
+                        </div>
+                    </div>
+
+                    <!-- فاتورة تم العثور عليها -->
+                    <div v-else class="card-bg p-10 rounded-[50px] border-red-500/20 space-y-8">
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-8">
+                            <h4 class="text-2xl font-black text-bright italic">محتويات فاتورة #{{ invoiceSearchId }}</h4>
+                            <button @click="invoiceFound = false" class="text-sm font-bold text-dim hover:text-white">إلغاء البحث</button>
+                        </div>
+                        <div class="space-y-4">
+                            <div v-for="item in dummyInvoiceItems" :key="item.id" class="flex justify-between items-center p-6 bg-slate-900 rounded-[30px] border border-slate-800">
+                                <div class="flex flex-col">
+                                    <span class="font-black text-bright text-lg">{{ item.name }}</span>
+                                    <span class="text-[10px] font-bold text-dim italic">السعر الأصلي: {{ item.price }} ج.م</span>
+                                </div>
+                                <button @click="confirmReturn(item)" class="px-6 py-3 bg-red-600/10 text-red-500 border border-red-500/20 rounded-xl font-black text-xs hover:bg-red-500 hover:text-white transition">إرجاع الصنف</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. حسابات العملاء والديون (Debts) -->
+                <div v-if="activeTab === 'debts'" class="space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div v-for="c in debtors" :key="c.id" class="card-bg p-8 rounded-[40px] flex items-center justify-between border-red-500/20 group hover:border-red-500 transition">
+                            <div class="flex items-center space-x-6 space-x-reverse">
+                                <div class="h-16 w-16 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 font-black text-2xl">{{ c.name[0] }}</div>
+                                <div>
+                                    <h4 class="text-2xl font-black text-bright leading-none">{{ c.name }}</h4>
+                                    <p class="text-xs text-dim font-bold mt-2 italic">{{ c.phone }}</p>
+                                </div>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-[10px] font-black text-dim uppercase tracking-widest mb-1">المديونية الحالية</p>
+                                <p class="text-3xl font-black text-red-500 leading-none tracking-tighter">{{ c.debt }} <span class="text-sm">ج.م</span></p>
+                                <button class="mt-4 px-6 py-2 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-xl text-xs font-black hover:bg-emerald-500 hover:text-white transition">تحصيل مبلغ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, watchEffect } = Vue;
+        createApp({
+            setup() {
+                const activeTab = ref('sales');
+                const tabs = [
+                    { id: 'sales', name: 'سجل المبيعات', icon: 'file-text' },
+                    { id: 'returns', name: 'المرتجعات', icon: 'rotate-ccw' },
+                    { id: 'debts', name: 'الديون والتحصيل', icon: 'users-2' }
+                ];
+
+                const sales = ref([
+                    { id: 8842, customer: 'عميل نقدي', total: '1,250', type: 'نقدي', date: '2024/04/29' },
+                    { id: 8841, customer: 'أحمد علي مصطفى', total: '15,400', type: 'آجل', date: '2024/04/28' },
+                    { id: 8840, customer: 'سارة محمود', total: '850', type: 'نقدي', date: '2024/04/28' }
+                ]);
+
+                const debtors = ref([
+                    { id: 1, name: 'أحمد علي مصطفى', phone: '01012345678', debt: '5,400' },
+                    { id: 2, name: 'محمد الشناوي', phone: '01122334455', debt: '12,000' },
+                    { id: 3, name: 'ورشة السلام', phone: '01223334445', debt: '1,850' }
+                ]);
+
+                onMounted(() => lucide.createIcons());
+                watchEffect(() => setTimeout(() => lucide.createIcons(), 0));
+
+                const invoiceSearchId = ref('');
+                const invoiceFound = ref(false);
+                const dummyInvoiceItems = ref([
+                    { id: 1, name: 'iPhone 15 Pro Max', price: '65,000' },
+                    { id: 2, name: 'جراب سيلكون آيفون 15', price: '450' }
+                ]);
+
+                const searchInvoice = () => {
+                    if (invoiceSearchId.value) {
+                        invoiceFound.value = true;
+                        setTimeout(() => lucide.createIcons(), 0);
+                    }
+                };
+
+                const confirmReturn = (item) => {
+                    Swal.fire({
+                        title: 'تأكيد عملية المرتجع؟',
+                        text: `سيتم إرجاع ${item.name} للمخزن ورد مبلغ ${item.price} ج.م للخزينة.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#DC2626',
+                        cancelButtonColor: '#1E293B',
+                        confirmButtonText: 'نعم، إرجاع',
+                        cancelButtonText: 'إلغاء',
+                        background: '#0F172A',
+                        color: '#FFFFFF'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({ title: 'تمت العملية!', text: 'تم إرجاع الصنف وتحديث المخازن والمالية.', icon: 'success', background: '#0F172A', color: '#FFFFFF' });
+                            invoiceFound.value = false;
+                        }
+                    });
+                };
+
+                return { activeTab, tabs, sales, debtors, invoiceSearchId, invoiceFound, dummyInvoiceItems, searchInvoice, confirmReturn };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
