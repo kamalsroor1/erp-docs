@@ -98,6 +98,7 @@
                             <thead class="bg-slate-800/50 border-b border-slate-800">
                                 <tr class="text-[10px] text-dim font-black uppercase tracking-[3px]">
                                     <th class="px-8 py-6">رقم الفاتورة</th>
+                                    <th class="px-8 py-6">الفرع</th>
                                     <th class="px-8 py-6">العميل</th>
                                     <th class="px-8 py-6 text-center">المبلغ</th>
                                     <th class="px-8 py-6">نوع الدفع</th>
@@ -108,6 +109,7 @@
                             <tbody class="divide-y divide-slate-800">
                                 <tr v-for="s in sales" :key="s.id" class="hover:bg-white/[0.01]">
                                     <td class="px-8 py-6 font-black text-bright">#{{ s.id }}</td>
+                                    <td class="px-8 py-6 font-bold text-dim italic">{{ s.branch }}</td>
                                     <td class="px-8 py-6 font-bold text-bright">{{ s.customer }}</td>
                                     <td class="px-8 py-6 text-center font-black text-emerald-400 text-lg">{{ s.total }} ج.م</td>
                                     <td class="px-8 py-6">
@@ -116,7 +118,7 @@
                                         </span>
                                     </td>
                                     <td class="px-8 py-6 text-dim font-bold italic">{{ s.date }}</td>
-                                    <td class="px-8 py-6">
+                                    <td class="px-8 py-6 text-center">
                                         <button class="p-2 text-slate-700 hover:text-white"><i data-lucide="printer" class="w-5 h-5"></i></button>
                                     </td>
                                 </tr>
@@ -191,9 +193,9 @@
                 ];
 
                 const sales = ref([
-                    { id: 8842, customer: 'عميل نقدي', total: '1,250', type: 'نقدي', date: '2024/04/29' },
-                    { id: 8841, customer: 'أحمد علي مصطفى', total: '15,400', type: 'آجل', date: '2024/04/28' },
-                    { id: 8840, customer: 'سارة محمود', total: '850', type: 'نقدي', date: '2024/04/28' }
+                    { id: 8842, customer: 'عميل نقدي', total: '1,250', type: 'نقدي', date: '2024/04/29', branch: 'فرع المنصورة' },
+                    { id: 8841, customer: 'أحمد علي مصطفى', total: '15,400', type: 'آجل', date: '2024/04/28', branch: 'فرع القاهرة' },
+                    { id: 8840, customer: 'سارة محمود', total: '850', type: 'نقدي', date: '2024/04/28', branch: 'فرع المنصورة' }
                 ]);
 
                 const debtors = ref([
