@@ -67,18 +67,29 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in-down { animation: fadeInDown 0.3s ease-out; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
     <div id="app" class="flex w-full" :class="{'light-mode': !isDark}">
         <!-- القائمة الجانبية -->
-        <aside class="w-64 sidebar flex flex-col hidden md:flex z-30">
-            <div class="p-8 text-center border-b border-slate-800/50 mb-4">
+        <aside :class="showMobileMenu ? 'translate-x-0' : 'translate-x-full md:translate-x-0'" 
+               class="fixed md:relative w-[90vw] md:w-64 h-full sidebar flex flex-col z-[100] md:z-30 transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none">
+            <div class="p-8 text-center border-b border-slate-800/50 mb-4 flex flex-col items-center">
+                <button @click="showMobileMenu = false" class="md:hidden self-end mb-4 text-dim hover:text-white bg-slate-800 p-2 rounded-xl border border-slate-700">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
                 <img :src="isDark ? 'logo.png' : 'logo-black.png'" alt="Logo" class="h-14 mx-auto mb-2">
                 <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">إدارة متكاملة</span>
             </div>
             <nav class="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
+                <!-- الروابط كما هي -->
                 <a href="index.html" class="flex items-center px-4 py-3 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-xl transition">
                     <i data-lucide="layout-dashboard" class="ml-3 w-5 h-5"></i>
                     <span class="font-bold text-lg text-bright">الرئيسية</span>
@@ -128,20 +139,23 @@
 
         <!-- المحتوى الرئيسي -->
         <main class="flex-1 flex flex-col overflow-y-auto custom-scrollbar transition-all duration-300">
-            <header class="h-20 header-glass flex items-center justify-between px-10 sticky top-0 z-50">
-                <div class="flex items-center space-x-4 space-x-reverse">
-                    <h2 class="text-3xl font-black text-bright leading-none">أهلاً، <span class="text-emerald-500">{{ userName }}</span></h2>
+            <header class="h-20 header-glass flex items-center justify-between px-4 md:px-10 sticky top-0 z-50">
+                <div class="flex items-center space-x-2 md:space-x-4 space-x-reverse">
+                    <!-- زر القائمة للجوال -->
+                    <button @click="showMobileMenu = true" class="md:hidden p-2 text-bright hover:bg-slate-800 rounded-xl">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <h2 class="text-xl md:text-3xl font-black text-bright leading-none truncate max-w-[150px] md:max-w-none">أهلاً، <span class="text-emerald-500">{{ userName }}</span></h2>
                     
-                    <!-- نظام تبديل الفروع -->
-                    <div class="relative mr-4">
-                        <button @click="showBranches = !showBranches" class="bg-slate-800 border-2 border-slate-700 px-4 py-2 rounded-xl flex items-center hover:border-emerald-500 transition shadow-lg group">
-                            <i data-lucide="map-pin" class="ml-2 w-4 h-4 text-emerald-500"></i>
-                            <span class="text-sm font-black text-bright">{{ currentBranch }}</span>
-                            <i data-lucide="chevron-down" class="mr-2 w-4 h-4 text-dim group-hover:text-emerald-500 transition"></i>
+                    <!-- نظام تبديل الفروع (مخفي في الشاشات الصغيرة جداً لتوفير مساحة) -->
+                    <div class="relative mr-2 hidden sm:block">
+                        <button @click="showBranches = !showBranches" class="bg-slate-800 border-2 border-slate-700 px-3 py-1.5 md:px-4 md:py-2 rounded-xl flex items-center hover:border-emerald-500 transition shadow-lg group">
+                            <i data-lucide="map-pin" class="ml-1 md:ml-2 w-3 md:w-4 h-3 md:h-4 text-emerald-500"></i>
+                            <span class="text-[10px] md:text-sm font-black text-bright">{{ currentBranch }}</span>
                         </button>
 
-                        <!-- قائمة الفروع المنسدلة -->
-                        <div v-if="showBranches" class="absolute right-0 mt-4 w-64 card-bg rounded-2xl shadow-2xl border-slate-700 overflow-hidden z-50 animate-fade-in-down">
+                        <div v-if="showBranches" class="absolute right-0 mt-4 w-56 md:w-64 card-bg rounded-2xl shadow-2xl border-slate-700 overflow-hidden z-50 animate-fade-in-down">
+                            <!-- ... القائمة كما هي ... -->
                             <div class="p-4 border-b border-slate-800 bg-slate-900/50">
                                 <span class="text-[10px] font-black text-dim uppercase tracking-widest italic">اختر الفرع للتبديل</span>
                             </div>
@@ -158,25 +172,24 @@
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-4 space-x-reverse">
+                <div class="flex items-center space-x-2 md:space-x-4 space-x-reverse">
                     <!-- الجرس والإشعارات -->
                     <div class="relative">
-                        <button @click="showNotifications = !showNotifications" class="p-3 bg-slate-800 border-2 border-slate-700 rounded-2xl hover:border-emerald-500 transition-all shadow-lg relative group">
-                            <i data-lucide="bell" class="w-6 h-6 text-emerald-500 group-hover:shake transition-transform"></i>
-                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg animate-pulse">3</span>
+                        <button @click="showNotifications = !showNotifications" class="p-2 md:p-3 bg-slate-800 border-2 border-slate-700 rounded-xl md:rounded-2xl hover:border-emerald-500 transition-all shadow-lg relative group">
+                            <i data-lucide="bell" class="w-5 md:w-6 h-5 md:h-6 text-emerald-500 group-hover:shake transition-transform"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] md:text-[10px] font-black w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg animate-pulse">3</span>
                         </button>
-
-                        <!-- قائمة الإشعارات المنسدلة -->
-                        <div v-if="showNotifications" class="absolute left-0 mt-4 w-96 card-bg rounded-[32px] shadow-2xl border-slate-700 overflow-hidden z-50 animate-fade-in-down">
-                            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-                                <h5 class="text-sm font-black text-bright uppercase tracking-widest italic">الإشعارات والتنبيهات</h5>
+                        <!-- ... الدروب داون كما هي ... -->
+                        <div v-if="showNotifications" class="absolute left-0 mt-4 w-[280px] md:w-96 card-bg rounded-[24px] md:rounded-[32px] shadow-2xl border-slate-700 overflow-hidden z-50 animate-fade-in-down">
+                            <div class="p-4 md:p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+                                <h5 class="text-xs md:text-sm font-black text-bright uppercase tracking-widest italic">الإشعارات والتنبيهات</h5>
                                 <button @click="showNotifications = false" class="text-xs text-dim hover:text-emerald-500">إغلاق</button>
                             </div>
-                            <div class="max-h-[400px] overflow-y-auto custom-scrollbar">
-                                <div v-for="alert in alerts" :key="alert.id" class="p-5 border-b border-slate-800 hover:bg-emerald-500/5 transition cursor-pointer group">
-                                    <div class="flex items-start space-x-4 space-x-reverse">
-                                        <div class="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-emerald-500 border border-slate-700 group-hover:border-emerald-500 transition">
-                                            <i :data-lucide="alert.icon" class="w-5 h-5"></i>
+                            <div class="max-h-[300px] md:max-h-[400px] overflow-y-auto custom-scrollbar">
+                                <div v-for="alert in alerts" :key="alert.id" class="p-4 md:p-5 border-b border-slate-800 hover:bg-emerald-500/5 transition cursor-pointer group">
+                                    <div class="flex items-start space-x-3 md:space-x-4 space-x-reverse">
+                                        <div class="h-8 w-8 md:h-10 md:w-10 rounded-full bg-slate-800 flex items-center justify-center text-emerald-500 border border-slate-700 group-hover:border-emerald-500 transition">
+                                            <i :data-lucide="alert.icon" class="w-4 md:w-5 h-4 md:h-5"></i>
                                         </div>
                                         <div class="flex-1">
                                             <p class="text-sm font-bold text-bright leading-relaxed">{{ alert.text }}</p>
@@ -194,8 +207,8 @@
                     </div>
 
                     <!-- زر تبديل الوضع -->
-                    <button @click="toggleTheme" class="p-3 bg-slate-800 border-2 border-slate-700 rounded-2xl hover:border-emerald-500 transition-all shadow-lg group">
-                        <i :data-lucide="isDark ? 'sun' : 'moon'" class="w-6 h-6 text-emerald-500 group-hover:rotate-12 transition-transform"></i>
+                    <button @click="toggleTheme" class="p-2 md:p-3 bg-slate-800 border-2 border-slate-700 rounded-xl md:rounded-2xl hover:border-emerald-500 transition-all shadow-lg group">
+                        <i :data-lucide="isDark ? 'sun' : 'moon'" class="w-5 md:w-6 h-5 md:h-6 text-emerald-500 group-hover:rotate-12 transition-transform"></i>
                     </button>
 
                     <div class="flex flex-col text-right hidden sm:flex border-r border-slate-800 pr-4 mr-2">
@@ -205,7 +218,7 @@
                 </div>
             </header>
 
-            <div class="p-10 space-y-10">
+            <div class="p-4 md:p-10 space-y-6 md:space-y-10">
                 <!-- KPI Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div class="card-bg p-10 rounded-[45px] relative overflow-hidden group hover:border-emerald-500/50 transition shadow-2xl">
@@ -298,6 +311,93 @@
                     </div>
                 </div>
             </div>
+
+        <!-- خلفية مظللة عند فتح المنيو في الجوال -->
+        <div v-if="showMobileMenu" @click="showMobileMenu = false" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[90] md:hidden animate-fade-in"></div>
+
+        <!-- مساعد إبراء الذكي (Command Center) -->
+        <div class="fixed bottom-6 left-6 md:bottom-8 md:left-8 z-[100] flex flex-col items-end space-y-4">
+            <!-- قائمة الخيارات -->
+            <div v-if="showCommandCenter" class="card-bg w-64 md:w-72 rounded-[32px] md:rounded-[40px] shadow-2xl border-emerald-500/30 overflow-hidden animate-fade-in-up mb-4">
+                <div class="p-4 md:p-6 bg-emerald-500/10 border-b border-emerald-500/20">
+                    <h5 class="text-xs md:text-sm font-black text-emerald-500 uppercase tracking-widest italic">المساعد الذكي</h5>
+                </div>
+                <div class="p-2 md:p-4 space-y-1 md:space-y-2">
+                    <button @click="showQuickAccess = true; showCommandCenter = false" class="w-full text-right p-3 md:p-4 rounded-2xl md:rounded-3xl hover:bg-emerald-500/10 transition flex items-center group">
+                        <div class="h-8 w-8 md:h-10 md:w-10 bg-slate-900 rounded-xl md:rounded-2xl flex items-center justify-center ml-3 text-emerald-500 border border-slate-800 group-hover:border-emerald-500">
+                            <i data-lucide="zap" class="w-4 h-4 md:w-5 md:h-5"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-black text-bright">الوصول السريع</span>
+                    </button>
+                    <button @click="showAIChat = true; showCommandCenter = false" class="w-full text-right p-3 md:p-4 rounded-2xl md:rounded-3xl hover:bg-blue-500/10 transition flex items-center group">
+                        <div class="h-8 w-8 md:h-10 md:w-10 bg-slate-900 rounded-xl md:rounded-2xl flex items-center justify-center ml-3 text-blue-500 border border-slate-800 group-hover:border-blue-500">
+                            <i data-lucide="bot" class="w-4 h-4 md:w-5 md:h-5"></i>
+                        </div>
+                        <span class="text-sm md:text-base font-black text-bright">دردشة إبراء AI</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- الزر العائم الرئيسي (FAB) -->
+            <button @click="showCommandCenter = !showCommandCenter" 
+                    :class="showCommandCenter ? 'rotate-45 bg-red-500 shadow-red-900/40' : 'bg-emerald-500 shadow-emerald-900/40'"
+                    class="h-16 w-16 md:h-20 md:w-20 rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-500 hover:scale-110 active:scale-95 group">
+                <i :data-lucide="showCommandCenter ? 'x' : 'command'" class="w-6 h-6 md:w-8 md:h-8 transition-transform"></i>
+            </button>
+        </div>
+
+            <!-- نافذة الدردشة مع الذكاء الاصطناعي -->
+            <div v-if="showAIChat" class="fixed bottom-32 left-4 right-4 md:left-8 md:w-96 h-[500px] md:h-[550px] card-bg rounded-[40px] md:rounded-[50px] shadow-2xl border-blue-500/30 overflow-hidden z-[110] flex flex-col animate-fade-in-up">
+                <div class="p-6 md:p-8 bg-blue-600/10 border-b border-blue-500/20 flex justify-between items-center">
+                    <div class="flex items-center space-x-3 md:space-x-4 space-x-reverse">
+                        <div class="h-10 w-10 md:h-12 md:w-12 bg-blue-500 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg animate-pulse">
+                            <i data-lucide="bot" class="w-6 md:w-7 h-6 md:h-7"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-sm md:text-lg font-black text-bright leading-none">إبراء AI</h5>
+                        </div>
+                    </div>
+                    <button @click="showAIChat = false" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                
+                <div class="flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar space-y-4">
+                    <div class="bg-slate-900/50 p-5 rounded-[30px] rounded-br-none border border-slate-800 max-w-[85%]">
+                        <p class="text-sm font-bold text-bright leading-relaxed">أهلاً كمال! كيف يمكنني مساعدتك اليوم في إدارة فرع المنصورة؟ يمكنك سؤالي عن المبيعات أو المخزون.</p>
+                    </div>
+                    <div class="bg-blue-600 p-5 rounded-[30px] rounded-bl-none text-white max-w-[85%] mr-auto text-left shadow-lg">
+                        <p class="text-sm font-bold leading-relaxed">أريد ملخص لمبيعات اليوم</p>
+                    </div>
+                </div>
+
+                <div class="p-4 md:p-6 border-t border-slate-800 bg-slate-900/30">
+                    <div class="relative">
+                        <input type="text" placeholder="اسأل المساعد..." class="w-full bg-[#020617] border-2 border-slate-800 rounded-full py-3 md:py-4 px-5 pr-12 text-xs md:text-sm font-bold text-bright outline-none focus:border-blue-500 transition">
+                        <button class="absolute right-1 top-1 h-8 w-8 md:h-10 md:w-10 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg">
+                            <i data-lucide="send" class="w-3 md:w-4 h-3 md:h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- نافذة الوصول السريع -->
+            <div v-if="showQuickAccess" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl flex items-center justify-center z-[120] p-4">
+                <div class="card-bg w-full max-w-2xl rounded-[40px] md:rounded-[60px] p-6 md:p-12 shadow-2xl border-emerald-500/30 text-center relative overflow-hidden">
+                    <div class="absolute -top-24 -right-24 h-64 w-64 bg-emerald-500/5 rounded-full blur-3xl"></div>
+                    <h3 class="text-2xl md:text-4xl font-black text-bright italic mb-2 md:mb-4 tracking-tighter uppercase">قائمة الوصول السريع</h3>
+                    <p class="text-[10px] md:text-sm text-dim font-bold mb-8 md:mb-12">اختر الواجهة التي تريد الانتقال إليها فوراً</p>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6 relative z-10">
+                        <a v-for="page in quickPages" :key="page.name" :href="page.url" class="p-4 md:p-8 bg-slate-900/50 border-2 border-slate-800 rounded-[30px] md:rounded-[40px] hover:border-emerald-500 transition-all group">
+                            <div class="h-12 w-12 md:h-16 md:w-16 mx-auto bg-slate-800 rounded-2xl md:rounded-3xl flex items-center justify-center mb-2 md:mb-4 text-emerald-500 border border-slate-700 group-hover:bg-emerald-500 group-hover:text-white transition">
+                                <i :data-lucide="page.icon" class="w-6 md:w-8 h-6 md:h-8"></i>
+                            </div>
+                            <span class="text-xs md:text-base font-black text-bright">{{ page.name }}</span>
+                        </a>
+                    </div>
+
+                    <button @click="showQuickAccess = false" class="mt-12 text-dim hover:text-white font-black uppercase tracking-widest text-[10px]">إغلاق القائمة</button>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -309,9 +409,21 @@
                 const isDark = ref(localStorage.getItem('theme') !== 'light');
                 const showNotifications = ref(false);
                 const showBranches = ref(false);
+                const showMobileMenu = ref(false);
+                const showCommandCenter = ref(false);
+                const showAIChat = ref(false);
+                const showQuickAccess = ref(false);
                 const userName = ref('كمال سرور');
                 const currentBranch = ref('فرع المنصورة');
                 const branchesList = ref(['فرع المنصورة', 'فرع القاهرة', 'مخزن الجملة']);
+                const quickPages = [
+                    { name: 'شاشة البيع', icon: 'shopping-cart', url: 'pos.html' },
+                    { name: 'إدارة المخزن', icon: 'box', url: 'inventory.html' },
+                    { name: 'الصيانة', icon: 'wrench', url: 'service.html' },
+                    { name: 'العملاء', icon: 'users', url: 'crm.html' },
+                    { name: 'المالية', icon: 'wallet', url: 'finance.html' },
+                    { name: 'الإعدادات', icon: 'settings', url: 'settings.html' }
+                ];
 
                 const switchBranch = (branch) => {
                     currentBranch.value = branch;
@@ -393,9 +505,13 @@
                     });
                 });
 
+                watchEffect(() => setTimeout(() => lucide.createIcons(), 0));
+
                 return { 
                     userName, alerts, currentBranch, isDark, toggleTheme, 
-                    showNotifications, showBranches, branchesList, switchBranch 
+                    showNotifications, showBranches, branchesList, switchBranch,
+                    showCommandCenter, showAIChat, showQuickAccess, quickPages,
+                    showMobileMenu
                 };
             }
         }).mount('#app');
