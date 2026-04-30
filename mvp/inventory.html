@@ -69,7 +69,22 @@
         <!-- المحتوى الرئيسي -->
         <main class="flex-1 flex flex-col overflow-hidden bg-[#020617]">
             <header class="h-20 border-b-2 border-slate-800 flex items-center justify-between px-10 bg-[#020617] z-20">
-                <h2 class="text-3xl font-black text-bright italic">إدارة المخزن</h2>
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <h2 class="text-3xl font-black text-bright italic">إدارة المخزن</h2>
+                    <div class="relative group mr-4">
+                        <button class="bg-slate-800 border-2 border-slate-700 px-4 py-2 rounded-xl flex items-center hover:border-emerald-500 transition">
+                            <i data-lucide="warehouse" class="ml-2 w-4 h-4 text-emerald-500"></i>
+                            <span class="text-sm font-black">{{ currentWarehouse }}</span>
+                            <i data-lucide="chevron-down" class="mr-2 w-4 h-4 text-dim"></i>
+                        </button>
+                        <div class="absolute top-full right-0 mt-2 w-48 card-bg rounded-xl shadow-2xl hidden group-hover:block z-50">
+                            <div class="p-2 space-y-1">
+                                <button @click="currentWarehouse = 'المخزن الرئيسي'" class="w-full text-right px-4 py-2 hover:bg-emerald-500/10 rounded-lg text-xs font-bold transition">المخزن الرئيسي</button>
+                                <button @click="currentWarehouse = 'مخزن العرض'" class="w-full text-right px-4 py-2 hover:bg-emerald-500/10 rounded-lg text-xs font-bold transition">مخزن العرض</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="flex items-center space-x-4 space-x-reverse">
                     <button @click="showAddProductModal = true" class="emerald-gradient text-white px-8 py-3 rounded-2xl font-black text-lg shadow-xl shadow-emerald-900/20">
                         <i data-lucide="plus" class="ml-2 inline w-6 h-6"></i>
@@ -206,10 +221,12 @@
             setup() {
                 const activeTab = ref('list');
                 const searchQuery = ref('');
+                const currentWarehouse = ref('المخزن الرئيسي');
                 const showAddProductModal = ref(false);
 
                 const tabs = [
                     { id: 'list', name: 'قائمة الأصناف', icon: 'list' },
+                    { id: 'transfers', name: 'التحويلات المخزنية', icon: 'move' },
                     { id: 'serials', name: 'تتبع السيريالات', icon: 'hash' },
                     { id: 'purchases', name: 'استلام بضاعة', icon: 'truck' },
                     { id: 'stocktake', name: 'الجرد السريع', icon: 'scan-barcode' }
@@ -250,7 +267,7 @@
                     });
                 };
 
-                return { activeTab, tabs, products, searchQuery, filteredProducts, showAddProductModal, saveProduct, stockTakeItems, confirmStockTake };
+                return { activeTab, tabs, products, searchQuery, filteredProducts, showAddProductModal, saveProduct, stockTakeItems, confirmStockTake, currentWarehouse };
             }
         }).mount('#app');
     </script>
