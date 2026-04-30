@@ -62,9 +62,9 @@
         createApp({
             setup() {
                 const plans = ref([
-                    { name: 'الباقة الأساسية', desc: 'للمحلات الصغيرة والبدايات القوية.', monthlyPrice: '450', featured: false, features: ['مستخدم واحد', 'مخزن حتى 500 صنف', 'شاشة مبيعات سريعة', 'دعم تليجرام'] },
-                    { name: 'الباقة الاحترافية', desc: 'للمراكز النشطة التي تطلب تحكم كامل.', monthlyPrice: '850', featured: true, features: ['مستخدمين غير محدودين', 'تتبع السيريالات IMEI', 'نظام الصيانة والتقارير', 'إدارة 3 فروع'] },
-                    { name: 'باقة المؤسسات', desc: 'للشركات وسلاسل الفروع الضخمة.', monthlyPrice: '1500', featured: false, features: ['فروع غير محدودة', 'نظام المسوقين بالعمولة', 'دعم فني VIP 24/7', 'ربط API مخصص'] }
+                    { name: 'الباقة الأساسية', desc: 'للمحلات الصغيرة والبدايات القوية.', monthlyPrice: '450', featured: false, features: ['فرع واحد / مخزن واحد', 'شاشة مبيعات سريعة', 'إدارة عملاء بسيطة', 'دعم تليجرام'] },
+                    { name: 'الباقة الاحترافية', desc: 'للمراكز النشطة التي تطلب تحكم كامل.', monthlyPrice: '850', featured: true, features: ['حتى 3 فروع ومخازن', 'تتبع السيريالات IMEI', 'نظام الصيانة والتقارير', 'تحويلات مخزنية بينية'] },
+                    { name: 'باقة المؤسسات', desc: 'للشركات وسلاسل الفروع الضخمة.', monthlyPrice: '1500', featured: false, features: ['فروع ومخازن غير محدودة', 'نظام المسوقين بالعمولة', 'إدارة مالية متقدمة (P&L)', 'ربط API ودعم VIP'] }
                 ]);
                 const selectPlan = (p) => { localStorage.setItem('selectedPlan', JSON.stringify(p)); window.location.href = 'register.html'; };
                 onMounted(() => lucide.createIcons());
