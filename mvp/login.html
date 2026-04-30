@@ -20,7 +20,8 @@
     <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[150px] -mr-64 -mt-64"></div>
 
     <div id="app" class="w-full max-w-lg z-10">
-        <div class="glass-card p-16 rounded-[60px] shadow-3xl">
+        <!-- شاشة تسجيل الدخول -->
+        <div v-if="step === 'login'" class="glass-card p-16 rounded-[60px] shadow-3xl">
             <div class="flex flex-col items-center mb-12 text-center">
                 <img src="logo.png" alt="Logo" class="h-24 w-auto mb-6">
                 <h1 class="text-4xl font-black text-bright tracking-tight leading-none italic">دخول النظام</h1>
@@ -56,21 +57,59 @@
                 </a>
             </div>
         </div>
+
+        <!-- شاشة اختيار الفرع -->
+        <div v-if="step === 'branch'" class="glass-card p-16 rounded-[60px] shadow-3xl text-center">
+            <h1 class="text-3xl font-black text-bright italic mb-4">اختر الفرع للبدء</h1>
+            <p class="text-slate-400 font-bold mb-10">تم العثور على 3 فروع مرتبطة بحسابك</p>
+            
+            <div class="space-y-4">
+                <button @click="selectBranch('فرع المنصورة')" class="w-full p-8 bg-slate-900 border-2 border-slate-800 rounded-[35px] hover:border-emerald-500 transition text-right flex items-center justify-between group">
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-black text-bright">فرع المنصورة</span>
+                        <span class="text-xs font-bold text-dim uppercase">الفرع الرئيسي</span>
+                    </div>
+                    <i data-lucide="arrow-left" class="w-8 h-8 text-slate-700 group-hover:text-emerald-500 transition"></i>
+                </button>
+                <button @click="selectBranch('فرع القاهرة')" class="w-full p-8 bg-slate-900 border-2 border-slate-800 rounded-[35px] hover:border-emerald-500 transition text-right flex items-center justify-between group">
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-black text-bright">فرع القاهرة</span>
+                        <span class="text-xs font-bold text-dim uppercase">حي المهندسين</span>
+                    </div>
+                    <i data-lucide="arrow-left" class="w-8 h-8 text-slate-700 group-hover:text-emerald-500 transition"></i>
+                </button>
+                <button @click="selectBranch('مخزن الجملة')" class="w-full p-8 bg-slate-900 border-2 border-slate-800 rounded-[35px] hover:border-emerald-500 transition text-right flex items-center justify-between group">
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-black text-bright">مخزن الجملة</span>
+                        <span class="text-xs font-bold text-dim uppercase">مركز التوزيع</span>
+                    </div>
+                    <i data-lucide="arrow-left" class="w-8 h-8 text-slate-700 group-hover:text-emerald-500 transition"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
         const { createApp, ref, onMounted } = Vue;
         createApp({
             setup() {
+                const step = ref('login');
                 const email = ref('');
                 const password = ref('');
                 const loading = ref(false);
                 const handleLogin = () => {
                     loading.value = true;
-                    setTimeout(() => window.location.href = 'index.html', 1500);
+                    setTimeout(() => {
+                        loading.value = false;
+                        step.value = 'branch';
+                        setTimeout(() => lucide.createIcons(), 0);
+                    }, 1500);
+                };
+                const selectBranch = (branch) => {
+                    window.location.href = 'index.html';
                 };
                 onMounted(() => lucide.createIcons());
-                return { email, password, loading, handleLogin };
+                return { step, email, password, loading, handleLogin, selectBranch };
             }
         }).mount('#app');
     </script>
