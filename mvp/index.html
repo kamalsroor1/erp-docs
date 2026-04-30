@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="dark">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,24 +10,61 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #020617; color: #FFFFFF; }
-        .sidebar { background-color: #020617; border-left: 2px solid #1E293B; }
-        .card-bg { background-color: #0F172A; border: 2px solid #1E293B; }
-        .emerald-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
-        .text-bright { color: #FFFFFF !important; }
+        :root {
+            --bg-main: #020617;
+            --bg-card: #0F172A;
+            --text-main: #FFFFFF;
+            --border: #1E293B;
+            --sidebar-bg: #020617;
+            --header-bg: rgba(2, 6, 23, 0.8);
+        }
+
+        .light-mode {
+            --bg-main: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --text-main: #0F172A;
+            --border: #E2E8F0;
+            --sidebar-bg: #FFFFFF;
+            --header-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: var(--bg-main); 
+            color: var(--text-main); 
+            transition: background-color 0.3s ease, color 0.3s ease;
+            margin: 0;
+        }
+        
+        .sidebar { background-color: var(--sidebar-bg); border-left: 2px solid var(--border); transition: all 0.3s ease; }
+        .card-bg { background-color: var(--bg-card); border: 2px solid var(--border); transition: all 0.3s ease; }
+        .header-glass { background-color: var(--header-bg); backdrop-blur: 12px; border-bottom: 2px solid var(--border); }
+        
+        .text-bright { color: var(--text-main) !important; }
         .text-dim { color: #94A3B8 !important; }
+        .light-mode .text-dim { color: #64748B !important; }
+        
+        .light-mode .bg-slate-900 { background-color: #F1F5F9; }
+        .light-mode .bg-slate-800 { background-color: #E2E8F0; }
+        .light-mode .border-slate-800 { border-color: #E2E8F0; }
+        .light-mode .border-slate-700 { border-color: #CBD5E1; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .light-mode .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <div id="app" class="flex w-full">
+    <div id="app" class="flex w-full" :class="{'light-mode': !isDark}">
         <!-- القائمة الجانبية -->
-        <aside class="w-64 sidebar flex flex-col hidden md:flex">
+        <aside class="w-64 sidebar flex flex-col hidden md:flex z-30">
             <div class="p-8 text-center border-b border-slate-800/50 mb-4">
-                <img src="logo.png" alt="Logo" class="h-14 mx-auto mb-2">
+                <img :src="isDark ? 'logo.png' : 'logo-black.png'" alt="Logo" class="h-14 mx-auto mb-2">
                 <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">إدارة متكاملة</span>
             </div>
-            <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+            <nav class="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
                 <a href="index.html" class="flex items-center px-4 py-3 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-xl transition">
                     <i data-lucide="layout-dashboard" class="ml-3 w-5 h-5"></i>
                     <span class="font-bold text-lg text-bright">الرئيسية</span>
@@ -61,7 +98,6 @@
                     <span class="font-bold text-lg text-bright">الإعدادات</span>
                 </a>
                 
-                <!-- روابط التبديل السريع (للعرض فقط) -->
                 <div class="mt-10 pt-10 border-t border-slate-800/50 space-y-2">
                     <p class="text-[10px] font-black text-slate-700 uppercase tracking-widest px-4 mb-4 italic">بوابات إضافية (Demo)</p>
                     <a href="admin_dashboard.html" class="flex items-center px-4 py-3 text-blue-400 hover:bg-blue-500/10 rounded-xl transition">
@@ -77,30 +113,27 @@
         </aside>
 
         <!-- المحتوى الرئيسي -->
-        <main class="flex-1 flex flex-col overflow-y-auto bg-[#020617] custom-scrollbar">
-            <header class="h-20 border-b-2 border-slate-800 flex items-center justify-between px-10 sticky top-0 bg-[#020617]/80 backdrop-blur-md z-20">
+        <main class="flex-1 flex flex-col overflow-y-auto custom-scrollbar transition-all duration-300">
+            <header class="h-20 header-glass flex items-center justify-between px-10 sticky top-0 z-20">
                 <div class="flex items-center space-x-4 space-x-reverse">
                     <h2 class="text-3xl font-black text-bright leading-none">أهلاً، <span class="text-emerald-500">{{ userName }}</span></h2>
-                    <!-- زر تبديل الفرع -->
                     <div class="relative group mr-4">
                         <button class="bg-slate-800 border-2 border-slate-700 px-4 py-2 rounded-xl flex items-center hover:border-emerald-500 transition">
                             <i data-lucide="map-pin" class="ml-2 w-4 h-4 text-emerald-500"></i>
-                            <span class="text-sm font-black">{{ currentBranch }}</span>
+                            <span class="text-sm font-black text-bright">{{ currentBranch }}</span>
                             <i data-lucide="chevron-down" class="mr-2 w-4 h-4 text-dim"></i>
                         </button>
-                        <!-- القائمة المنسدلة (Demo) -->
-                        <div class="absolute top-full right-0 mt-2 w-48 card-bg rounded-xl shadow-2xl hidden group-hover:block z-50">
-                            <div class="p-2 space-y-1">
-                                <button class="w-full text-right px-4 py-2 hover:bg-emerald-500/10 rounded-lg text-xs font-bold transition">فرع المنصورة</button>
-                                <button class="w-full text-right px-4 py-2 hover:bg-emerald-500/10 rounded-lg text-xs font-bold transition">فرع القاهرة - المهندسين</button>
-                                <button class="w-full text-right px-4 py-2 hover:bg-emerald-500/10 rounded-lg text-xs font-bold transition">المخزن الرئيسي (مركزي)</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
-                <div class="flex items-center space-x-6 space-x-reverse text-right">
-                    <div class="flex flex-col">
-                        <span class="text-[10px] font-black text-dim uppercase tracking-widest leading-none mb-1">الحالة التشغيلية</span>
+
+                <div class="flex items-center space-x-6 space-x-reverse">
+                    <!-- زر تبديل الوضع -->
+                    <button @click="toggleTheme" class="p-3 bg-slate-800 border-2 border-slate-700 rounded-2xl hover:border-emerald-500 transition-all shadow-lg group">
+                        <i :data-lucide="isDark ? 'sun' : 'moon'" class="w-6 h-6 text-emerald-500 group-hover:rotate-12 transition-transform"></i>
+                    </button>
+
+                    <div class="flex flex-col text-right">
+                        <span class="text-[10px] font-black text-dim uppercase tracking-widest leading-none mb-1 italic">الحالة التشغيلية</span>
                         <span class="text-xs font-black text-emerald-500 italic">متصل بالفرع الحالي ✅</span>
                     </div>
                 </div>
@@ -117,88 +150,83 @@
 
                     <div class="card-bg p-10 rounded-[45px] relative overflow-hidden group hover:border-red-500/50 transition shadow-2xl">
                         <div class="absolute top-0 left-0 w-full h-2 bg-red-500"></div>
-                        <p class="text-xs font-black text-dim uppercase tracking-widest mb-3">ديون العملاء (هذا الفرع)</p>
+                        <p class="text-xs font-black text-dim uppercase tracking-widest mb-3">ديون العملاء</p>
                         <h3 class="text-5xl font-black text-red-500 tracking-tighter">5,800 <span class="text-sm font-normal text-dim italic">ج.م</span></h3>
                     </div>
 
                     <div class="card-bg p-10 rounded-[45px] relative overflow-hidden group hover:border-blue-500/50 transition shadow-2xl">
                         <div class="absolute top-0 left-0 w-full h-2 bg-blue-500"></div>
-                        <p class="text-xs font-black text-dim uppercase tracking-widest mb-3">رصيد الخزينة الحالي</p>
-                        <h3 class="text-5xl font-black text-bright tracking-tighter">3,200 <span class="text-sm font-normal text-dim italic">ج.م</span></h3>
+                        <p class="text-xs font-black text-dim uppercase tracking-widest mb-3">رصيد الخزينة</p>
+                        <h3 class="text-5xl font-black text-bright tracking-tighter">142,500 <span class="text-sm font-normal text-dim italic">ج.م</span></h3>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <div class="space-y-10">
-                        <h4 class="text-2xl font-black text-bright italic mr-2 flex items-center">
+                        <h4 class="text-2xl font-black text-bright italic flex items-center">
                             <i data-lucide="layout-grid" class="ml-2 text-emerald-500"></i>
-                            لوحة الوصول السريع (Quick Access)
+                            وصول سريع (Quick Access)
                         </h4>
                         
-                        <!-- نظام البلاطات المحدث (Tiles Grid) -->
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            <!-- العمليات اليومية -->
-                            <button onclick="location.href='pos.html'" class="card-bg p-6 rounded-3xl hover:border-emerald-500 transition flex flex-col items-center justify-center space-y-3 group bg-emerald-500/5">
+                            <button onclick="location.href='pos.html'" class="card-bg p-6 rounded-3xl hover:border-emerald-500 transition flex flex-col items-center justify-center space-y-3 bg-emerald-500/5 group">
                                 <i data-lucide="shopping-cart" class="w-8 h-8 text-emerald-500"></i>
-                                <span class="font-black text-sm">بيع جديد</span>
+                                <span class="font-black text-sm text-bright">بيع جديد</span>
                             </button>
                             <button class="card-bg p-6 rounded-3xl hover:border-blue-500 transition flex flex-col items-center justify-center space-y-3">
                                 <i data-lucide="truck" class="w-8 h-8 text-blue-500"></i>
-                                <span class="font-black text-sm">شراء / توريد</span>
+                                <span class="font-black text-sm text-bright">شراء / توريد</span>
                             </button>
                             <button class="card-bg p-6 rounded-3xl hover:border-red-500 transition flex flex-col items-center justify-center space-y-3">
                                 <i data-lucide="refresh-ccw" class="w-8 h-8 text-red-500"></i>
-                                <span class="font-black text-sm">مرتجع بيع</span>
+                                <span class="font-black text-sm text-bright">مرتجع بيع</span>
                             </button>
                             
-                            <!-- المخازن -->
                             <button onclick="location.href='inventory.html'" class="card-bg p-6 rounded-3xl hover:border-orange-500 transition flex flex-col items-center justify-center space-y-3">
                                 <i data-lucide="scan-barcode" class="w-8 h-8 text-orange-500"></i>
-                                <span class="font-black text-sm">جرد مخزن</span>
+                                <span class="font-black text-sm text-bright">جرد مخزن</span>
                             </button>
                             <button class="card-bg p-6 rounded-3xl hover:border-purple-500 transition flex flex-col items-center justify-center space-y-3">
                                 <i data-lucide="move" class="w-8 h-8 text-purple-500"></i>
-                                <span class="font-black text-sm">تحويل لفرع</span>
+                                <span class="font-black text-sm text-bright">تحويل لفرع</span>
                             </button>
                             <button class="card-bg p-6 rounded-3xl hover:border-cyan-500 transition flex flex-col items-center justify-center space-y-3">
                                 <i data-lucide="clipboard-list" class="w-8 h-8 text-cyan-500"></i>
-                                <span class="font-black text-sm">عرض أسعار</span>
+                                <span class="font-black text-sm text-bright">عرض أسعار</span>
                             </button>
 
-                            <!-- المالي -->
                             <button onclick="location.href='finance.html'" class="card-bg p-6 rounded-3xl hover:border-emerald-400 transition flex flex-col items-center justify-center space-y-3">
                                 <i data-lucide="arrow-down-left" class="w-8 h-8 text-emerald-400"></i>
-                                <span class="font-black text-sm">قبض (مقبوضات)</span>
+                                <span class="font-black text-sm text-bright">مقبوضات</span>
                             </button>
                             <button onclick="location.href='finance.html'" class="card-bg p-6 rounded-3xl hover:border-rose-400 transition flex flex-col items-center justify-center space-y-3">
                                 <i data-lucide="arrow-up-right" class="w-8 h-8 text-rose-400"></i>
-                                <span class="font-black text-sm">صرف (مدفوعات)</span>
+                                <span class="font-black text-sm text-bright">مدفوعات</span>
                             </button>
                             <button onclick="location.href='settings.html'" class="card-bg p-6 rounded-3xl hover:border-slate-500 transition flex flex-col items-center justify-center space-y-3">
                                 <i data-lucide="settings" class="w-8 h-8 text-slate-500"></i>
-                                <span class="font-black text-sm">إعداد النظام</span>
+                                <span class="font-black text-sm text-bright">إعدادات</span>
                             </button>
                         </div>
 
-                        <!-- التنبيهات -->
                         <div class="card-bg p-8 rounded-[45px] border-orange-500/20">
                             <h5 class="text-sm font-black text-orange-400 uppercase tracking-widest mb-6 flex items-center italic">
                                 <i data-lucide="bell-ring" class="ml-2 w-5 h-5 animate-bounce"></i>
-                                تنبيهات تحتاج انتباهك
+                                تنبيهات النظام
                             </h5>
                             <div class="space-y-4">
                                 <div v-for="alert in alerts" :key="alert.id" class="flex items-center justify-between p-4 bg-slate-900 rounded-2xl border border-slate-800 hover:border-slate-700 transition">
                                     <span class="text-sm font-bold text-bright italic">{{ alert.text }}</span>
-                                    <span class="text-[9px] font-black bg-emerald-500/10 text-emerald-500 px-3 py-1.5 rounded-xl uppercase">{{ alert.label }}</span>
+                                    <span class="text-[9px] font-black bg-emerald-500/10 text-emerald-500 px-3 py-1.5 rounded-xl uppercase tracking-tighter">{{ alert.label }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- الرسم البياني -->
-                    <div class="card-bg p-10 rounded-[50px] shadow-2xl flex flex-col">
-                        <h4 class="text-2xl font-black text-bright mb-10 italic">أرباحك خلال الأسبوع</h4>
-                        <div class="flex-1 h-[300px]">
+                    <div class="card-bg p-10 rounded-[50px] shadow-2xl flex flex-col min-h-[450px]">
+                        <h4 class="text-2xl font-black text-bright mb-10 italic">أداء الأسبوع (صافي الربح)</h4>
+                        <div class="flex-1">
                             <canvas id="profitChart"></canvas>
                         </div>
                     </div>
@@ -208,22 +236,51 @@
     </div>
 
     <script>
-        const { createApp, ref, onMounted } = Vue;
+        const { createApp, ref, onMounted, watchEffect } = Vue;
 
         createApp({
             setup() {
+                const isDark = ref(localStorage.getItem('theme') !== 'light');
                 const userName = ref('كمال سرور');
                 const currentBranch = ref('فرع المنصورة');
                 const alerts = ref([
-                    { id: 1, text: 'سيريال iPhone 15 مكرر في الجرد', label: 'تنبيه سيريالات' },
-                    { id: 2, text: 'نفاذ مخزون AirPods Pro في فرع المنصورة', label: 'نقص مخزون' },
-                    { id: 3, text: 'استحقاق دفع فاتورة لمورد - غداً', label: 'مدفوعات' }
+                    { id: 1, text: 'سيريال iPhone 15 مكرر في الجرد', label: 'سيريالات' },
+                    { id: 2, text: 'نفاذ مخزون AirPods Pro في فرع المنصورة', label: 'مخزون' },
+                    { id: 3, text: 'استحقاق دفع فاتورة لمورد - غداً', label: 'مالية' }
                 ]);
 
+                let profitChart = null;
+
+                const applyTheme = () => {
+                    if (isDark.value) {
+                        document.body.classList.remove('light-mode');
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        document.body.classList.add('light-mode');
+                        localStorage.setItem('theme', 'light');
+                    }
+                    if (profitChart) updateChartColors();
+                    setTimeout(() => lucide.createIcons(), 0);
+                };
+
+                const toggleTheme = () => {
+                    isDark.value = !isDark.value;
+                    applyTheme();
+                };
+
+                const updateChartColors = () => {
+                    const textColor = isDark.value ? '#94a3b8' : '#64748b';
+                    const gridColor = isDark.value ? '#1e293b' : '#e2e8f0';
+                    profitChart.options.scales.y.ticks.color = textColor;
+                    profitChart.options.scales.y.grid.color = gridColor;
+                    profitChart.options.scales.x.ticks.color = textColor;
+                    profitChart.update();
+                };
+
                 onMounted(() => {
-                    lucide.createIcons();
+                    applyTheme();
                     const ctx = document.getElementById('profitChart').getContext('2d');
-                    new Chart(ctx, {
+                    profitChart = new Chart(ctx, {
                         type: 'line',
                         data: {
                             labels: ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
@@ -244,14 +301,14 @@
                             maintainAspectRatio: false,
                             plugins: { legend: { display: false } },
                             scales: {
-                                y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { weight: 'bold' } } },
-                                x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 'bold' } } }
+                                y: { grid: { color: isDark.value ? '#1e293b' : '#e2e8f0' }, ticks: { color: isDark.value ? '#94a3b8' : '#64748b', font: { weight: 'bold' } } },
+                                x: { grid: { display: false }, ticks: { color: isDark.value ? '#94a3b8' : '#64748b', font: { weight: 'bold' } } }
                             }
                         }
                     });
                 });
 
-                return { userName, alerts, currentBranch };
+                return { userName, alerts, currentBranch, isDark, toggleTheme };
             }
         }).mount('#app');
     </script>
