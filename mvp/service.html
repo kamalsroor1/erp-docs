@@ -112,7 +112,9 @@
                             <span :class="getStatusColor(ticket.status)" class="px-4 py-2 rounded-xl text-xs font-black italic uppercase border border-white/10">
                                 {{ ticket.status }}
                             </span>
-                            <button class="p-3 bg-slate-800 hover:bg-slate-700 rounded-2xl transition"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
+                            <button @click="openTicketActions(ticket)" class="p-3 bg-slate-800 hover:bg-slate-700 rounded-2xl transition text-blue-400">
+                                <i data-lucide="settings-2" class="w-6 h-6"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -120,7 +122,7 @@
             </div>
         </main>
 
-        <!-- نافذة تذكرة صيانة جديدة (مسار المستخدم) -->
+        <!-- نافذة تذكرة صيانة جديدة -->
         <div v-if="showNewTicketModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4">
             <div class="card-bg w-full max-w-4xl rounded-[60px] p-12 shadow-2xl border-blue-500/30 overflow-y-auto max-h-[95vh] custom-scrollbar">
                 <div class="flex justify-between items-center mb-10 border-b border-slate-800 pb-8">
@@ -129,7 +131,6 @@
                 </div>
                 
                 <form @submit.prevent="saveTicket" class="space-y-10">
-                    <!-- الخطوة 1: بيانات العميل -->
                     <div class="space-y-6">
                         <h4 class="text-xl font-black text-blue-400 italic border-r-4 border-blue-500 pr-4">1. بيانات العميل</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -144,7 +145,6 @@
                         </div>
                     </div>
 
-                    <!-- الخطوة 2: بيانات الجهاز والعطل -->
                     <div class="space-y-6">
                         <h4 class="text-xl font-black text-blue-400 italic border-r-4 border-blue-500 pr-4">2. بيانات الجهاز والعطل</h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -176,6 +176,84 @@
                 </form>
             </div>
         </div>
+
+        <!-- نافذة تحديث حالة التذكرة -->
+        <div v-if="showTicketActionsModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4">
+            <div class="card-bg w-full max-w-2xl rounded-[60px] p-12 shadow-2xl border-blue-500/30">
+                <div class="flex justify-between items-center mb-10 border-b border-slate-800 pb-8">
+                    <div>
+                        <h3 class="text-3xl font-black text-bright italic tracking-tighter uppercase">تحديث حالة التذكرة #{{ selectedTicket?.id }}</h3>
+                        <p class="text-xs font-bold text-dim mt-2">{{ selectedTicket?.customerName }} - {{ selectedTicket?.device }}</p>
+                    </div>
+                    <button @click="showTicketActionsModal = false" class="text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-8 h-8"></i></button>
+                </div>
+                
+                <form @submit.prevent="updateTicketStatus" class="space-y-8">
+                    <div class="space-y-6">
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">الحالة الجديدة</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button v-for="status in ['قيد الإصلاح', 'جاهز للتسليم', 'تم التسليم', 'مرفوض']" 
+                                        :key="status" type="button" 
+                                        @click="ticketUpdateData.status = status"
+                                        :class="ticketUpdateData.status === status ? 'border-blue-500 bg-blue-500/10 text-white' : 'border-slate-800 text-dim'"
+                                        class="py-4 rounded-2xl border-2 font-black transition text-sm">
+                                    {{ status }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">تقرير الفني / الملاحظات</label>
+                            <textarea v-model="ticketUpdateData.notes" placeholder="اكتب ما تم في الجهاز أو سبب الرفض..." class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-6 text-lg font-bold text-bright outline-none focus:border-blue-500 h-32 transition shadow-inner"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-6 space-x-reverse pt-10 border-t border-slate-800">
+                        <button type="button" @click="showTicketActionsModal = false" class="flex-1 py-6 bg-slate-900 text-dim rounded-[30px] font-black text-xl hover:text-white transition">إلغاء</button>
+                        <button type="button" @click="openBillingModal" class="flex-1 py-6 bg-emerald-600/10 text-emerald-500 border-2 border-emerald-500/20 rounded-[30px] font-black text-xl hover:bg-emerald-600 hover:text-white transition">حساب التكاليف 💳</button>
+                        <button type="submit" class="flex-2 py-6 blue-gradient text-white rounded-[30px] font-black text-2xl shadow-2xl shadow-blue-900/40 transition-all hover:scale-[1.02]">
+                            تحديث الحالة الآن ✅
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- نافذة فاتورة الصيانة (الحسابات) -->
+        <div v-if="showBillingModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center z-[110] p-4">
+            <div class="card-bg w-full max-w-xl rounded-[60px] p-12 shadow-2xl border-emerald-500/30">
+                <div class="flex justify-between items-center mb-10 border-b border-slate-800 pb-8">
+                    <h3 class="text-3xl font-black text-bright italic tracking-tighter uppercase">تسوية مالية للتذكرة #{{ selectedTicket?.id }}</h3>
+                    <button @click="showBillingModal = false" class="text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-8 h-8"></i></button>
+                </div>
+                
+                <div class="space-y-8">
+                    <div class="grid grid-cols-1 gap-6">
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">تكلفة قطع الغيار</label>
+                            <input v-model.number="billingData.parts" type="number" placeholder="0.00" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-8 text-2xl font-black text-bright outline-none focus:border-emerald-500 transition shadow-inner">
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">تكلفة المصنعية / اليد</label>
+                            <input v-model.number="billingData.labor" type="number" placeholder="0.00" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-8 text-2xl font-black text-bright outline-none focus:border-emerald-500 transition shadow-inner">
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/50 p-8 rounded-[40px] border-2 border-emerald-500/20 text-center">
+                        <p class="text-xs font-black text-dim uppercase tracking-[4px] mb-2 italic">إجمالي المطلوب سداده</p>
+                        <h4 class="text-6xl font-black text-emerald-400 tracking-tighter">{{ billingData.parts + billingData.labor }} <span class="text-xl">ج.م</span></h4>
+                    </div>
+
+                    <div class="flex space-x-6 space-x-reverse pt-6">
+                        <button type="button" @click="showBillingModal = false" class="flex-1 py-6 bg-slate-900 text-dim rounded-[30px] font-black text-xl hover:text-white transition">إلغاء</button>
+                        <button @click="saveBilling" class="flex-2 py-6 emerald-gradient text-white rounded-[30px] font-black text-2xl shadow-2xl shadow-emerald-900/40 transition-all hover:scale-[1.02]">
+                            اعتماد الفاتورة 🖨️
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -184,6 +262,12 @@
             setup() {
                 const activeTab = ref('all');
                 const showNewTicketModal = ref(false);
+                const showTicketActionsModal = ref(false);
+                const showBillingModal = ref(false);
+                const selectedTicket = ref(null);
+                const ticketUpdateData = ref({ status: '', notes: '' });
+                const billingData = ref({ parts: 0, labor: 0 });
+
                 const tabs = [
                     { id: 'all', name: 'كافة التذاكر', icon: 'list' },
                     { id: 'repair', name: 'قيد الإصلاح', icon: 'wrench' },
@@ -197,6 +281,46 @@
                     { id: 1048, customerName: 'شركة النيل', device: 'iPad Air 4', issue: 'تغيير بطارية', status: 'تم التسليم', deliveryDate: '2024/04/25' }
                 ]);
 
+                const openTicketActions = (ticket) => {
+                    selectedTicket.value = ticket;
+                    ticketUpdateData.value.status = ticket.status;
+                    showTicketActionsModal.value = true;
+                    setTimeout(() => lucide.createIcons(), 0);
+                };
+
+                const openBillingModal = () => {
+                    showBillingModal.value = true;
+                    setTimeout(() => lucide.createIcons(), 0);
+                };
+
+                const saveBilling = () => {
+                    Swal.fire({
+                        title: 'تم اعتماد الفاتورة! 💸',
+                        text: `إجمالي المبلغ: ${billingData.parts.value + billingData.labor.value} ج.م. تم تحديث المالية.`,
+                        icon: 'success',
+                        background: '#0F172A',
+                        color: '#FFFFFF',
+                        confirmButtonColor: '#10B981'
+                    }).then(() => {
+                        showBillingModal.value = false;
+                        showTicketActionsModal.value = false;
+                    });
+                };
+
+                const updateTicketStatus = () => {
+                    Swal.fire({
+                        title: 'تم التحديث! ✅',
+                        text: `تم تغيير حالة التذكرة #${selectedTicket.value.id} إلى ${ticketUpdateData.value.status}.`,
+                        icon: 'success',
+                        background: '#0F172A',
+                        color: '#FFFFFF',
+                        confirmButtonColor: '#3B82F6'
+                    }).then(() => {
+                        showTicketActionsModal.value = false;
+                        selectedTicket.value.status = ticketUpdateData.value.status;
+                    });
+                };
+
                 const filteredTickets = computed(() => {
                     if (activeTab.value === 'all') return tickets.value;
                     const statusMap = { 'repair': 'قيد الإصلاح', 'ready': 'جاهز للتسليم', 'delivered': 'تم التسليم' };
@@ -206,6 +330,7 @@
                 const getStatusColor = (status) => {
                     if (status === 'قيد الإصلاح') return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
                     if (status === 'جاهز للتسليم') return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                    if (status === 'مرفوض') return 'bg-red-500/10 text-red-500 border-red-500/20';
                     return 'bg-slate-800 text-dim border-slate-700';
                 };
 
@@ -223,7 +348,11 @@
                 onMounted(() => lucide.createIcons());
                 watchEffect(() => setTimeout(() => lucide.createIcons(), 0));
 
-                return { activeTab, tabs, tickets, filteredTickets, showNewTicketModal, getStatusColor, saveTicket };
+                return { 
+                    activeTab, tabs, tickets, filteredTickets, showNewTicketModal, getStatusColor, saveTicket,
+                    showTicketActionsModal, showBillingModal, selectedTicket, ticketUpdateData, billingData, 
+                    openTicketActions, openBillingModal, saveBilling, updateTicketStatus
+                };
             }
         }).mount('#app');
     </script>

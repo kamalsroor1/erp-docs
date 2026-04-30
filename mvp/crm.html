@@ -69,6 +69,7 @@
             <header class="h-20 border-b-2 border-slate-800 flex items-center justify-between px-10 bg-[#020617]">
                 <h2 class="text-3xl font-black text-bright italic">المبيعات والعملاء</h2>
                 <div class="flex items-center space-x-4 space-x-reverse">
+                    <button @click="showAddCustomerModal = true" class="px-6 py-2 emerald-gradient text-white rounded-xl font-black text-xs shadow-lg shadow-emerald-900/20">إضافة عميل جديد</button>
                     <button class="px-6 py-2 bg-slate-800 text-white rounded-xl font-black text-xs border border-slate-700">تصدير التقارير</button>
                 </div>
             </header>
@@ -171,7 +172,7 @@
                             <div class="text-left">
                                 <p class="text-[10px] font-black text-dim uppercase tracking-widest mb-1">المديونية الحالية</p>
                                 <p class="text-3xl font-black text-red-500 leading-none tracking-tighter">{{ c.debt }} <span class="text-sm">ج.م</span></p>
-                                <button class="mt-4 px-6 py-2 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-xl text-xs font-black hover:bg-emerald-500 hover:text-white transition">تحصيل مبلغ</button>
+                                <button @click="openCollectModal(c)" class="mt-4 px-6 py-2 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-xl text-xs font-black hover:bg-emerald-500 hover:text-white transition">تحصيل مبلغ</button>
                             </div>
                         </div>
                     </div>
@@ -179,6 +180,88 @@
 
             </div>
         </main>
+
+        <!-- نافذة إضافة عميل جديد -->
+        <div v-if="showAddCustomerModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4">
+            <div class="card-bg w-full max-w-2xl rounded-[60px] p-12 shadow-2xl border-emerald-500/30">
+                <div class="flex justify-between items-center mb-10 border-b border-slate-800 pb-8">
+                    <h3 class="text-4xl font-black text-bright italic tracking-tighter">إضافة عميل جديد</h3>
+                    <button @click="showAddCustomerModal = false" class="text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-8 h-8"></i></button>
+                </div>
+                
+                <form @submit.prevent="saveCustomer" class="space-y-8">
+                    <div class="space-y-6">
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">اسم العميل بالكامل</label>
+                            <input v-model="newCustomer.name" type="text" placeholder="مثلاً: محمد أحمد علي" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-8 text-xl font-black text-bright outline-none focus:border-emerald-500 transition shadow-inner">
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">رقم الموبايل</label>
+                                <input v-model="newCustomer.phone" type="text" placeholder="01xxxxxxxxx" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-8 text-xl font-black text-bright outline-none focus:border-emerald-500 transition shadow-inner">
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">رصيد افتتاحي (مديونية)</label>
+                                <input v-model="newCustomer.debt" type="number" placeholder="0" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-8 text-xl font-black text-red-500 outline-none focus:border-red-500 transition shadow-inner">
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">العنوان</label>
+                            <input v-model="newCustomer.address" type="text" placeholder="المحافظة - المدينة - الحي" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-8 text-xl font-black text-bright outline-none focus:border-emerald-500 transition shadow-inner">
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-6 space-x-reverse pt-10 border-t border-slate-800">
+                        <button type="button" @click="showAddCustomerModal = false" class="flex-1 py-6 bg-slate-900 text-dim rounded-[30px] font-black text-xl hover:text-white transition">إلغاء</button>
+                        <button type="submit" class="flex-2 py-6 emerald-gradient text-white rounded-[30px] font-black text-2xl shadow-2xl shadow-emerald-900/40 transition-all hover:scale-[1.02]">
+                            حفظ بيانات العميل 💾
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- نافذة تحصيل مديونية -->
+        <div v-if="showCollectDebtModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4">
+            <div class="card-bg w-full max-w-xl rounded-[60px] p-12 shadow-2xl border-emerald-500/30">
+                <div class="flex justify-between items-center mb-10 border-b border-slate-800 pb-8">
+                    <h3 class="text-3xl font-black text-bright italic tracking-tighter">تحصيل مديونية عميل</h3>
+                    <button @click="showCollectDebtModal = false" class="text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-8 h-8"></i></button>
+                </div>
+                
+                <form @submit.prevent="saveCollection" class="space-y-8">
+                    <div class="text-center bg-slate-900/50 p-6 rounded-[30px] border border-slate-800 mb-6">
+                        <p class="text-xs font-black text-dim uppercase tracking-[4px] mb-2 italic">العميل الحالي</p>
+                        <h4 class="text-2xl font-black text-bright leading-none">{{ selectedDebtor?.name }}</h4>
+                        <p class="text-emerald-500 font-black mt-3 italic text-xl">إجمالي الدين: {{ selectedDebtor?.debt }} ج.م</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">المبلغ المحصل الآن</label>
+                            <input v-model="collectionData.amount" type="number" placeholder="أدخل المبلغ" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-6 px-8 text-4xl font-black text-emerald-400 outline-none focus:border-emerald-500 transition text-center shadow-inner">
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">طريقة التحصيل</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button type="button" @click="collectionData.method = 'cash'" :class="collectionData.method === 'cash' ? 'border-emerald-500 bg-emerald-500/10 text-white' : 'border-slate-800 text-dim'" class="py-4 rounded-2xl border-2 font-black transition">نقدي (Cash)</button>
+                                <button type="button" @click="collectionData.method = 'transfer'" :class="collectionData.method === 'transfer' ? 'border-blue-500 bg-blue-500/10 text-white' : 'border-slate-800 text-dim'" class="py-4 rounded-2xl border-2 font-black transition">تحويل بنكي</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-6 space-x-reverse pt-10 border-t border-slate-800">
+                        <button type="button" @click="showCollectDebtModal = false" class="flex-1 py-6 bg-slate-900 text-dim rounded-[30px] font-black text-xl hover:text-white transition">إلغاء</button>
+                        <button type="submit" class="flex-2 py-6 emerald-gradient text-white rounded-[30px] font-black text-2xl shadow-2xl shadow-emerald-900/40 transition-all hover:scale-[1.02]">
+                            تأكيد التحصيل ✅
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -186,6 +269,12 @@
         createApp({
             setup() {
                 const activeTab = ref('sales');
+                const showAddCustomerModal = ref(false);
+                const showCollectDebtModal = ref(false);
+                const newCustomer = ref({ name: '', phone: '', debt: 0, address: '' });
+                const selectedDebtor = ref(null);
+                const collectionData = ref({ amount: 0, method: 'cash' });
+
                 const tabs = [
                     { id: 'sales', name: 'سجل المبيعات', icon: 'file-text' },
                     { id: 'returns', name: 'المرتجعات', icon: 'rotate-ccw' },
@@ -203,6 +292,41 @@
                     { id: 2, name: 'محمد الشناوي', phone: '01122334455', debt: '12,000' },
                     { id: 3, name: 'ورشة السلام', phone: '01223334445', debt: '1,850' }
                 ]);
+
+                const saveCustomer = () => {
+                    Swal.fire({
+                        title: 'تم الحفظ! 🎉',
+                        text: `تم إضافة العميل ${newCustomer.value.name} بنجاح.`,
+                        icon: 'success',
+                        background: '#0F172A',
+                        color: '#FFFFFF',
+                        confirmButtonColor: '#10B981'
+                    }).then(() => {
+                        showAddCustomerModal.value = false;
+                        newCustomer.value = { name: '', phone: '', debt: 0, address: '' };
+                    });
+                };
+
+                const openCollectModal = (debtor) => {
+                    selectedDebtor.value = debtor;
+                    collectionData.value.amount = debtor.debt.replace(',', '');
+                    showCollectDebtModal.value = true;
+                    setTimeout(() => lucide.createIcons(), 0);
+                };
+
+                const saveCollection = () => {
+                    Swal.fire({
+                        title: 'تم التحصيل! 💰',
+                        text: `تم تحصيل مبلغ ${collectionData.value.amount} ج.م من العميل ${selectedDebtor.value.name}.`,
+                        icon: 'success',
+                        background: '#0F172A',
+                        color: '#FFFFFF',
+                        confirmButtonColor: '#10B981'
+                    }).then(() => {
+                        showCollectDebtModal.value = false;
+                        collectionData.value = { amount: 0, method: 'cash' };
+                    });
+                };
 
                 onMounted(() => lucide.createIcons());
                 watchEffect(() => setTimeout(() => lucide.createIcons(), 0));
@@ -241,7 +365,11 @@
                     });
                 };
 
-                return { activeTab, tabs, sales, debtors, invoiceSearchId, invoiceFound, dummyInvoiceItems, searchInvoice, confirmReturn };
+                return { 
+                    activeTab, tabs, sales, debtors, invoiceSearchId, invoiceFound, dummyInvoiceItems, 
+                    searchInvoice, confirmReturn, showAddCustomerModal, newCustomer, saveCustomer,
+                    showCollectDebtModal, selectedDebtor, collectionData, openCollectModal, saveCollection
+                };
             }
         }).mount('#app');
     </script>

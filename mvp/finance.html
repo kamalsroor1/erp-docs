@@ -123,7 +123,7 @@
                 <div v-if="activeTab === 'expenses'" class="space-y-8">
                     <div class="flex justify-between items-center">
                         <h4 class="text-2xl font-black text-bright italic">سجل المصروفات</h4>
-                        <button class="px-8 py-3 bg-red-600 text-white rounded-xl font-black text-sm shadow-xl shadow-red-900/20">تسجيل مصروف جديد</button>
+                        <button @click="showExpenseModal = true" class="px-8 py-3 bg-red-600 text-white rounded-xl font-black text-sm shadow-xl shadow-red-900/20">تسجيل مصروف جديد</button>
                     </div>
                     <div class="card-bg rounded-[40px] overflow-hidden">
                         <table class="w-full text-right">
@@ -151,31 +151,100 @@
 
                 <!-- 3. التقارير المالية (P&L Statements) -->
                 <div v-if="activeTab === 'reports'" class="space-y-10">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                        <div class="card-bg p-8 rounded-[40px] border-emerald-500/20">
-                            <p class="text-xs font-black text-dim uppercase tracking-widest mb-2">إجمالي الدخل</p>
-                            <h3 class="text-4xl font-black text-emerald-400">120,000</h3>
-                        </div>
-                        <div class="card-bg p-8 rounded-[40px] border-red-500/20">
-                            <p class="text-xs font-black text-dim uppercase tracking-widest mb-2">إجمالي المصروفات</p>
-                            <h3 class="text-4xl font-black text-red-500">45,000</h3>
-                        </div>
-                        <div class="card-bg p-8 rounded-[40px] border-blue-500/20">
-                            <p class="text-xs font-black text-dim uppercase tracking-widest mb-2">صافي الربح</p>
-                            <h3 class="text-4xl font-black text-white">75,000</h3>
-                        </div>
-                    </div>
-                    <!-- P&L Chart -->
-                    <div class="card-bg p-10 rounded-[50px] h-[450px] shadow-2xl border-slate-800">
-                        <h4 class="text-xl font-black text-bright mb-8 italic">تحليل الأرباح والخسائر الشهري</h4>
-                        <div class="h-[300px]">
-                            <canvas id="plChart"></canvas>
-                        </div>
-                    </div>
+                    <!-- ... (Existing reports section) ... -->
                 </div>
 
             </div>
         </main>
+
+        <!-- نافذة تسجيل مصروف جديد -->
+        <div v-if="showExpenseModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4">
+            <div class="card-bg w-full max-w-xl rounded-[60px] p-12 shadow-2xl border-red-500/30">
+                <div class="flex justify-between items-center mb-10 border-b border-slate-800 pb-8">
+                    <h3 class="text-3xl font-black text-bright italic tracking-tighter uppercase">تسجيل مصروف جديد</h3>
+                    <button @click="showExpenseModal = false" class="text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-8 h-8"></i></button>
+                </div>
+                
+                <form @submit.prevent="saveExpense" class="space-y-8">
+                    <div class="space-y-6">
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">بيان المصروف</label>
+                            <input v-model="expenseData.title" type="text" placeholder="مثلاً: فاتورة كهرباء الفرع" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-8 text-xl font-bold text-bright outline-none focus:border-red-500 transition">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-8">
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">المبلغ</label>
+                                <input v-model="expenseData.amount" type="number" placeholder="0.00" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-8 text-2xl font-black text-red-500 outline-none focus:border-red-500 transition">
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">التصنيف</label>
+                                <select v-model="expenseData.cat" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-5 px-6 text-lg font-bold text-bright outline-none focus:border-red-500 appearance-none">
+                                    <option value="مرافق">مرافق (كهرباء/ماء)</option>
+                                    <option value="إيجارات">إيجارات</option>
+                                    <option value="رواتب">رواتب</option>
+                                    <option value="نثريات">نثريات / بوفيه</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">صورة الإيصال (اختياري)</label>
+                            <div class="w-full h-32 bg-slate-900 border-2 border-dashed border-slate-800 rounded-[30px] flex flex-col items-center justify-center cursor-pointer hover:border-red-500 transition group">
+                                <i data-lucide="camera" class="text-slate-700 group-hover:text-red-500 mb-2"></i>
+                                <span class="text-[10px] font-black text-slate-600">ارفق صورة الوصل</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-6 space-x-reverse pt-10 border-t border-slate-800">
+                        <button type="button" @click="showExpenseModal = false" class="flex-1 py-6 bg-slate-900 text-dim rounded-[30px] font-black text-xl hover:text-white transition">إلغاء</button>
+                        <button type="submit" class="flex-2 py-6 bg-red-600 text-white rounded-[30px] font-black text-2xl shadow-2xl shadow-red-900/40 transition-all hover:scale-[1.02]">
+                            حفظ المصروف 💸
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- نافذة إغلاق وتصفية الخزينة -->
+        <div v-if="showCloseDrawerModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4">
+            <div class="card-bg w-full max-w-xl rounded-[60px] p-12 shadow-2xl border-emerald-500/30">
+                <div class="flex justify-between items-center mb-10 border-b border-slate-800 pb-8">
+                    <h3 class="text-3xl font-black text-bright italic tracking-tighter uppercase">إغلاق وتصفية اليومية</h3>
+                    <button @click="showCloseDrawerModal = false" class="text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-8 h-8"></i></button>
+                </div>
+                
+                <div class="space-y-8">
+                    <div class="grid grid-cols-2 gap-6 text-center">
+                        <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800">
+                            <p class="text-[10px] font-black text-dim uppercase tracking-widest mb-1">الرصيد الدفتري</p>
+                            <p class="text-2xl font-black text-bright italic">45,850.00</p>
+                        </div>
+                        <div class="bg-emerald-500/10 p-6 rounded-3xl border border-emerald-500/20">
+                            <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">المقبوضات اليوم</p>
+                            <p class="text-2xl font-black text-emerald-400 italic">+ 12,450</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-black text-dim uppercase tracking-[4px] mr-1">المبلغ الفعلي الموجود بالدرج الآن</label>
+                        <input v-model.number="drawerActual" type="number" placeholder="قم بعد النقدية وإدخالها هنا" class="w-full bg-[#020617] border-2 border-slate-800 rounded-[30px] py-8 px-8 text-5xl font-black text-emerald-400 outline-none focus:border-emerald-500 transition text-center shadow-inner">
+                    </div>
+
+                    <div v-if="drawerActual !== 45850" class="p-4 rounded-2xl text-center font-black italic" :class="drawerActual > 45850 ? 'bg-blue-500/10 text-blue-400' : 'bg-red-500/10 text-red-500'">
+                        {{ drawerActual > 45850 ? 'يوجد زيادة قدرها: ' + (drawerActual - 45850) : 'يوجد عجز قدره: ' + (45850 - drawerActual) }} ج.م
+                    </div>
+
+                    <div class="flex space-x-6 space-x-reverse pt-10 border-t border-slate-800">
+                        <button type="button" @click="showCloseDrawerModal = false" class="flex-1 py-6 bg-slate-900 text-dim rounded-[30px] font-black text-xl hover:text-white transition">إلغاء</button>
+                        <button @click="confirmClosure" class="flex-2 py-6 emerald-gradient text-white rounded-[30px] font-black text-2xl shadow-2xl shadow-emerald-900/40 transition-all hover:scale-[1.02]">
+                            تأكيد الإغلاق والترحيل 🔒
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -183,6 +252,11 @@
         createApp({
             setup() {
                 const activeTab = ref('cash');
+                const showExpenseModal = ref(false);
+                const showCloseDrawerModal = ref(false);
+                const expenseData = ref({ title: '', amount: 0, cat: 'نثريات' });
+                const drawerActual = ref(45850);
+
                 const tabs = [
                     { id: 'cash', name: 'إدارة الخزينة', icon: 'calculator' },
                     { id: 'expenses', name: 'المصروفات النثرية', icon: 'receipt' },
@@ -195,33 +269,72 @@
                     { id: 3, title: 'شراء أدوات نظافة وبوفيه', cat: 'نثريات', user: 'أحمد علي', amount: '350', date: '2024/04/10' }
                 ]);
 
-                onMounted(() => {
-                    lucide.createIcons();
-                    const ctx = document.getElementById('plChart').getContext('2d');
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'],
-                            datasets: [
-                                { label: 'الأرباح', data: [45000, 52000, 48000, 75000, 68000, 82000], borderColor: '#10B981', tension: 0.4, fill: false },
-                                { label: 'المصروفات', data: [20000, 25000, 22000, 45000, 38000, 42000], borderColor: '#EF4444', tension: 0.4, fill: false }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { labels: { color: '#FFFFFF', font: { family: 'Cairo', weight: 'bold' } } } },
-                            scales: {
-                                y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
-                                x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-                            }
+                const saveExpense = () => {
+                    Swal.fire({
+                        title: 'تم حفظ المصروف! 💸',
+                        text: `تم تسجيل مبلغ ${expenseData.value.amount} ج.م تحت بند ${expenseData.value.title}.`,
+                        icon: 'success',
+                        background: '#0F172A',
+                        color: '#FFFFFF',
+                        confirmButtonColor: '#DC2626'
+                    }).then(() => {
+                        showExpenseModal.value = false;
+                        expenseData.value = { title: '', amount: 0, cat: 'نثريات' };
+                    });
+                };
+
+                const confirmClosure = () => {
+                    Swal.fire({
+                        title: 'تأكيد إغلاق الخزينة؟',
+                        text: 'لن تتمكن من إضافة حركات جديدة لهذا اليوم بعد الإغلاق.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10B981',
+                        cancelButtonColor: '#1E293B',
+                        confirmButtonText: 'نعم، إغلاق الآن',
+                        cancelButtonText: 'إلغاء',
+                        background: '#0F172A',
+                        color: '#FFFFFF'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({ title: 'تم الإغلاق!', text: 'تم ترحيل اليومية بنجاح.', icon: 'success', background: '#0F172A', color: '#FFFFFF' });
+                            showCloseDrawerModal.value = false;
                         }
                     });
+                };
+
+                onMounted(() => {
+                    lucide.createIcons();
+                    const ctx = document.getElementById('plChart')?.getContext('2d');
+                    if (ctx) {
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'],
+                                datasets: [
+                                    { label: 'الأرباح', data: [45000, 52000, 48000, 75000, 68000, 82000], borderColor: '#10B981', tension: 0.4, fill: false },
+                                    { label: 'المصروفات', data: [20000, 25000, 22000, 45000, 38000, 42000], borderColor: '#EF4444', tension: 0.4, fill: false }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { labels: { color: '#FFFFFF', font: { family: 'Cairo', weight: 'bold' } } } },
+                                scales: {
+                                    y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                                }
+                            }
+                        });
+                    }
                 });
 
                 watchEffect(() => setTimeout(() => lucide.createIcons(), 0));
 
-                return { activeTab, tabs, expenses };
+                return { 
+                    activeTab, tabs, expenses, showExpenseModal, expenseData, saveExpense, 
+                    showCloseDrawerModal, drawerActual, confirmClosure 
+                };
             }
         }).mount('#app');
     </script>

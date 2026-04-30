@@ -113,7 +113,7 @@
                 <div v-if="activeTab === 'branches_list'" class="space-y-8">
                     <div class="flex justify-between items-center">
                         <h4 class="text-2xl font-black text-bright italic">قائمة الفروع والمخازن</h4>
-                        <button class="px-8 py-3 bg-emerald-600 text-white rounded-xl font-black text-sm">إضافة فرع جديد</button>
+                        <button @click="showBranchModal = true" class="px-8 py-3 bg-emerald-600 text-white rounded-xl font-black text-sm">إضافة فرع جديد</button>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div v-for="b in branches" :key="b.id" class="card-bg p-8 rounded-[40px] border-slate-800 hover:border-emerald-500 transition group relative overflow-hidden">
@@ -136,7 +136,7 @@
                 <div v-if="activeTab === 'users'" class="space-y-8">
                     <div class="flex justify-between items-center">
                         <h4 class="text-2xl font-black text-bright italic">إدارة الموظفين والصلاحيات</h4>
-                        <button class="px-8 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">إضافة موظف جديد</button>
+                        <button @click="showUserModal = true" class="px-8 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">إضافة موظف جديد</button>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div v-for="u in users" :key="u.id" class="card-bg p-6 rounded-[32px] flex items-center justify-between border-slate-800">
@@ -173,12 +173,117 @@
                                 <p class="text-xs text-dim font-bold mt-1">تنسيق الفواتير وحجم الورق (80mm / 58mm).</p>
                             </div>
                         </div>
-                        <button class="px-6 py-3 bg-slate-800 text-white rounded-xl font-black text-xs">إعداد</button>
+                        <button @click="showPrinterModal = true" class="px-6 py-3 bg-slate-800 text-white rounded-xl font-black text-xs">إعداد</button>
                     </div>
                 </div>
 
             </div>
         </main>
+
+        <!-- نافذة إضافة فرع جديد -->
+        <div v-if="showBranchModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4">
+            <div class="card-bg w-full max-w-xl rounded-[60px] p-12 shadow-2xl border-emerald-500/30">
+                <div class="flex justify-between items-center mb-10 border-b border-slate-800 pb-8">
+                    <h3 class="text-3xl font-black text-bright italic tracking-tighter uppercase">إضافة فرع / مخزن جديد</h3>
+                    <button @click="showBranchModal = false" class="text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-8 h-8"></i></button>
+                </div>
+                <div class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-dim uppercase tracking-widest mr-1">اسم الفرع</label>
+                        <input type="text" class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-bright font-bold outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-dim uppercase tracking-widest mr-1">نوع المنشأة</label>
+                        <select class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-bright font-bold outline-none focus:border-emerald-500 appearance-none">
+                            <option>فرع بيع (نقاط بيع)</option>
+                            <option>مخزن فقط</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-dim uppercase tracking-widest mr-1">العنوان بالتفصيل</label>
+                        <input type="text" class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-bright font-bold outline-none focus:border-emerald-500">
+                    </div>
+                    <button @click="showBranchModal = false" class="w-full py-4 emerald-gradient text-white rounded-2xl font-black text-lg mt-6">حفظ المنشأة الجديدة</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- نافذة إضافة موظف جديد -->
+        <div v-if="showUserModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4">
+            <div class="card-bg w-full max-w-xl rounded-[60px] p-12 shadow-2xl border-blue-500/30">
+                <div class="flex justify-between items-center mb-10 border-b border-slate-800 pb-8">
+                    <h3 class="text-3xl font-black text-bright italic tracking-tighter uppercase">إضافة موظف جديد</h3>
+                    <button @click="showUserModal = false" class="text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-8 h-8"></i></button>
+                </div>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-widest mr-1">اسم الموظف</label>
+                            <input type="text" class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-bright font-bold outline-none focus:border-blue-500">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-dim uppercase tracking-widest mr-1">الوظيفة / الدور</label>
+                            <select class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-bright font-bold outline-none focus:border-blue-500 appearance-none">
+                                <option>كاشير (مبيعات)</option>
+                                <option>فني صيانة</option>
+                                <option>مسؤول مخزن</option>
+                                <option>مدير فرع</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-dim uppercase tracking-widest mr-1">كلمة المرور (للدخول للنظام)</label>
+                        <input type="password" class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-bright font-bold outline-none focus:border-blue-500">
+                    </div>
+                    <div class="space-y-4">
+                        <label class="text-[10px] font-black text-dim uppercase tracking-widest mr-1">الصلاحيات الأساسية</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="flex items-center p-3 bg-slate-900 rounded-xl cursor-pointer border border-slate-800 hover:border-blue-500">
+                                <input type="checkbox" class="ml-3 accent-blue-500">
+                                <span class="text-xs font-bold">البيع والتحصيل</span>
+                            </label>
+                            <label class="flex items-center p-3 bg-slate-900 rounded-xl cursor-pointer border border-slate-800 hover:border-blue-500">
+                                <input type="checkbox" class="ml-3 accent-blue-500">
+                                <span class="text-xs font-bold">إدارة المخزن</span>
+                            </label>
+                            <label class="flex items-center p-3 bg-slate-900 rounded-xl cursor-pointer border border-slate-800 hover:border-blue-500">
+                                <input type="checkbox" class="ml-3 accent-blue-500">
+                                <span class="text-xs font-bold">استلام الصيانة</span>
+                            </label>
+                            <label class="flex items-center p-3 bg-slate-900 rounded-xl cursor-pointer border border-slate-800 hover:border-blue-500">
+                                <input type="checkbox" class="ml-3 accent-blue-500">
+                                <span class="text-xs font-bold">عرض التقارير</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button @click="showUserModal = false" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-lg mt-6 shadow-xl shadow-blue-900/20">تأكيد إضافة الموظف</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- نافذة إعدادات الطابعة -->
+        <div v-if="showPrinterModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center z-[100] p-4">
+            <div class="card-bg w-full max-w-xl rounded-[60px] p-12 shadow-2xl border-slate-700">
+                <div class="flex justify-between items-center mb-10 border-b border-slate-800 pb-8">
+                    <h3 class="text-3xl font-black text-bright italic tracking-tighter uppercase">إعدادات الطابعة الحرارية</h3>
+                    <button @click="showPrinterModal = false" class="text-slate-500 hover:text-white transition"><i data-lucide="x" class="w-8 h-8"></i></button>
+                </div>
+                <div class="space-y-6">
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-black text-dim uppercase tracking-widest mr-1">مقاس الورق</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button class="py-4 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 text-white font-black">80mm (كبير)</button>
+                            <button class="py-4 rounded-2xl border-2 border-slate-800 text-dim font-black">58mm (صغير)</button>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-black text-dim uppercase tracking-widest mr-1">نص تذييل الفاتورة</label>
+                        <textarea class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl p-4 text-bright font-bold outline-none focus:border-emerald-500 h-24" placeholder="مثلاً: شكراً لزيارتكم.. البضاعة المباعة لا ترد ولا تستبدل إلا خلال 14 يوم"></textarea>
+                    </div>
+                    <button @click="showPrinterModal = false" class="w-full py-4 bg-slate-800 text-white rounded-2xl font-black text-lg mt-6 border border-slate-700">حفظ الإعدادات</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -186,6 +291,10 @@
         createApp({
             setup() {
                 const activeTab = ref('branch');
+                const showBranchModal = ref(false);
+                const showUserModal = ref(false);
+                const showPrinterModal = ref(false);
+
                 const tabs = [
                     { id: 'branch', name: 'بيانات الشركة واللوجو', icon: 'building-2' },
                     { id: 'branches_list', name: 'إدارة الفروع والمخازن', icon: 'map-pin' },
@@ -209,7 +318,10 @@
                 onMounted(() => lucide.createIcons());
                 watchEffect(() => setTimeout(() => lucide.createIcons(), 0));
 
-                return { activeTab, tabs, users, branches };
+                return { 
+                    activeTab, tabs, users, branches, 
+                    showBranchModal, showUserModal, showPrinterModal 
+                };
             }
         }).mount('#app');
     </script>
