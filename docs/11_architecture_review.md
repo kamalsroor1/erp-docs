@@ -52,12 +52,14 @@
 |---|---|---|
 | **JSONB** (لخصائص الأجهزة المتغيرة) | ✅ أداء ممتاز مع Indexing | ⚠️ JSON بطيء |
 | **Full-text Search** (بحث السيريال) | ✅ مدمج وسريع | ⚠️ أضعف |
+| **Window Functions** (للحسابات التراكمية) | ✅ متفوقة في الأداء | ⚠️ دعم محدود |
 | **UNIQUE Constraints مركبة** | ✅ (serial_number, tenant_id) | ✅ يدعم |
 | **Concurrent Writes** | ✅ MVCC أقوى | ⚠️ أبطأ |
 
 **مخاطر التصميم:**
 - ⚠️ **Missing Indexes:** جدول `device_items` يحتاج Index صريح على `serial_number + tenant_id`. عند 100,000 سجل البحث بدونه كارثة أداء.
 - ⚠️ **Logical FK بدون FK حقيقي:** `users.tenant_id` لا يملك FK فعلي لأن قاعدتا البيانات منفصلتان — خيار مقصود وصحيح لكن يجب توثيقه.
+- 💡 **توصية هامة:** تخزين التكلفة (Cost) داخل جدول `invoice_lines` وقت البيع لضمان ثبات التقارير التاريخية عند تغير التكلفة المتوسطة لاحقاً.
 
 ---
 
@@ -121,13 +123,17 @@
 
 ---
 
-## 3. الثغرات التقنية الحرجة (يجب معالجتها)
+## 3. الثغرات التقنية والحلول المعمارية المتقدمة
 
-1. **Cross-Database Transactions:** استخدام Database Events + Retry Queue لضمان تزامن تفعيل الاشتراك بين القاعدتين.
-2. **Tenant Isolation في الـ Webhooks:** تضمين `tenant_id` في metadata الـ Payment Order عند الإنشاء.
-3. **Rate Limiting في الاستيراد الضخم:** تقسيم Excel import لـ Chunks صغيرة (100 سجل/Job) عبر Laravel Queue.
-4. **Missing Indexes:** إضافة Indexes صريحة على `device_items(serial_number, tenant_id)` و `sales(tenant_id, created_at)`.
-5. **Backup Strategy:** نسخ احتياطي يومي لـ S3 + تفعيل WAL Archiving في PostgreSQL.
+1. **حساب التكلفة المتوسطة (Moving Average):**
+   - **الحل:** بناء **Event Listener** يعمل في الخلفية (Queue) مع كل عملية إدخال في جدول حركات المخزون لتحديث حقل `average_cost` في جدول الأصناف فورياً.
+2. **الأرصدة التراكمية (Running Balances):**
+   - **الحل:** تجنب حلقات التكرار (Loops) برمجياً؛ اعتمد كلياً على الـ **Window Functions** في PostgreSQL (مثل `SUM() OVER (ORDER BY date)`) لتوليد الأرصدة بسرعة فائقة في تقارير الخزينة وحركة الأصناف.
+3. **Cross-Database Transactions:** استخدام Database Events + Retry Queue لضمان تزامن تفعيل الاشتراك بين القاعدتين.
+4. **Tenant Isolation في الـ Webhooks:** تضمين `tenant_id` في metadata الـ Payment Order عند الإنشاء.
+5. **Rate Limiting في الاستيراد الضخم:** تقسيم Excel import لـ Chunks صغيرة (100 سجل/Job).
+6. **Missing Indexes:** إضافة Indexes صريحة على `device_items(serial_number, tenant_id)` و `sales(tenant_id, created_at)`.
+7. **Backup Strategy:** نسخ احتياطي يومي لـ S3 + تفعيل WAL Archiving في PostgreSQL.
 
 ---
 
