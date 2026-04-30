@@ -129,11 +129,13 @@
    - **الحل:** بناء **Event Listener** يعمل في الخلفية (Queue) مع كل عملية إدخال في جدول حركات المخزون لتحديث حقل `average_cost` في جدول الأصناف فورياً.
 2. **الأرصدة التراكمية (Running Balances):**
    - **الحل:** تجنب حلقات التكرار (Loops) برمجياً؛ اعتمد كلياً على الـ **Window Functions** في PostgreSQL (مثل `SUM() OVER (ORDER BY date)`) لتوليد الأرصدة بسرعة فائقة في تقارير الخزينة وحركة الأصناف.
-3. **Cross-Database Transactions:** استخدام Database Events + Retry Queue لضمان تزامن تفعيل الاشتراك بين القاعدتين.
-4. **Tenant Isolation في الـ Webhooks:** تضمين `tenant_id` في metadata الـ Payment Order عند الإنشاء.
-5. **Rate Limiting في الاستيراد الضخم:** تقسيم Excel import لـ Chunks صغيرة (100 سجل/Job).
-6. **Missing Indexes:** إضافة Indexes صريحة على `device_items(serial_number, tenant_id)` و `sales(tenant_id, created_at)`.
-7. **Backup Strategy:** نسخ احتياطي يومي لـ S3 + تفعيل WAL Archiving في PostgreSQL.
+4. **عزل الفروع آلياً (Global Scopes):**
+   - **الحل:** استخدام Laravel Global Scopes لربط كل استعلام بـ `branch_id` المخزن في الـ Session. هذا يضمن عدم تسرب البيانات (Data Leakage) ويجعل الكود أنظف (Clean Code) حيث لا يحتاج المطور لكتابة `where` في كل مكان.
+5. **منطق التكلفة الموحد (Unified Moving Average):**
+   - **القرار:** يتم حساب التكلفة المتوسطة على مستوى الشركة/المؤسسة ككل (Unified) وليس لكل فرع على حدة، لتبسيط التقارير المالية والتحويلات بين الفروع.
+6. **Cross-Database Transactions:** استخدام Database Events + Retry Queue لضمان تزامن تفعيل الاشتراك بين القاعدتين.
+7. **Rate Limiting في الاستيراد الضخم:** تقسيم Excel import لـ Chunks صغيرة (100 سجل/Job).
+8. **Backup Strategy:** نسخ احتياطي يومي لـ S3 + تفعيل WAL Archiving في PostgreSQL.
 
 ---
 
