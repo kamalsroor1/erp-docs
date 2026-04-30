@@ -67,7 +67,14 @@
         <!-- المحتوى الرئيسي -->
         <main class="flex-1 flex flex-col overflow-hidden bg-[#020617]">
             <header class="h-20 border-b-2 border-slate-800 flex items-center justify-between px-10 sticky top-0 bg-[#020617]/80 backdrop-blur-md z-20">
-                <h2 class="text-3xl font-black text-bright italic">مركز التقارير</h2>
+                <div class="flex items-center space-x-6 space-x-reverse">
+                    <h2 class="text-3xl font-black text-bright italic">مركز التقارير</h2>
+                    <div class="flex items-center bg-slate-900 rounded-xl border border-slate-800 p-1">
+                        <button @click="selectedBranch = 'all'" :class="selectedBranch === 'all' ? 'bg-emerald-500 text-white shadow-lg' : 'text-dim hover:text-white'" class="px-4 py-1.5 rounded-lg text-[10px] font-black transition">كافة الفروع</button>
+                        <button @click="selectedBranch = 'mansoura'" :class="selectedBranch === 'mansoura' ? 'bg-emerald-500 text-white shadow-lg' : 'text-dim hover:text-white'" class="px-4 py-1.5 rounded-lg text-[10px] font-black transition">المنصورة</button>
+                        <button @click="selectedBranch = 'cairo'" :class="selectedBranch === 'cairo' ? 'bg-emerald-500 text-white shadow-lg' : 'text-dim hover:text-white'" class="px-4 py-1.5 rounded-lg text-[10px] font-black transition">القاهرة</button>
+                    </div>
+                </div>
                 <div class="flex items-center space-x-4 space-x-reverse">
                     <button class="px-6 py-2 bg-slate-800 text-white rounded-xl font-black text-xs border border-slate-700">تصدير Excel</button>
                     <button class="px-6 py-2 bg-slate-800 text-white rounded-xl font-black text-xs border border-slate-700">طباعة PDF</button>
@@ -167,6 +174,7 @@
         createApp({
             setup() {
                 const activeTab = ref('sales');
+                const selectedBranch = ref('all');
                 const tabs = [
                     { id: 'sales', name: 'تقارير المبيعات', icon: 'trending-up' },
                     { id: 'inventory', name: 'حالة المخزون', icon: 'box' },
@@ -213,7 +221,7 @@
 
                 watchEffect(() => setTimeout(() => lucide.createIcons(), 0));
 
-                return { activeTab, tabs, lowStock, topCustomers };
+                return { activeTab, tabs, lowStock, topCustomers, selectedBranch };
             }
         }).mount('#app');
     </script>
