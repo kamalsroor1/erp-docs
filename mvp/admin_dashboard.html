@@ -91,6 +91,7 @@
                                 <tr class="text-[10px] text-dim font-black uppercase tracking-[3px]">
                                     <th class="px-8 py-6">المحل / التاجر</th>
                                     <th class="px-8 py-6">الباقة</th>
+                                    <th class="px-8 py-6 text-center">الفروع</th>
                                     <th class="px-8 py-6">تاريخ الانضمام</th>
                                     <th class="px-8 py-6">الحالة</th>
                                     <th class="px-8 py-6 text-center">الإجراءات</th>
@@ -104,6 +105,10 @@
                                     </td>
                                     <td class="px-8 py-6">
                                         <span class="px-3 py-1 bg-slate-800 rounded-lg text-[10px] font-black text-blue-400 italic">{{ t.plan }}</span>
+                                    </td>
+                                    <td class="px-8 py-6 text-center">
+                                        <span class="text-lg font-black text-bright">{{ t.branchCount }}</span>
+                                        <span class="text-[10px] text-dim font-bold italic"> / {{ t.branchLimit }}</span>
                                     </td>
                                     <td class="px-8 py-6 text-dim font-bold italic text-sm">{{ t.date }}</td>
                                     <td class="px-8 py-6">
@@ -170,9 +175,9 @@
                 ]);
 
                 const tenants = ref([
-                    { id: 1, name: 'محل كمال للإلكترونيات', domain: 'kamal.ebraa-erp.com', plan: 'الاحترافية', date: '2024/04/20', status: 'نشط' },
-                    { id: 2, name: 'أولاد علي للهواتف', domain: 'ali-phones.ebraa-erp.com', plan: 'الأساسية', date: '2024/04/18', status: 'نشط' },
-                    { id: 3, name: 'مركز السلام التقني', domain: 'salam.ebraa-erp.com', plan: 'المؤسسات', date: '2024/04/15', status: 'منتهي' }
+                    { id: 1, name: 'محل كمال للإلكترونيات', domain: 'kamal.ebraa-erp.com', plan: 'الاحترافية', branchCount: 2, branchLimit: 3, date: '2024/04/20', status: 'نشط' },
+                    { id: 2, name: 'أولاد علي للهواتف', domain: 'ali-phones.ebraa-erp.com', plan: 'الأساسية', branchCount: 1, branchLimit: 1, date: '2024/04/18', status: 'نشط' },
+                    { id: 3, name: 'مركز السلام التقني', domain: 'salam.ebraa-erp.com', plan: 'المؤسسات', branchCount: 8, branchLimit: 15, date: '2024/04/15', status: 'منتهي' }
                 ]);
 
                 onMounted(() => lucide.createIcons());
