@@ -22,8 +22,9 @@
 3.  **الفواتير (Invoicing):** (شاشة POS السريعة، فواتير المشتريات، مرتجعات المبيعات والمشتريات).
 4.  **الحسابات (Accounting):** (دليل العملاء، دليل الموردين، كشوفات الحساب التفصيلية).
 5.  **الخزينة (Treasury):** (حركة الخزينة مع مؤشر الرصيد، التحويلات البنكية، صرف وقبض).
-6.  **التقارير (Reports):** (تحليل المبيعات المتقدم، حركة الصنف التفصيلية، تقارير الأرباح).
-7.  **النظام (System Settings):** (بيانات الشركة، إدارة المستخدمين، مصفوفة الصلاحيات CRUD).
+6.  **الصيانة (Maintenance):** (فتح تذاكر صيانة، تتبع حالة الجهاز، استهلاك قطع غيار، تحويل لفاتورة).
+7.  **التقارير (Reports):** (تحليل المبيعات المتقدم، حركة الصنف التفصيلية، تقارير الأرباح).
+8.  **النظام (System Settings):** (بيانات الشركة، إدارة المستخدمين، مصفوفة الصلاحيات CRUD).
 
 ### 🤝 ثانياً: بوابة المسوقين (Affiliate Portal) — `/affiliate`
 8.  **الرئيسية (Overview):** إجمالي العمولات، الرابط الخاص بك (Unique Referral Link).
@@ -72,6 +73,7 @@ graph TD
     POS[Fast POS Screen] --- Inv[Inventory/IMEI Tracking]
     Inv --> Reports[Financial Reports]
     POS --> Customers[CRM/Debt Management]
+    POS --- Maintenance[Repair/Maintenance Center]
     end
 
     subgraph Affiliate_Portal
