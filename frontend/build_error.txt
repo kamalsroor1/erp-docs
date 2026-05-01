@@ -1,0 +1,29 @@
+
+> frontend@0.0.0 build
+> vite build
+
+vite v8.0.10 building client environment for production...
+[2Ktransforming...✓ 1882 modules transformed.
+✗ Build failed in 318ms
+error during build:
+Build failed with 1 error:
+
+[plugin vite:vue] /home/kamalsroor/دراسه جدوي لمشروع erp/frontend/src/views/POS.vue
+RolldownError: At least one <template> or <script> is required in a single file component. /home/kamalsroor/دراسه جدوي لمشروع erp/frontend/src/views/POS.vue
+SyntaxError: At least one <template> or <script> is required in a single file component. /home/kamalsroor/دراسه جدوي لمشروع erp/frontend/src/views/POS.vue
+    at Object.parse$1 [as parse] (/home/kamalsroor/دراسه جدوي لمشروع erp/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:1894:7)
+    at createDescriptor (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/@vitejs/plugin-vue/dist/index.mjs:50:42)
+    at transformMain (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/@vitejs/plugin-vue/dist/index.mjs:1303:33)
+    at TransformPluginContextImpl.handler (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/@vitejs/plugin-vue/dist/index.mjs:1714:27)
+    at TransformPluginContextImpl.handler (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/vite/dist/node/chunks/node.js:33261:13)
+    at plugin (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/rolldown/dist/shared/bindingify-input-options-DbbBhzky.mjs:1172:30)
+    at plugin.<computed> (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/rolldown/dist/shared/bindingify-input-options-DbbBhzky.mjs:1612:18)
+    at aggregateBindingErrorsIntoJsError (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/rolldown/dist/shared/error-DL-e8-oE.mjs:48:18)
+    at unwrapBindingResult (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/rolldown/dist/shared/error-DL-e8-oE.mjs:18:128)
+    at #build (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/rolldown/dist/shared/rolldown-build-DSxL8qiP.mjs:3317:34)
+    at async buildEnvironment (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/vite/dist/node/chunks/node.js:33018:64)
+    at async Object.build (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/vite/dist/node/chunks/node.js:33440:19)
+    at async Object.buildApp (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/vite/dist/node/chunks/node.js:33437:153)
+    at async CAC.<anonymous> (file:///home/kamalsroor/%D8%AF%D8%B1%D8%A7%D8%B3%D9%87%20%D8%AC%D8%AF%D9%88%D9%8A%20%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20erp/frontend/node_modules/vite/dist/node/cli.js:778:3) {
+  errors: [Getter/Setter]
+}
