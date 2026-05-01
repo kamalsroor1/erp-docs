@@ -4,25 +4,37 @@ const routes = [
   {
     path: '/',
     name: 'Dashboard',
-    component: () => import('../views/Dashboard.vue'),
+    component: () => import('../views/Dashboard/Dashboard.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/Login.vue'),
+    component: () => import('../views/Auth/Login.vue'),
     meta: { layout: 'AuthLayout' }
   },
   {
     path: '/pos',
     name: 'POS',
-    component: () => import('../views/POS.vue'),
+    component: () => import('../views/Sales/POS.vue'),
     meta: { requiresAuth: true, layout: 'POSLayout' }
   },
   {
     path: '/inventory',
     name: 'Inventory',
-    component: () => import('../views/Inventory.vue'),
+    component: () => import('../views/Inventory/Inventory.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/inventory/transfer',
+    name: 'StockTransfer',
+    component: () => import('../views/Inventory/StockTransfer.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/inventory/audit',
+    name: 'StockAudit',
+    component: () => import('../views/Inventory/StockAudit.vue'),
     meta: { requiresAuth: true }
   }
 ]
