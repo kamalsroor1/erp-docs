@@ -38,19 +38,55 @@ Follow the same logging protocol in `history/YYYY-MM-DD.md` but include:
 
 ---
 
-## 5. 🏗️ Local Data Architecture
-- **Mock Services**: Create a `services/` directory to handle all CRUD operations on LocalStorage/SQLite.
-- **Seeding**: Automatically seed the local database with "Dummy Data" (e.g., 5 products, 3 customers, 2 repair tickets) if it's empty, to ensure the demo is never blank.
-- **Export/Import**: Provide a "Reset Data" or "Export Data" button in settings for easy demo cleanup.
+## 🏗️ دليل بناء النسخة التجريبية (Front-End MVP)
+
+هذا القسم هو الدليل التنفيذي لبناء واجهة تفاعلية كاملة بدون خوادم، تعمل محلياً لإثبات الفكرة وتوليد الطلبات المسبقة (Pre-Orders).
+
+### 📌 نظرة عامة على الـ MVP
+**الهدف**: بناء تطبيق ويب يتصرف كأنه متصل بسيرفر حقيقي. يمكن للعميل تسجيل الدخول، إضافة منتجات، إجراء عمليات بيع من شاشة الـ POS، ورؤية الأرباح.. والبيانات تُحفظ محلياً في المتصفح.
+
+### التقنيات المختارة:
+- **إدارة الحالة**: Pinia (لحفظ السلة والإعدادات).
+- **قاعدة البيانات**: **Dexie.js** (غلاف لـ IndexedDB لتخزين آلاف السجلات محلياً).
+- **المكونات**: **PrimeVue** (لـ DataTables الاحترافية).
+- **الرسوم البيانية**: Chart.js.
 
 ---
 
-## 6. 🏛️ Operational Modes (Frontend Focus)
-- **UI Architect**: Designing layouts, color schemes, and UX flows.
-- **UI Developer**: Implementing the Vue components and LocalStorage logic.
-- **UI Tester**: Verifying that forms validate and data persists after page refresh.
+## 🗺️ خريطة البناء (4 أسابيع)
+
+### الأسبوع 1: الهيكل والمصادقة الوهمية
+- **الـ Layouts**: إنشاء `AuthLayout` (تسجيل دخول)، `AppLayout` (الرئيسية)، و `POSLayout` (ملء الشاشة).
+- **Fake Auth**: حفظ Fake Token في `localStorage` وحماية المسارات بـ `Router Guards`.
+
+### الأسبوع 2: الداتا بيز المحلية والمخزون
+- **Dexie.js Setup**: تعريف جداول `products`, `items`, `invoices`, `invoice_lines`.
+- **Inventory Screens**: عرض وقائمة المنتجات مع ميزة **"توليد بيانات عشوائية"** لملء العرض.
+
+### الأسبوع 3: وحش النظام — شاشة الـ POS
+- **Pinia Cart**: إدارة السلة واحتساب الخصم والضريبة لحظياً.
+- **Barcode Logic**: البحث في `db.items` عن السيريال الممسوح وتحديث الحالة لـ `sold` عند الدفع.
+- **Checkout**: تسجيل الفاتورة وتفريغ السلة وإظهار نافذة الطباعة الوهمية.
+
+### الأسبوع 4: لوحة التحكم والتقارير
+- **إحصائيات تفاعلية**: قراءة الأرباح اليومية عبر طرح التكلفة من سعر البيع في الفواتير المحلية.
+- **Charts**: رسم بياني للمبيعات لآخر 7 أيام.
+- **سجل الفواتير**: جدول لاستعراض العمليات التي تمت أثناء العرض.
 
 ---
 
-## ⚠️ Compliance Warning
-Focus on visual excellence and flawless local interactivity. If a feature isn't functional or looks "basic," it fails the MVP demo criteria. **Focus on one thing, and do it perfectly.**
+## 🎭 سيناريو العرض التقديمي (The Sales Pitch)
+1.  **لوحة التحكم**: "هذه شاشتك الصباحية لمراقبة الأرباح".
+2.  **التجربة العملية**: استخدام قارئ باركود حقيقي لمسح منتج؛ رؤيته يظهر في الفاتورة فوراً؛ ثم إتمام البيع.
+3.  **الشفافية**: "هذا Prototype سريع جداً لنضمن ملاءمة التجربة لاحتياجاتكم؛ النسخة النهائية ستكون سحابية بنفس هذه السرعة".
+
+---
+
+## ⚡ ملخص القرارات التقنية (Frontend)
+| الميزة | الأداة | السبب |
+|---|---|---|
+| **التصميم** | TailwindCSS | مرونة وعصرانية التصميم (Glassmorphism). |
+| **المكونات** | PrimeVue | أفضل DataTables للـ ERP. |
+| **الداتا بيز** | Dexie.js | أقوى مكتبة للتعامل مع IndexedDB. |
+| **إدارة الحالة** | Pinia | خفة الوزن والربط السريع بين POS و Dashboard. |
+| **التنبيهات** | Vue Toastification | مظهر احترافي عند نجاح العمليات. |
