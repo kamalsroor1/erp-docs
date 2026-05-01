@@ -21,6 +21,7 @@
 - [تدفقات المستخدم (User Flows)](https://raw.githubusercontent.com/kamalsroor1/erp-docs/main/docs/15_ux_user_flows.md)
 - [المواصفات التقنية (Technical Specs)](https://raw.githubusercontent.com/kamalsroor1/erp-docs/main/docs/16_ux_technical_specs.md)
 - [دليل الهوية والبراند (Style Guide)](https://raw.githubusercontent.com/kamalsroor1/erp-docs/main/docs/17_ui_style_guide_and_branding.md)
+- [نظام الإشعارات (Notifications)](https://raw.githubusercontent.com/kamalsroor1/erp-docs/main/docs/18_نظام_الإشعارات_notifications.md)
 
 ---
 
@@ -42,5 +43,6 @@
 - [لوحة تحكم المنصة (SaaS Admin)](https://raw.githubusercontent.com/kamalsroor1/erp-docs/main/docs/pages/13_لوحة_تحكم_المنصة_admin.md)
 - [بوابة المسوقين (Affiliate)](https://raw.githubusercontent.com/kamalsroor1/erp-docs/main/docs/pages/14_بوابة_المسوقين_affiliate.md)
 - [تتبع الصيانة للعملاء (Public Track)](https://raw.githubusercontent.com/kamalsroor1/erp-docs/main/docs/pages/15_تتبع_الصيانة_العام_track.md)
+- [إعداد المحل (Onboarding)](https://raw.githubusercontent.com/kamalsroor1/erp-docs/main/docs/pages/16_خطوات_إعداد_المحل_onboarding.md)
 
 ---
