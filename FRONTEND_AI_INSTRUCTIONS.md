@@ -9,13 +9,16 @@ We are building a **Front-end Only** version of Ebraa ERP.
 - **Persistence**: All data must be stored in `LocalStorage` or a local `SQLite` database (WASM/Client-side).
 - **Interactivity**: Every button, form, and chart must work using local data to simulate a real backend.
 - **Goal**: A high-fidelity prototype that wows potential customers.
+- **Roles**:
+    - **Admin**: Full access to all modules (Dashboard, Inventory, POS, Analytics).
+    - **Cashier**: Restricted access (POS, Cart, Invoice History).
 
 ---
 
 ## 1. 🧠 Context & Task Tracking (Mandatory)
 Before any task, the AI **MUST** read:
-- **Project Plan**: [frontend/FE_PLAN.md](frontend/FE_PLAN.md)
-- **Task List**: [frontend/FE_TASKS.md](frontend/FE_TASKS.md)
+- **Project Plan**: [FE_PLAN.md](FE_PLAN.md)
+- **Task List**: [FE_TASKS.md](FE_TASKS.md)
 - **Recent History**: The latest file in the [history/](history/) directory.
 
 **Rule**: After completing any task, the AI **MUST** update `FE_TASKS.md` (marking items as `[x]`) and create a corresponding entry in the `history/` log.
