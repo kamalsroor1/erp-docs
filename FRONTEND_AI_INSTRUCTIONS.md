@@ -16,12 +16,12 @@ We are building a **Front-end Only** version of Ebraa ERP.
 ---
 
 ## 1. 🧠 Context & Task Tracking (Mandatory)
-Before any task, the AI **MUST** read:
-- **Project Plan**: [FE_PLAN.md](FE_PLAN.md)
-- **Task List**: [FE_TASKS.md](FE_TASKS.md)
-- **Recent History**: The latest file in the [history/](history/) directory.
+Before starting any task, the AI **MUST** perform these 3 steps:
+1.  **Read Planning**: Check `FE_PLAN.md` and `FE_TASKS.md` to identify the current objective.
+2.  **Audit History**: Read `history/YYYY-MM-DD.md` to understand what was last done and avoid overwriting.
+3.  **Check Protocol**: Review these instructions to ensure architectural compliance.
 
-**Rule**: After completing any task, the AI **MUST** update `FE_TASKS.md` (marking items as `[x]`) and create a corresponding entry in the `history/` log.
+**Rule**: After completion, the AI **MUST** update `FE_TASKS.md` (marking `[x]`) and **APPEND** a new entry to the `history/` log.
 
 ---
 
@@ -40,14 +40,28 @@ To maintain focus and avoid incomplete features:
 - **Routing**: Vue Router (Web Hash mode for local file compatibility if needed).
 - **Charts**: ApexCharts or Chart.js for financial data simulation.
 - **Icons**: Lucide-Vue or Heroicons.
+- **Precision Math**: **Big.js** (Mandatory for all financial calculations).
 
 ---
 
-## 4. 📝 Mandatory History Logging
-Follow the same logging protocol in `history/YYYY-MM-DD.md` but include:
-- **UI Logic**: Explanation of how the local data is manipulated.
-- **Component**: The specific Vue component modified.
-- **Demo Impact**: How this change affects the customer demo experience.
+## 4. 📝 Mandatory History Logging (The Ledger)
+Follow the strict protocol in `AI_INSTRUCTIONS.md`. 
+### 🚫 CRITICAL: NO OVERWRITING
+- **NEVER** use `write_to_file` or `Overwrite: true` on an existing history file.
+- **ALWAYS** use `append` logic to add new entries at the **BOTTOM**.
+
+### Log Format for Frontend:
+```markdown
+## [HH:mm] - [Task Title]
+- **Summary**: Overview of feature/logic added.
+- **Files Modified**: 
+    - `src/views/Inventory.vue` [UPDATED]
+- **Changes Detail**: 
+    - **Logic**: (e.g., Integrated Big.js for tax calc).
+    - **UI**: (e.g., Added Glassmorphism cards).
+    - **Demo Impact**: (e.g., Customer can now see live stock updates).
+- **Status**: [Success / Pending]
+```
 
 ---
 
@@ -103,3 +117,119 @@ Follow the same logging protocol in `history/YYYY-MM-DD.md` but include:
 | **الداتا بيز** | Dexie.js | أقوى مكتبة للتعامل مع IndexedDB. |
 | **إدارة الحالة** | Pinia | خفة الوزن والربط السريع بين POS و Dashboard. |
 | **التنبيهات** | Vue Toastification | مظهر احترافي عند نجاح العمليات. |
+
+---
+
+## 🏗️ 5. الهيكل المعماري والمعايير البرمجية (Architecture & Standards)
+
+يجب الالتزام بالمعايير التالية لضمان جودة الكود وسهولة صيانته:
+
+### 📁 1. هيكلة المجلدات (Folder Structure)
+نعتمد تقسيم **Feature-based Architecture**:
+```plaintext
+src/
+├── api/             # ملفات Axios لكل موديول (مشتريات، مبيعات، حسابات)
+├── assets/          # الصور، الأيقونات، وملفات الـ CSS (Tailwind مثلاً)
+├── components/      # المكونات العامة (Shared UI)
+│   ├── AppButton.vue
+│   └── AppButton.test.js      # اختبار الـ props والـ emits
+├── composables/     # الـ Logic المشترك
+│   ├── useFinancials.js
+│   └── useFinancials.test.js  # اختبار العمليات الحسابية ( Edge Cases)
+├── stores/          # ملفات Pinia لكل قطاع
+│   ├── cart.js
+│   └── cart.test.js           # اختبار تحديث الـ State والـ Getters
+├── views/           # الصفحات الأساسية مقسمة حسب الموديول
+└── utils/           # دوال مساعدة (Format Currency, Date Helpers)
+```
+
+### 📏 2. القواعد البرمجية الصارمة:
+
+*   **القاعدة الأولى: منطق الحسابات (Composables)**
+    "أي عملية حسابية (مثل حساب الضريبة، صافي الفاتورة، أو خصم الصنف) لا تُكتب داخل الـ Component. بل تُكتب في ملف مستقل في مجلد `composables/` (مثلاً `useFinancials.js`) لتكون قابلة للاستخدام في شاشة البيع، الشراء، والمرتجع بنفس الدقة."
+
+*   **القاعدة الثانية: إدارة البيانات (Pinia Store)**
+    "بيانات الجلسة الحالية (مثل المستخدم، الفرع النشط، الخزينة المختارة، أو سلة المشتريات الحالية) تُخزن في Pinia. لا نعتمد على الـ Local Storage مباشرة داخل المكونات، بل يتم التعامل مع Store مخصص لكل قطاع (مثل `useTreasuryStore` أو `useAuthStore`)."
+
+*   **القاعدة الثالثة: المكونات الذكية والغباء (Smart vs Dumb Components)**
+    "الـ Components الموجودة في مجلد `components/` يجب أن تكون **Dumb Components**؛ أي أنها تستقبل بيانات عبر props وترسل أحداثاً عبر emits فقط، ولا تتصل بالـ API مباشرة. أما الـ Views فهي الـ **Smart Components** التي تتعامل مع الـ API والـ Stores وتوزع البيانات على المكونات."
+
+*   **القاعدة الرابعة: توحيد شكل البيانات (API Layer)**
+    "كل موديول له ملف API خاص به في مجلد `api/`. يتم استخدام Axios Interceptors لمعالجة الأخطاء (مثل انتهاء الجلسة أو خطأ في الصلاحيات) بشكل موحد، مع التأكد من إرسال الـ Token في كل طلب."
+
+### 💡 3. مثال عملي للتنفيذ (فاتورة بيع):
+1.  **الـ API**: ملف `src/api/sales.js` يحتوي على دالة `createInvoice`.
+2.  **الـ Store**: ملف `src/stores/cart.js` يخزن الأصناف قبل الحفظ.
+3.  **الـ Composable**: ملف `src/composables/useVatCalculator.js` يحسب ضريبة الـ 14%.
+4.  **الـ Component**: مكون `AppTable.vue` يعرض الأصناف، ومكون `AppSearch.vue` يبحث بالباركود.
+5.  **الـ View**: صفحة `SalesInvoice.vue` تجمع كل ما سبق.
+
+### 🛡️ 4. الأنواع الصارمة (Strict Types)
+يفضل تعريف Interfaces لكل نموذج بيانات لتجنب الأخطاء في أسماء الحقول:
+```typescript
+interface Product { 
+  id: number; 
+  name: string;
+  price: number; 
+  vat: number; 
+}
+```
+هذا يضمن دقة التعامل مع الحقول (مثلاً استخدام `price` بدلاً من `unit_price`) من قبل الـ AI والمطورين.
+
+    3. **الوضع المظلم والمضيء**: استخدام `dark:` للتأكد من وضوح العناصر في كلتا الحالتين."
+
+*   **القاعدة السادسة: الجودة والاختبارات (Testing & QA)**
+    "يجب أن يرافق كل ملف منطق برمجي ملف اختبار `.test.js` باستخدام **Vitest**:
+    1. **Composables**: اختبار كافة الحالات (صفر، مبالغ ضخمة، أرقام عشرية، خصم أكبر من السعر).
+    2. **Stores**: اختبار أن الـ State يتحدث بشكل صحيح (مثلاً إضافة صنف للسلة) وأن الـ Getters تحسب الإجمالي بدقة.
+    3. **Components**: اختبار ظهور الـ props بشكل صحيح وانطلاق الـ emits عند التفاعل."
+
+---
+
+## 🧪 6. استراتيجية الاختبار (Testing Strategy)
+
+نحن نستخدم **Vitest** لضمان استقرار النظام:
+- **Business Logic**: أي منطق حسابي (مديونية، ضرائب، مخزون) يجب أن يكون له Unit Test يغطي الحالات العادية والشاذة (Edge Cases).
+- **TDD Approach**: عند الطلب، ابدأ بكتابة الاختبار أولاً قبل الكود البرمجي.
+- **Mocking**: يجب عمل Mocking لأي API calls لضمان سرعة الاختبارات واستقلاليتها عن الخوادم.
+
+---
+
+## 🏛️ 7. معايير متقدمة لنظام الـ ERP (Advanced ERP Standards)
+
+يجب الالتزام بالمعايير التالية لضمان ملاءمة النظام لمتطلبات المؤسسات الكبرى (Enterprise Grade):
+
+### 🛡️ 1. نظام الصلاحيات الدقيق (RBAC)
+- التحكم في الصلاحيات يكون على مستوى **العملية (Action)** وليس فقط الدور.
+- **UI Masking**: استخدام Custom Directive `v-can="'permission-name'"` لإخفاء العناصر من الـ DOM تماماً إذا لم يملك المستخدم الصلاحية.
+
+### 📝 2. سجل العمليات (Audit Logs)
+- كل عملية حساسة (إضافة، تعديل، حذف) يجب أن تسجل في جدول مستقل.
+- يجب توفير واجهة لعرض "تاريخ العمليات" (Activity History) داخل صفحات التفاصيل.
+
+### 🔢 3. معالجة الأرقام العشرية (Precision Management)
+- **ممنوع** استخدام الحسابات التقليدية في JavaScript للعمليات المالية.
+- يجب استخدام مكتبة **Big.js** لضمان دقة الكسور وتجنب أخطاء Floating Point.
+- توحيد عدد الخانات العشرية (Rounding) في النظام بالكامل (غالباً خانتين).
+
+### 📶 4. وضع الأوفلاين والمزامنة (Offline & Persistence)
+- الاعتماد على **Dexie.js** لتخزين البيانات الأساسية محلياً.
+- السماح بإجراء العمليات (مثل البيع) في حالة انقطاع الإنترنت، مع مزامنة البيانات تلقائياً عند عودة الاتصال (Background Sync).
+
+### 🔔 5. التنبيهات اللحظية (Real-time Notifications)
+- استخدام **WebSockets** (مثل Laravel Echo/Reverb) لتمرير التنبيهات فوراً للمدير (نقص مخزون، تحصيل شيكات) بدون تحديث الصفحة.
+
+### 🖨️ 6. محرك الطباعة (Printing Engine)
+- بناء Template Engine مرن يسمح بتخصيص شكل الفاتورة (اللوجو، الهيدر، الفوتر).
+- استخدام CSS `@media print` لضمان خروج المطبوعات بشكل احترافي يحافظ على الهوية البصرية.
+
+### ⌨️ 7. التفاعل السريع (Keyboard-First UI)
+- نظام الـ ERP يعتمد على سرعة مدخلي البيانات.
+- يجب دعم اختصارات الكيبورد بشكل كامل:
+    - `F9`: حفظ (Save/Post).
+    - `F2`: بحث (Search).
+    - `Enter`: التنقل بين الحقول.
+    - `Esc`: إغلاق النوافذ (Close/Cancel).
+
+### ⏳ 8. حالات التحميل (Loading States)
+- كل زرار تفاعلي (Save/Delete) يجب أن يحتوي على Loading Spinner لمنع تكرار الضغط أثناء المعالجة.

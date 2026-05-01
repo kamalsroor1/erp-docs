@@ -46,18 +46,22 @@ The assistant operates in one of three distinct modes, depending on the task pha
 
 After every code modification or addition, the AI is **strictly required** to update or create a history log.
 
+### 🚫 CRITICAL RULE: NO OVERWRITING
+- **NEVER** use tools in a way that replaces the entire content of a history file if it already contains entries for that day.
+- **ALWAYS** use `append` logic (via `replace_file_content` targeting the end of the file) to add new entries at the **BOTTOM** of the existing file.
+- **Verification**: Before writing to a history file, the AI must read it to ensure it is appending, not overwriting.
+
 ### Log File Format
 - **Path**: `history/YYYY-MM-DD.md`
-- **Structure**:
+- **Template (MUST FOLLOW)**:
     ```markdown
-    ## [Entry Time] - [Task Title]
-    - **Summary**: Brief overview of the change.
+    ## [HH:mm] - [Task Title]
+    - **Summary**: Brief overview of what was achieved in this specific step.
     - **Files Modified**: 
-        - `path/to/file1.php`
-        - `path/to/file2.vue`
+        - `path/to/file1.ext` [Status: NEW/UPDATED/DELETED]
     - **Changes Detail**: 
-        - [File Basename]: [Line Range] - [Reason/Logic]
-    - **Status**: (Success / Pending / Issues)
+        - Detailed technical breakdown of logic changes, refactoring decisions, or new features added.
+    - **Status**: [Success / Pending / Issues]
     ```
 
 ---
