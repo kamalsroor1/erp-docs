@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUIStore } from '../store/ui'
+import { useUIStore } from '../stores/ui'
 import { useI18n } from 'vue-i18n'
 import { 
   LayoutDashboard, 
@@ -94,7 +94,7 @@ const logoSrc = computed(() => {
             <Menu class="w-6 h-6" />
           </Button>
           <h2 class="text-sm font-medium text-slate-400 hidden md:block">
-            {{ uiStore.isRTL ? 'المنصة v1.5' : 'Platform v1.5' }}
+            {{ t('platform_version') }}
           </h2>
         </div>
         
@@ -132,10 +132,3 @@ const logoSrc = computed(() => {
     </main>
   </div>
 </template>
-
-<style scoped>
-.router-link-active {
-  background: rgba(79, 70, 229, 0.1);
-  border: 1px solid rgba(79, 70, 229, 0.2);
-}
-</style>
