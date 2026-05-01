@@ -12,6 +12,16 @@ We are building a **Front-end Only** version of Ebraa ERP.
 
 ---
 
+## 1. 🧠 Context & Task Tracking (Mandatory)
+Before any task, the AI **MUST** read:
+- **Project Plan**: [frontend/FE_PLAN.md](frontend/FE_PLAN.md)
+- **Task List**: [frontend/FE_TASKS.md](frontend/FE_TASKS.md)
+- **Recent History**: The latest file in the [history/](history/) directory.
+
+**Rule**: After completing any task, the AI **MUST** update `FE_TASKS.md` (marking items as `[x]`) and create a corresponding entry in the `history/` log.
+
+---
+
 ## 2. 🧩 The "One Task at a Time" Rule (STRICT)
 To maintain focus and avoid incomplete features:
 - The AI **MUST ONLY** work on **ONE** specific task or component per request.

@@ -7,9 +7,12 @@ This document serves as the primary operational directive for the AI Coding Assi
 ## 1. 🧠 Context Awareness (Mandatory Initial Step)
 
 Before executing any task, the AI **MUST**:
-1.  **Read Documentation**: Scan the `docs/` directory (specifically `architecture.md`, `db_schema.md`, and `01_roadmap.md`) to understand the current system state.
-2.  **Review History**: Read the most recent file in the `history/` directory to identify recent progress, open issues, and avoid redundant work or conflicts.
-3.  **Verify Permissions**: Ensure all commands are run within the workspace and adhere to safety protocols.
+1.  **Read Planning Files**: Check `frontend/FE_PLAN.md` and `frontend/FE_TASKS.md` for the current roadmap and task status.
+2.  **Read Documentation**: Scan the `docs/` directory to understand the business logic.
+3.  **Review History**: Read the most recent file in the `history/` directory to avoid conflicts.
+4.  **Verify Permissions**: Ensure all commands are run within the workspace.
+
+**Rule**: Always update the relevant task list and history log upon completion of any task.
 
 ---
 
