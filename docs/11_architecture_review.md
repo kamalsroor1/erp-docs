@@ -79,7 +79,7 @@
 | **No Axios (Built-in XHR)** | تقليل حجم الـ Bundle وتحسين الأداء بالعميل المدمج. |
 | **Simplified SSR** | لا حاجة لسيرفر Node.js منفصل أثناء التطوير. |
 | **useHttp Hook** | إرسال طلبات خلفية (حالة طابعة / رصيد) بدون تغيير الصفحة. |
-| **History Encryption** | تشفير بيانات المتصفح لضمان أمان بيانات المحلات. |
+| **History Encryption** | تشفير بيانات المتصفح لضمان أمان بيانات المنشآت. |
 
 **توزيع الأعمال النهائي:**
 - صفحات الإدارة (Products, Reports, Settings): Inertia + Vue بدون API.
@@ -94,8 +94,8 @@
 | النموذج | الوصف | Ebraa ERP |
 |---|---|---|
 | Single DB, Shared Tables | tenant_id في كل جدول — يدوي | ❌ خطر Data Leakage |
-| Separate Schema per Tenant | Schema مختلف لكل محل | ❌ معقد جداً للـ Solo Dev |
-| Separate DB per Tenant | قاعدة بيانات لكل محل | ❌ تكلفة استضافة مرتفعة |
+| Separate Schema per Tenant | Schema مختلف لكل منشأة | ❌ معقد جداً للـ Solo Dev |
+| Separate DB per Tenant | قاعدة بيانات لكل منشأة | ❌ تكلفة استضافة مرتفعة |
 | **Dual DB (stancl/tenancy)** | **Central DB + Tenant DB تلقائياً** | **✅ القرار المختار** |
 
 **مميزات stancl/tenancy على الحل اليدوي:**

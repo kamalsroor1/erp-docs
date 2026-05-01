@@ -15,7 +15,7 @@
 
 ---
 
-## 2. لوحة تحكم صاحب المحل (Owner Dashboard)
+## 2. لوحة تحكم صاحب المنشأة (Owner Dashboard)
 *   **النوع:** Responsive Web (Mobile Optimized)
 *   **التصميم:** يعتمد على **"البلاطات" (Tiles)** للوصول السريع للعمليات المتكررة.
 *   **لوحة الوصول السريع (Quick Access Tiles):**
