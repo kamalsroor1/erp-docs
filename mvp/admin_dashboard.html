@@ -34,7 +34,7 @@
                 </a>
                 <a href="#" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
                     <i data-lucide="building-2" class="ml-3 w-5 h-5"></i>
-                    <span class="font-bold text-lg">إدارة المحلات</span>
+                    <span class="font-bold text-lg">إدارة المنشائات</span>
                 </a>
                 <a href="#" class="flex items-center px-4 py-3 text-dim hover:bg-slate-800 rounded-xl transition">
                     <i data-lucide="credit-card" class="ml-3 w-5 h-5"></i>
@@ -47,7 +47,7 @@
                 <div class="pt-10">
                     <a href="index.html" class="flex items-center px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition">
                         <i data-lucide="log-out" class="ml-3 w-5 h-5"></i>
-                        <span class="font-bold">خروج للمحل</span>
+                        <span class="font-bold">خروج للمنشائه</span>
                     </a>
                 </div>
             </nav>
@@ -79,17 +79,17 @@
                     </div>
                 </div>
 
-                <!-- 2. إدارة المحلات (Tenants) -->
+                <!-- 2. إدارة المنشائات (Tenants) -->
                 <div class="space-y-8">
                     <div class="flex justify-between items-center">
-                        <h4 class="text-2xl font-black text-bright italic">آخر المحلات المنضمة</h4>
+                        <h4 class="text-2xl font-black text-bright italic">آخر المنشائات المنضمة</h4>
                         <button class="px-8 py-3 blue-gradient text-white rounded-xl font-black text-sm shadow-xl shadow-blue-900/20">عرض كافة المشتركين</button>
                     </div>
                     <div class="card-bg rounded-[45px] overflow-hidden shadow-2xl">
                         <table class="w-full text-right">
                             <thead class="bg-slate-800/50 border-b border-slate-800">
                                 <tr class="text-[10px] text-dim font-black uppercase tracking-[3px]">
-                                    <th class="px-8 py-6">المحل / التاجر</th>
+                                    <th class="px-8 py-6">المنشائه / التاجر</th>
                                     <th class="px-8 py-6">الباقة</th>
                                     <th class="px-8 py-6 text-center">الفروع</th>
                                     <th class="px-8 py-6">تاريخ الانضمام</th>
@@ -151,7 +151,7 @@
                             <div class="p-5 bg-slate-900 rounded-3xl border border-slate-800 flex justify-between items-center">
                                 <div>
                                     <p class="font-black text-bright">عطل في طابعة الفرع</p>
-                                    <p class="text-[10px] text-dim mt-1 font-bold italic">محل: إلكترونيات السلام</p>
+                                    <p class="text-[10px] text-dim mt-1 font-bold italic">منشائه: إلكترونيات السلام</p>
                                 </div>
                                 <span class="px-3 py-1 bg-red-500/10 text-red-500 text-[10px] font-black rounded-lg">عاجل</span>
                             </div>
@@ -168,14 +168,14 @@
         createApp({
             setup() {
                 const stats = ref([
-                    { label: 'إجمالي المحلات', value: '1,250', trend: '+15% هذا الشهر' },
+                    { label: 'إجمالي المنشائات', value: '1,250', trend: '+15% هذا الشهر' },
                     { label: 'مشتركين نشطين', value: '840', trend: '+5% هذا الشهر' },
                     { label: 'إيرادات الشهر', value: '145k', trend: '+22% نمو' },
                     { label: 'تذاكر الدعم', value: '12', trend: '8 تذاكر مغلقة اليوم' }
                 ]);
 
                 const tenants = ref([
-                    { id: 1, name: 'محل كمال للإلكترونيات', domain: 'kamal.ebraa-erp.com', plan: 'الاحترافية', branchCount: 2, branchLimit: 3, date: '2024/04/20', status: 'نشط' },
+                    { id: 1, name: 'منشائه كمال للإلكترونيات', domain: 'kamal.ebraa-erp.com', plan: 'الاحترافية', branchCount: 2, branchLimit: 3, date: '2024/04/20', status: 'نشط' },
                     { id: 2, name: 'أولاد علي للهواتف', domain: 'ali-phones.ebraa-erp.com', plan: 'الأساسية', branchCount: 1, branchLimit: 1, date: '2024/04/18', status: 'نشط' },
                     { id: 3, name: 'مركز السلام التقني', domain: 'salam.ebraa-erp.com', plan: 'المؤسسات', branchCount: 8, branchLimit: 15, date: '2024/04/15', status: 'منتهي' }
                 ]);

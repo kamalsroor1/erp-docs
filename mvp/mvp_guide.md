@@ -35,8 +35,8 @@
 
 | الصفحة | الوصف السريع | الرابط |
 | :--- | :--- | :--- |
-| **لوحة تحكم المنصة** | واجهة مدير النظام (SaaS Admin) لإدارة المحلات المشتركة والخطط والدعم. | [admin_dashboard.html](admin_dashboard.html) |
-| **بوابة المسوقين** | واجهة المسوق (Affiliate) لتتبع العمولات، الروابط، والمحلات المسجلة. | [affiliate_dashboard.html](affiliate_dashboard.html) |
+| **لوحة تحكم المنصة** | واجهة مدير النظام (SaaS Admin) لإدارة المنشائات المشتركة والخطط والدعم. | [admin_dashboard.html](admin_dashboard.html) |
+| **بوابة المسوقين** | واجهة المسوق (Affiliate) لتتبع العمولات، الروابط، والمنشائات المسجلة. | [affiliate_dashboard.html](affiliate_dashboard.html) |
 | **تتبع الصيانة العام** | صفحة عامة للعملاء لتتبع حالة أجهزتهم برقم التذكرة دون تسجيل دخول. | [track.html](track.html) |
 
 ---
