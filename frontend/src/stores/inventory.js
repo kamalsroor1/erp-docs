@@ -1,23 +1,47 @@
 import { defineStore } from 'pinia'
 import { db } from '../database/db'
 import { ref, computed } from 'vue'
+import { useUIStore } from './ui'
 
 export const useInventoryStore = defineStore('inventory', () => {
+  const uiStore = useUIStore()
   const products = ref([])
   const warehouses = ref([])
   const selectedWarehouseId = ref(null)
   const loading = ref(false)
 
-  // Fetch all warehouses and set default
+  // Getters
+  const totalStockItems = computed(() => {
+    return products.value.reduce((acc, p) => acc + (p.stock || 0), 0)
+  })
+
+  const totalEstimatedValue = computed(() => {
+    return products.value.reduce((acc, p) => acc + ((p.stock || 0) * (p.buy_price || 0)), 0)
+  })
+
+  // Fetch warehouses filtered by active branch
   async function loadWarehouses() {
-    warehouses.value = await db.warehouses.toArray()
-    if (warehouses.value.length > 0 && !selectedWarehouseId.value) {
-      selectedWarehouseId.value = warehouses.value.find(w => w.is_default)?.id || warehouses.value[0].id
+    const branchId = parseInt(uiStore.selectedBranchId)
+    const allWarehouses = await db.warehouses.where('branch_id').equals(branchId).toArray()
+    warehouses.value = allWarehouses
+    
+    if (allWarehouses.length > 0) {
+      // Keep selection if it exists in current branch, otherwise reset to first
+      if (!allWarehouses.find(w => w.id === selectedWarehouseId.value)) {
+        selectedWarehouseId.value = allWarehouses[0].id
+      }
+    } else {
+      selectedWarehouseId.value = null
     }
   }
 
   // Fetch products with stock levels for the selected warehouse
   async function fetchInventory() {
+    if (!selectedWarehouseId.value) {
+      products.value = []
+      return
+    }
+    
     loading.value = true
     try {
       const allProducts = await db.products.toArray()
@@ -42,7 +66,7 @@ export const useInventoryStore = defineStore('inventory', () => {
         }
       }))
 
-      products.value = enrichedProducts
+      products.value = enrichedProducts.filter(p => p.status === 'active') // Filter inactive for main view
     } finally {
       loading.value = false
     }
@@ -60,17 +84,14 @@ export const useInventoryStore = defineStore('inventory', () => {
 
       for (const item of items) {
         if (item.serial_number) {
-          // Serialized item
           await db.items.where({ serial_number: item.serial_number }).modify({ 
             status: 'in_transit',
-            warehouse_id: toId // Or keep original until received? Specs say "In-Transit"
+            warehouse_id: toId 
           })
         } else {
-          // Bulk item
           const sourceStock = await db.inventory_stocks.where({ product_id: item.product_id, warehouse_id: fromId }).first()
           if (sourceStock && sourceStock.quantity >= item.quantity) {
             await db.inventory_stocks.update(sourceStock.id, { quantity: sourceStock.quantity - item.quantity })
-            // Logic for destination (usually stays pending until received)
           }
         }
 
@@ -89,6 +110,8 @@ export const useInventoryStore = defineStore('inventory', () => {
     warehouses,
     selectedWarehouseId,
     loading,
+    totalStockItems,
+    totalEstimatedValue,
     loadWarehouses,
     fetchInventory,
     transferStock

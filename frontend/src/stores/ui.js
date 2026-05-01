@@ -4,6 +4,8 @@ export const useUIStore = defineStore('ui', {
   state: () => ({
     theme: localStorage.getItem('theme') || 'dark',
     locale: localStorage.getItem('locale') || 'ar',
+    selectedBranchId: parseInt(localStorage.getItem('selectedBranchId')) || 1,
+    pageLoading: false,
   }),
   
   getters: {
@@ -20,6 +22,15 @@ export const useUIStore = defineStore('ui', {
     setLocale(lang) {
       this.locale = lang
       this.applyLocale()
+    },
+
+    setBranch(id) {
+      this.selectedBranchId = id
+      localStorage.setItem('selectedBranchId', id)
+    },
+
+    setPageLoading(status) {
+      this.pageLoading = status
     },
     
     applyTheme() {

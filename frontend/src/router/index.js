@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import { useUIStore } from '../stores/ui'
 
 const routes = [
   {
@@ -45,6 +46,9 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  const uiStore = useUIStore()
+  uiStore.setPageLoading(true)
+  
   const isAuthenticated = !!localStorage.getItem('auth_token')
   
   if (to.meta.requiresAuth && !isAuthenticated) {
@@ -54,6 +58,14 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
+})
+
+router.afterEach(() => {
+  const uiStore = useUIStore()
+  // Add a small delay to make the loading visible for demo purposes
+  setTimeout(() => {
+    uiStore.setPageLoading(false)
+  }, 300)
 })
 
 export default router
