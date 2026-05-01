@@ -12,6 +12,7 @@ We are building a **Front-end Only** version of Ebraa ERP.
 - **Roles**:
     - **Admin**: Full access to all modules (Dashboard, Inventory, POS, Analytics).
     - **Cashier**: Restricted access (POS, Cart, Invoice History).
+    - **Branch Manager**: Access to specific branch data and inventory.
 
 ---
 
@@ -231,5 +232,25 @@ interface Product {
     - `Enter`: التنقل بين الحقول.
     - `Esc`: إغلاق النوافذ (Close/Cancel).
 
-### ⏳ 8. حالات التحميل (Loading States)
-- كل زرار تفاعلي (Save/Delete) يجب أن يحتوي على Loading Spinner لمنع تكرار الضغط أثناء المعالجة.
+### ⏳ 8. حالات التحميل الشاملة (Universal Loading States)
+- **Buttons**: أي زرار يقوم بعملية (حفظ، حذف، تعديل، أو طلب بيانات) **يجب** أن يحتوي على خاصية `:loading`.
+- **Page Transitions**: يجب إظهار مؤشر تحميل (Progress Bar أو Overlay) عند التنقل بين الصفحات لضمان عدم شعور المستخدم بتجمد النظام.
+- **Feedback**: لا يُترك المستخدم أبداً بدون استجابة بصرية عند الضغط على أي عنصر تفاعلي.
+
+### 📏 10. التباعد والترجمه (Spacing & i18n)
+- **Interactive Spacing**: يجب ترك مسافة (Padding/Gap) كافية بين الأزرار، الـ Selects، والـ Dropdowns (على الأقل `gap-3` أو `gap-4`). لا تترك العناصر ملتصقة أبداً.
+- **Strict Translation**: يُمنع منعاً باتاً كتابة أي نصوص ثابتة (Hardcoded Strings). يجب استخدام `{{ t('key') }}` لجميع النصوص بدون استثناء.
+- **Audit Requirement**: عند تعديل أي ملف، يجب التأكد من مطابقة الملف لكافة القواعد (RBAC, Mobile, Spacing, Translation).
+
+### 📱 9. واجهة متوافقة مع الجوال (PWA & Mobile Ready)
+- **Responsive Layout**: يجب أن تكون جميع الجداول والبطاقات متوافقة مع شاشات الهاتف.
+- **Touch-Friendly**: الأزرار والقوائم يجب أن تكون كبيرة كفاية للمس.
+- **PWA Capabilities**: تهيئة النظام ليعمل كتطبيق مستقل عند تثبيته على الهاتف (Splash screen, Icons).
+
+### 🔍 10. البحث المتقدم والفلترة (Advanced Selection)
+- **Advanced Select**: استخدام مكونات `MultiSelect` أو `Dropdown` مع خاصية البحث (`filter`) والفرز.
+- **Global Search**: توفير شريط بحث سريع في الهيدر للوصول السريع للمنتجات أو الفواتير.
+
+### 🏢 11. نظام الفروع المتعددة (Branch Switching)
+- يجب توفير سليكت (Select) في الهيدر يسمح بتبديل "الفرع النشط".
+- جميع البيانات (المخزن، المبيعات) يجب أن تتأثر تلقائياً بالفرع المختار.

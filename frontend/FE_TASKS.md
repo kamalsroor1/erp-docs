@@ -7,6 +7,8 @@
 - [x] Setup Base Layouts (`AppLayout.vue`, `AuthLayout.vue`, `POSLayout.vue`)
 - [x] Implement Fake Auth Logic (LocalStorage Token + Router Guards)
 - [x] Create Login Page UI
+- [ ] Implement Global **Branch Switcher** in AppLayout
+- [ ] Upgrade PrimeVue Dropdowns to **Advanced Select with Filter/Search**
 
 ## 📦 Phase 3: Advanced Inventory Module
 - [x] Expand Dexie.js Schema (Warehouses, Transfers, Stocks)
@@ -16,6 +18,8 @@
 - [ ] Implement Excel/CSV Bulk Import component
 - [x] Build Mobile Stock Audit view (Camera scanning)
 - [ ] Add Stock Movement History (Ledger) for products
+- [ ] Optimize Inventory Table for **Mobile/Touch Devices** (Responsive cards)
+- [ ] Review Inventory module vs `docs/07` specifications
 - [x] Refactor Components to "Dumb Components" (e.g., AddProductModal)
 
 ## 🛒 Phase 3: POS System
@@ -25,8 +29,10 @@
 - [ ] Design Thermal Receipt print preview
 
 ## 📊 Phase 4: Analytics
+- [ ] Refactor DataGenerator for **High-Volume Realistic Data**
+- [ ] Connect Dashboard widgets to **Live Dexie.js Queries** (Calculated Totals)
 - [x] Build Dashboard summary widgets
-- [ ] Implement Sales Charts (Chart.js)
+- [ ] Implement Sales Charts (Local Data)
 - [ ] Final UI Polish & Demo verification
 
 ## 🛡️ Enterprise Standardization (In Progress)

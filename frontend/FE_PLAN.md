@@ -8,11 +8,11 @@ This plan outlines the execution steps for building the Ebraa ERP Frontend MVP a
 
 ### Week 1: Foundation & Auth
 - **Goal**: Setup project, layouts, and simulated login.
-- **Key Tasks**: Vite initialization, Tailwind/PrimeVue setup, Router guards.
+- **Key Tasks**: Vite initialization, Tailwind/PrimeVue setup, Router guards, **Branch Switching Logic**.
 
 ### Week 2: Local Database & Inventory
 - **Goal**: Setup Dexie.js and product management.
-- **Key Tasks**: DB schema, Product CRUD, Random Data Generator.
+- **Key Tasks**: DB schema, Product CRUD, **Advanced Data Generator (Realistic Volume)**, **Responsive Mobile Views**.
 
 ### Week 3: POS & Sales Logic
 - **Goal**: Build the core selling interface.
@@ -20,7 +20,7 @@ This plan outlines the execution steps for building the Ebraa ERP Frontend MVP a
 
 ### Week 4: Dashboard & Analytics
 - **Goal**: Managerial reports and data visualization.
-- **Key Tasks**: Financial counters, Sales charts, History logs.
+- **Key Tasks**: **Dynamic Financial Counters (Live Data)**, **Functional Sales Charts**, History logs.
 
 ---
 
