@@ -15,8 +15,12 @@ const scannedItems = ref([
 ])
 
 const finishAudit = () => {
+  loading.value = true
   // Logic to save audit
-  router.push('/inventory')
+  setTimeout(() => {
+    loading.value = false
+    router.push('/inventory')
+  }, 1000)
 }
 
 const { register, unregister } = useKeyboardShortcuts({
@@ -99,6 +103,7 @@ onUnmounted(() => {
        <Button 
          v-can="'edit_inventory'"
          @click="finishAudit"
+         :loading="loading"
          class="w-full max-w-lg !bg-slate-900 dark:!bg-white !text-white dark:!text-slate-900 !py-4 !rounded-2xl !font-black shadow-xl"
        >
          {{ t('finish_audit') }} (F9)

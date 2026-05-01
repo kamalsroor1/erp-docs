@@ -15,11 +15,17 @@ import {
   Menu
 } from 'lucide-vue-next'
 import Button from 'primevue/button'
+import ProgressBar from 'primevue/progressbar'
 
 const router = useRouter()
 const uiStore = useUIStore()
 const { t, locale } = useI18n()
 const isSidebarOpen = ref(true)
+const branches = ref([
+  { id: 1, name: 'فرع القاهرة - الرئيسي' },
+  { id: 2, name: 'فرع الإسكندرية' },
+  { id: 3, name: 'فرع المنصورة' }
+])
 
 const menuItems = computed(() => [
   { name: t('dashboard'), path: '/', icon: LayoutDashboard },
@@ -76,6 +82,7 @@ const logoSrc = computed(() => {
       <div class="absolute bottom-8 left-0 right-0 px-4">
         <button 
           @click="logout"
+          :disabled="uiStore.pageLoading"
           class="flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all"
           :class="uiStore.isDark ? 'text-slate-400 hover:bg-red-500/10 hover:text-red-400' : 'text-slate-500 hover:bg-red-50 hover:text-red-600'"
         >
@@ -87,6 +94,11 @@ const logoSrc = computed(() => {
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden" :class="uiStore.isDark ? 'bg-midnight/50' : 'bg-slate-50/50'">
+      <!-- Global Page Loader -->
+      <div v-if="uiStore.pageLoading" class="fixed top-0 left-0 right-0 z-[100]">
+        <ProgressBar mode="indeterminate" style="height: 3px" class="!bg-transparent !border-none" />
+      </div>
+
       <!-- Top Bar -->
       <header class="h-16 flex items-center justify-between px-8 border-b glass-dark sticky top-0 z-40" :class="uiStore.isDark ? 'border-white/5' : 'border-slate-200'">
         <div class="flex items-center gap-4">
@@ -99,6 +111,18 @@ const logoSrc = computed(() => {
         </div>
         
         <div class="flex items-center gap-3">
+          <!-- Branch Switcher -->
+          <div class="hidden md:flex items-center gap-2 mr-4">
+             <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">{{ t('branch') }}:</span>
+             <select 
+               v-model="uiStore.selectedBranchId" 
+               @change="uiStore.setBranch($event.target.value)"
+               class="bg-transparent border-none text-sm font-bold text-primary-500 focus:ring-0 cursor-pointer outline-none"
+             >
+               <option v-for="b in branches" :key="b.id" :value="b.id" class="bg-midnight text-white">{{ b.name }}</option>
+             </select>
+          </div>
+
           <!-- Theme Toggle -->
           <Button @click="uiStore.toggleTheme" text rounded class="!text-slate-400 dark:!text-slate-500 hover:!bg-white/5">
             <Sun v-if="uiStore.isDark" class="w-5 h-5" />

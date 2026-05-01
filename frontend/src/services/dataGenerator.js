@@ -1,34 +1,96 @@
-import { db } from '../database/db';
+import { db } from '../database/db'
 
-const sampleProducts = [
-  { name: 'iPhone 15 Pro', category: 'Smartphones', sku: 'IP15P-256-BLK' },
-  { name: 'MacBook Air M2', category: 'Laptops', sku: 'MBA-M2-8-256' },
-  { name: 'AirPods Pro 2', category: 'Accessories', sku: 'APP2-WHT' },
-  { name: 'Samsung S24 Ultra', category: 'Smartphones', sku: 'S24U-512-TIT' },
-  { name: 'Dell XPS 13', category: 'Laptops', sku: 'DELL-XPS13-16' },
-];
+export const generateRealisticData = async () => {
+  // 1. Clear existing data to avoid duplicates in demo
+  await db.branches.clear()
+  await db.warehouses.clear()
+  await db.products.clear()
+  await db.items.clear()
 
-export const generateDummyData = async () => {
-  const productCount = await db.products.count();
-  if (productCount > 0) return; // Don't duplicate
+  // 2. Add Branches
+  const branches = [
+    { id: 1, name: 'فرع القاهرة - الرئيسي', location: 'القاهرة', code: 'CAI-01' },
+    { id: 2, name: 'فرع الإسكندرية', location: 'الإسكندرية', code: 'ALX-02' },
+    { id: 3, name: 'فرع المنصورة', location: 'المنصورة', code: 'MAN-03' }
+  ]
+  await db.branches.bulkAdd(branches)
 
-  console.log('Generating dummy data...');
+  // 3. Add Warehouses tied to Branches
+  const warehouses = [
+    { id: 1, branch_id: 1, name: 'مخزن القاهرة الرئيسي' },
+    { id: 2, branch_id: 1, name: 'مخزن قطع الغيار - القاهرة' },
+    { id: 3, branch_id: 2, name: 'مخزن الإسكندرية' },
+    { id: 4, branch_id: 3, name: 'مخزن المنصورة' }
+  ]
+  await db.warehouses.bulkAdd(warehouses)
 
-  for (const p of sampleProducts) {
-    const productId = await db.products.add(p);
+  // 4. Generate 50+ Products
+  const categories = ['Smartphones', 'Laptops', 'Tablets', 'Accessories', 'Printers']
+  const brands = ['Apple', 'Samsung', 'HP', 'Dell', 'Lenovo', 'Canon']
+  const products = []
+
+  for (let i = 1; i <= 60; i++) {
+    const brand = brands[Math.floor(Math.random() * brands.length)]
+    const category = categories[Math.floor(Math.random() * categories.length)]
+    const buyPrice = Math.floor(Math.random() * 30000) + 500
+    const sellPrice = buyPrice + (buyPrice * 0.2) // 20% margin
     
-    // Generate 5 items for each product
-    const items = [];
-    for (let i = 0; i < 5; i++) {
-      items.push({
-        product_id: productId,
-        serial_number: `SN-${p.sku}-${Math.floor(1000 + Math.random() * 9000)}`,
-        status: 'available',
-        purchase_price: Math.floor(500 + Math.random() * 1500)
-      });
-    }
-    await db.items.bulkAdd(items);
+    products.push({
+      id: i,
+      name: `${brand} ${category === 'Smartphones' ? 'Galaxy S' : 'Pro Book'} ${i + 10}`,
+      brand: brand,
+      category: category,
+      buy_price: buyPrice,
+      sell_price: sellPrice,
+      type: i % 5 === 0 ? 'bulk' : 'serial', // Most are serialized
+      status: i % 15 === 0 ? 'inactive' : 'active',
+      reorder_point: 5,
+      barcode: `622${1000000 + i}`,
+      barcode_2: `000${2000000 + i}`
+    })
   }
+  await db.products.bulkAdd(products)
 
-  console.log('Dummy data generation complete.');
-};
+  // 5. Generate Items (Inventory Records)
+  const items = []
+  let itemCounter = 1
+
+  for (const product of products) {
+    if (product.status === 'inactive') continue
+
+    // Add items to random warehouses
+    const warehouseId = warehouses[Math.floor(Math.random() * warehouses.length)].id
+    const stockCount = Math.floor(Math.random() * 20) // Random stock 0-20
+    
+    for (let j = 0; j < stockCount; j++) {
+      items.push({
+        id: itemCounter++,
+        product_id: product.id,
+        warehouse_id: warehouseId,
+        serial_number: product.type === 'serial' ? `SN-${product.id}-${1000 + j}` : null,
+        status: 'available',
+        added_date: new Date(Date.now() - Math.random() * 1000000000).toISOString()
+      })
+    }
+  }
+  await db.items.bulkAdd(items)
+
+  // 6. Generate 25+ Invoices for Analytics
+  const invoices = []
+  for (let i = 1; i <= 30; i++) {
+    const branchId = (i % 3) + 1
+    const total = Math.floor(Math.random() * 50000) + 1000
+    invoices.push({
+      id: i,
+      branch_id: branchId,
+      total: total,
+      tax: total * 0.14,
+      discount: 0,
+      created_at: new Date(Date.now() - (30 - i) * 86400000).toISOString(),
+      status: 'paid'
+    })
+  }
+  await db.invoices.bulkAdd(invoices)
+
+  console.log('✅ Realistic Demo Data Generated Successfully')
+}

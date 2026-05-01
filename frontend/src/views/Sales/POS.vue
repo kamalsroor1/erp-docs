@@ -198,7 +198,7 @@ onUnmounted(() => {
             class="w-full !bg-primary-500 hover:!bg-primary-600 !border-none !p-6 !rounded-3xl !font-black !text-white !text-2xl shadow-2xl shadow-primary-500/20 transition-all transform active:scale-95 flex items-center justify-center gap-4 disabled:!opacity-30"
           >
             <CreditCard class="w-8 h-8" />
-            <span>{{ t('pay_now') }} (F9)</span>
+            <span>{{ t('pay_now') }}</span>
           </Button>
           
           <Button 
@@ -206,7 +206,7 @@ onUnmounted(() => {
             text
             class="w-full !text-slate-500 hover:!text-red-400 !font-bold !py-4"
           >
-            {{ t('cancel_transaction') }} (Esc)
+            {{ t('cancel_transaction') }}
           </Button>
         </div>
       </aside>
