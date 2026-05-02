@@ -1,16 +1,22 @@
 <script setup>
+/**
+ * @file StockTransfer.vue
+ * @description Smart component for inter-warehouse stock transfers.
+ * Follows ERP standards: Modular i18n, BaseText, BaseTable, Keyboard-First.
+ */
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useInventoryStore } from '../../stores/inventory'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { db } from '../../database/db'
 import Button from 'primevue/button'
-import Dropdown from 'primevue/dropdown'
-import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import { Truck, ArrowLeft, Plus, Trash2, CheckCircle, Info } from 'lucide-vue-next'
 import { useToast } from 'primevue/usetoast'
 import { useKeyboardShortcuts } from '../../utils/keyboard'
+import BaseText from '../../components/base/BaseText.vue'
+import BaseSelect from '../../components/base/BaseSelect.vue'
+import BaseTable from '../../components/base/BaseTable.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -24,13 +30,13 @@ const loading = ref(false)
 
 const addItem = async () => {
   if (!fromWarehouse.value) {
-    toast.add({ severity: 'warn', summary: t('loading'), detail: t('select_source'), life: 3000 })
+    toast.add({ severity: 'warn', summary: t('common.loading'), detail: t('inventory.select_source'), life: 3000 })
     return
   }
   
   const allItems = await db.items.where({ warehouse_id: fromWarehouse.value, status: 'available' }).limit(5).toArray()
   if (allItems.length === 0) {
-    toast.add({ severity: 'warn', summary: t('loading'), detail: t('out_of_stock'), life: 3000 })
+    toast.add({ severity: 'warn', summary: t('common.loading'), detail: t('inventory.out_of_stock'), life: 3000 })
     return
   }
   
@@ -52,22 +58,22 @@ const removeItem = (serial) => {
 
 const submitTransfer = async () => {
   if (!fromWarehouse.value || !toWarehouse.value || transferItems.value.length === 0) {
-    toast.add({ severity: 'error', summary: t('error'), detail: t('loading'), life: 3000 })
+    toast.add({ severity: 'error', summary: t('common.error'), detail: t('common.loading'), life: 3000 })
     return
   }
   
   if (fromWarehouse.value === toWarehouse.value) {
-    toast.add({ severity: 'error', summary: t('error'), detail: t('same_warehouse_error'), life: 3000 })
+    toast.add({ severity: 'error', summary: t('common.error'), detail: t('inventory.same_warehouse_error'), life: 3000 })
     return
   }
 
   loading.value = true
   try {
     await inventoryStore.transferStock(fromWarehouse.value, toWarehouse.value, transferItems.value)
-    toast.add({ severity: 'success', summary: t('success'), detail: t('transfer_success'), life: 3000 })
+    toast.add({ severity: 'success', summary: t('common.success'), detail: t('inventory.transfer_success'), life: 3000 })
     router.push('/inventory')
   } catch (err) {
-    toast.add({ severity: 'error', summary: t('error'), detail: t('transfer_error'), life: 3000 })
+    toast.add({ severity: 'error', summary: t('common.error'), detail: t('inventory.transfer_error'), life: 3000 })
   } finally {
     loading.value = false
   }
@@ -96,16 +102,16 @@ onUnmounted(() => {
         <Button @click="router.back()" text class="!text-slate-400">
           <ArrowLeft class="w-6 h-6" />
         </Button>
-        <h1 class="text-3xl font-black text-slate-900 dark:text-white">{{ t('new_transfer') }}</h1>
+        <BaseText type="h1">{{ t('inventory.new_transfer') }}</BaseText>
       </div>
       <Button 
         v-can="'manage_warehouses'"
         @click="submitTransfer" 
         :loading="loading"
-        class="!bg-emerald-500 hover:!bg-emerald-600 !border-none !text-white !px-10 !py-3 !rounded-2xl !font-black shadow-xl shadow-emerald-500/20 flex items-center gap-2"
+        class="!bg-emerald-500 hover:!bg-emerald-600 !border-none !text-white !px-10 !py-3 !rounded-2xl !font-black shadow-xl shadow-emerald-500/20 flex items-center gap-2 transition-all transform active:scale-95"
       >
-        <CheckCircle class="w-5 h-5" />
-        <span>{{ t('confirm_and_ship') }} (F9)</span>
+        <CheckCircle v-if="!loading" class="w-5 h-5" />
+        <BaseText weight="black" class="!text-white">{{ t('inventory.confirm_and_ship') }} (F9)</BaseText>
       </Button>
     </div>
 
@@ -114,14 +120,14 @@ onUnmounted(() => {
       <div class="lg:col-span-1 space-y-6">
         <div class="glass p-8 rounded-3xl border border-slate-200 dark:border-white/5 space-y-6">
           <div class="space-y-2">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-widest">{{ t('from_warehouse') }}</label>
-            <Dropdown 
+            <BaseText type="label">{{ t('inventory.from_warehouse') }}</BaseText>
+            <BaseSelect 
               v-model="fromWarehouse" 
               :options="inventoryStore.warehouses" 
               optionLabel="name" 
               optionValue="id"
-              :placeholder="t('select_source')"
-              class="w-full !bg-slate-50 dark:!bg-white/5 !border-slate-200 dark:!border-white/10 !rounded-2xl"
+              :placeholder="t('inventory.select_source')"
+              class="w-full"
             />
           </div>
 
@@ -132,23 +138,26 @@ onUnmounted(() => {
           </div>
 
           <div class="space-y-2">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-widest">{{ t('to_warehouse') }}</label>
-            <Dropdown 
+            <BaseText type="label">{{ t('inventory.to_warehouse') }}</BaseText>
+            <BaseSelect 
               v-model="toWarehouse" 
               :options="inventoryStore.warehouses" 
               optionLabel="name" 
               optionValue="id"
-              :placeholder="t('select_destination')"
-              class="w-full !bg-slate-50 dark:!bg-white/5 !border-slate-200 dark:!border-white/10 !rounded-2xl"
+              :placeholder="t('inventory.select_destination')"
+              class="w-full"
             />
           </div>
         </div>
 
-        <div class="p-6 bg-indigo-500/5 rounded-3xl border border-indigo-500/10 text-sm text-indigo-600 dark:text-indigo-400">
-           <p class="font-bold flex items-center gap-2 mb-2">
-             <Info class="w-4 h-4" /> {{ t('dashboard') }}
-           </p>
-           {{ t('transfer_note') }}
+        <div class="p-6 bg-indigo-500/5 rounded-3xl border border-indigo-500/10 space-y-2">
+           <div class="flex items-center gap-2">
+             <Info class="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> 
+             <BaseText weight="bold" color="primary">{{ t('common.dashboard') }}</BaseText>
+           </div>
+           <BaseText size="text-xs" class="!text-indigo-600 dark:!text-indigo-400">
+             {{ t('inventory.transfer_note') }}
+           </BaseText>
         </div>
       </div>
 
@@ -156,33 +165,23 @@ onUnmounted(() => {
       <div class="lg:col-span-2 space-y-6">
         <div class="glass rounded-3xl border border-slate-200 dark:border-white/5 overflow-hidden flex flex-col min-h-[400px]">
            <div class="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-white/5">
-              <h3 class="font-bold text-slate-900 dark:text-white">{{ t('items_to_transfer') }}</h3>
+              <BaseText weight="bold">{{ t('inventory.items_to_transfer') }}</BaseText>
               <Button @click="addItem" text class="!text-primary-500 !font-bold flex items-center gap-2">
                 <Plus class="w-4 h-4" />
-                {{ t('add_item') }}
+                <BaseText weight="bold" color="primary">{{ t('inventory.add_item') }}</BaseText>
               </Button>
            </div>
 
-           <DataTable 
+           <BaseTable 
             :value="transferItems" 
-            class="!bg-transparent"
-            :pt="{
-              table: { class: 'w-full text-left' },
-              thead: { class: 'hidden' },
-              column: {
-                bodyCell: { class: '!p-6 !border-b !border-slate-100 dark:!border-white/5 !text-slate-700 dark:!text-slate-200' }
-              }
-            }"
+            :emptyMessage="t('inventory.no_items_transfer')"
+            class="h-full"
            >
-             <template #empty>
-               <div class="py-20 text-center text-slate-400 italic">{{ t('no_items_transfer') }}</div>
-             </template>
-             
-             <Column field="name">
+             <Column field="name" :header="t('inventory.add_product')">
                 <template #body="slotProps">
                    <div class="flex flex-col">
-                     <span class="font-bold">{{ slotProps.data.name }}</span>
-                     <span class="text-xs text-slate-500">{{ slotProps.data.serial_number }}</span>
+                     <BaseText weight="bold">{{ slotProps.data.name }}</BaseText>
+                     <BaseText type="label" size="text-xs">{{ slotProps.data.serial_number }}</BaseText>
                    </div>
                 </template>
              </Column>
@@ -190,13 +189,29 @@ onUnmounted(() => {
              <Column class="w-20">
                 <template #body="slotProps">
                    <Button @click="removeItem(slotProps.data.serial_number)" text rounded severity="danger" class="hover:!bg-red-500/10">
-                     <Trash2 class="w-5 h-5" />
+                     <Trash2 class="w-5 h-5 text-red-500" />
                    </Button>
                 </template>
              </Column>
-           </DataTable>
+
+             <template #mobile-card="{ data: item }">
+                <div class="flex justify-between items-start">
+                   <div class="flex flex-col">
+                     <BaseText weight="bold">{{ item.name }}</BaseText>
+                     <BaseText type="label" size="text-xs">{{ item.serial_number }}</BaseText>
+                   </div>
+                   <Button @click="removeItem(item.serial_number)" text rounded severity="danger">
+                     <Trash2 class="w-4 h-4" />
+                   </Button>
+                </div>
+             </template>
+           </BaseTable>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* BaseTable handles the internal styling */
+</style>

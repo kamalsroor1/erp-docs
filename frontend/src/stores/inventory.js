@@ -2,7 +2,13 @@ import { defineStore } from 'pinia'
 import { db } from '../database/db'
 import { ref, computed } from 'vue'
 import { useUIStore } from './ui'
+import Big from 'big.js'
 
+/**
+ * @file inventory.js
+ * @description Pinia store for inventory management.
+ * Follows ERP standards: Big.js for precision math, Dexie.js for persistence.
+ */
 export const useInventoryStore = defineStore('inventory', () => {
   const uiStore = useUIStore()
   const products = ref([])
@@ -16,7 +22,12 @@ export const useInventoryStore = defineStore('inventory', () => {
   })
 
   const totalEstimatedValue = computed(() => {
-    return products.value.reduce((acc, p) => acc + ((p.stock || 0) * (p.buy_price || 0)), 0)
+    // Rule: Use Big.js for financial calculations
+    return products.value.reduce((acc, p) => {
+      const stock = new Big(p.stock || 0)
+      const price = new Big(p.buy_price || 0)
+      return new Big(acc).plus(stock.times(price)).toNumber()
+    }, 0)
   })
 
   // Fetch warehouses filtered by active branch
