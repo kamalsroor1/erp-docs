@@ -28,7 +28,7 @@ const ptOptions = {
     class: '!bg-[var(--input-bg)] !border-[var(--input-border)] !rounded-2xl !p-1 transition-all focus:!border-primary-500' 
   },
   label: { 
-    class: '!text-[var(--text-main)] !font-bold !text-sm !p-3' 
+    class: '!text-[var(--text-main)] !font-bold !text-sm !p-4' 
   },
   panel: { 
     class: 'glass-dark !border-[var(--border-color)] !rounded-2xl !shadow-2xl overflow-hidden' 
