@@ -18,7 +18,7 @@
 - [ ] Implement Excel/CSV Bulk Import component
 - [x] Build Mobile Stock Audit view (Camera scanning)
 - [ ] Add Stock Movement History (Ledger) for products
-- [ ] Optimize Inventory Table for **Mobile/Touch Devices** (Responsive cards)
+- [x] Optimize Inventory Table for **Mobile/Touch Devices** (Responsive cards)
 - [ ] Review Inventory module vs `docs/07` specifications
 - [x] Refactor Components to "Dumb Components" (e.g., AddProductModal)
 
@@ -32,7 +32,7 @@
 - [ ] Refactor DataGenerator for **High-Volume Realistic Data**
 - [ ] Connect Dashboard widgets to **Live Dexie.js Queries** (Calculated Totals)
 - [x] Build Dashboard summary widgets
-- [ ] Implement Sales Charts (Local Data)
+- [x] Implement Sales Charts (Local Data)
 - [ ] Final UI Polish & Demo verification
 
 ## 🛡️ Enterprise Standardization (In Progress)
