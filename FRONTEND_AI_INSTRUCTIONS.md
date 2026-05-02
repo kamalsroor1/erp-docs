@@ -1,256 +1,171 @@
 # 🎨 Frontend MVP Protocol (FRONTEND_AI_INSTRUCTIONS.md)
 
-This document defines the specialized rules for building the **Ebraa ERP Frontend MVP**. The primary goal is to create a fully interactive, data-persistent prototype (using LocalStorage/SQLite) for client demonstrations and pre-order generation.
+This document defines the specialized rules for building the **Ebraa ERP Frontend MVP**. The primary goal is to create a fully interactive, data-persistent prototype for client demonstrations and pre-order generation.
 
 ---
 
-## 1. 🎯 Primary Objective: The "Demo-Ready" MVP
-We are building a **Front-end Only** version of Ebraa ERP. 
-- **Persistence**: All data must be stored in `LocalStorage` or a local `SQLite` database (WASM/Client-side).
-- **Interactivity**: Every button, form, and chart must work using local data to simulate a real backend.
-- **Goal**: A high-fidelity prototype that wows potential customers.
-- **Roles**:
-    - **Admin**: Full access to all modules (Dashboard, Inventory, POS, Analytics).
-    - **Cashier**: Restricted access (POS, Cart, Invoice History).
-    - **Branch Manager**: Access to specific branch data and inventory.
+## 🛑 1. Mandatory Operation Protocol (The Workflow)
 
----
-
-## 1. 🧠 Context & Task Tracking (Mandatory)
-Before starting any task, the AI **MUST** perform these 3 steps:
+### 🧠 1.1 Context & Task Tracking
+Before starting any task, the AI **MUST**:
 1.  **Read Planning**: Check `FE_PLAN.md` and `FE_TASKS.md` to identify the current objective.
-2.  **Audit History**: Read `history/YYYY-MM-DD.md` to understand what was last done and avoid overwriting.
-3.  **Check Protocol**: Review these instructions to ensure architectural compliance.
+2.  **Audit History**: Read `history/YYYY-MM-DD.md` to understand the latest state and avoid overwriting.
+3.  **Check Protocol**: Review these instructions to ensure architectural compliance for the specific task.
+4.  **Check Components**: Search `src/components/base/` to reuse existing components.
 
 **Rule**: After completion, the AI **MUST** update `FE_TASKS.md` (marking `[x]`) and **APPEND** a new entry to the `history/` log.
 
----
-
-## 2. 🧩 The "One Task at a Time" Rule (STRICT)
-To maintain focus and avoid incomplete features:
-- The AI **MUST ONLY** work on **ONE** specific task or component per request.
+### 🧩 1.2 The "One Task at a Time" Rule (STRICT)
+- Work on **ONLY ONE** specific task or component per request.
 - Do not attempt to build multiple pages or logic systems simultaneously.
 - Finish, test, and document the current task before moving to the next.
 
----
-
-## 3. 🛠️ Technology Stack (Frontend)
-- **Framework**: Vue 3 (Composition API + `<script setup>`).
-- **State Management**: **Pinia** (Must be configured to persist to LocalStorage).
-- **Styling**: **Tailwind CSS** (Premium/Glassmorphism design).
-- **Routing**: Vue Router (Web Hash mode for local file compatibility if needed).
-- **Charts**: ApexCharts or Chart.js for financial data simulation.
-- **Icons**: Lucide-Vue or Heroicons.
-- **Precision Math**: **Big.js** (Mandatory for all financial calculations).
-
----
-
-## 4. 📝 Mandatory History Logging (The Ledger)
-Follow the strict protocol in `AI_INSTRUCTIONS.md`. 
-### 🚫 CRITICAL: NO OVERWRITING
-- **NEVER** use `write_to_file` or `Overwrite: true` on an existing history file.
-- **ALWAYS** use `append` logic to add new entries at the **BOTTOM**.
-
-### Log Format for Frontend:
+### 📝 1.3 Mandatory History Logging (The Ledger)
+- **CRITICAL**: Never use `Overwrite: true` on an existing history file. Always **APPEND** to the bottom.
+- **Format**:
 ```markdown
 ## [HH:mm] - [Task Title]
 - **Summary**: Overview of feature/logic added.
-- **Files Modified**: 
-    - `src/views/Inventory.vue` [UPDATED]
-- **Changes Detail**: 
-    - **Logic**: (e.g., Integrated Big.js for tax calc).
-    - **UI**: (e.g., Added Glassmorphism cards).
-    - **Demo Impact**: (e.g., Customer can now see live stock updates).
+- **Files Modified**: `src/views/Inventory.vue` [UPDATED]
+- **Changes Detail**: (Logic details, UI details, Demo impact).
 - **Status**: [Success / Pending]
 ```
 
 ---
 
-## 🏗️ دليل بناء النسخة التجريبية (Front-End MVP)
+## 🎯 2. Primary Objective & Strategy
 
-هذا القسم هو الدليل التنفيذي لبناء واجهة تفاعلية كاملة بدون خوادم، تعمل محلياً لإثبات الفكرة وتوليد الطلبات المسبقة (Pre-Orders).
+### 🚀 2.1 The "Demo-Ready" MVP
+We are building a **Front-end Only** version of Ebraa ERP. 
+- **Persistence**: All data must be stored in `LocalStorage` or a local `SQLite/Dexie.js` database.
+- **Interactivity**: Every button, form, and chart must work using local data to simulate a real backend.
+- **Goal**: A high-fidelity prototype that wows potential customers.
 
-### 📌 نظرة عامة على الـ MVP
-**الهدف**: بناء تطبيق ويب يتصرف كأنه متصل بسيرفر حقيقي. يمكن للعميل تسجيل الدخول، إضافة منتجات، إجراء عمليات بيع من شاشة الـ POS، ورؤية الأرباح.. والبيانات تُحفظ محلياً في المتصفح.
-
-### التقنيات المختارة:
-- **إدارة الحالة**: Pinia (لحفظ السلة والإعدادات).
-- **قاعدة البيانات**: **Dexie.js** (غلاف لـ IndexedDB لتخزين آلاف السجلات محلياً).
-- **المكونات**: **PrimeVue** (لـ DataTables الاحترافية).
-- **الرسوم البيانية**: Chart.js.
-
----
-
-## 🗺️ خريطة البناء (4 أسابيع)
-
-### الأسبوع 1: الهيكل والمصادقة الوهمية
-- **الـ Layouts**: إنشاء `AuthLayout` (تسجيل دخول)، `AppLayout` (الرئيسية)، و `POSLayout` (ملء الشاشة).
-- **Fake Auth**: حفظ Fake Token في `localStorage` وحماية المسارات بـ `Router Guards`.
-
-### الأسبوع 2: الداتا بيز المحلية والمخزون
-- **Dexie.js Setup**: تعريف جداول `products`, `items`, `invoices`, `invoice_lines`.
-- **Inventory Screens**: عرض وقائمة المنتجات مع ميزة **"توليد بيانات عشوائية"** لملء العرض.
-
-### الأسبوع 3: وحش النظام — شاشة الـ POS
-- **Pinia Cart**: إدارة السلة واحتساب الخصم والضريبة لحظياً.
-- **Barcode Logic**: البحث في `db.items` عن السيريال الممسوح وتحديث الحالة لـ `sold` عند الدفع.
-- **Checkout**: تسجيل الفاتورة وتفريغ السلة وإظهار نافذة الطباعة الوهمية.
-
-### الأسبوع 4: لوحة التحكم والتقارير
-- **إحصائيات تفاعلية**: قراءة الأرباح اليومية عبر طرح التكلفة من سعر البيع في الفواتير المحلية.
-- **Charts**: رسم بياني للمبيعات لآخر 7 أيام.
-- **سجل الفواتير**: جدول لاستعراض العمليات التي تمت أثناء العرض.
+### 🎭 2.2 Roles & Scenarios
+- **Admin**: Full access to all modules (Dashboard, Inventory, POS, Analytics).
+- **Cashier**: Restricted access (POS, Cart, Invoice History).
+- **Branch Manager**: Access to specific branch data and inventory.
+- **Sales Pitch**: Focus on Dashboard (Profit monitoring), POS (Barcode scanning/instant checkout), and Transparency (Speed & UX).
 
 ---
 
-## 🎭 سيناريو العرض التقديمي (The Sales Pitch)
-1.  **لوحة التحكم**: "هذه شاشتك الصباحية لمراقبة الأرباح".
-2.  **التجربة العملية**: استخدام قارئ باركود حقيقي لمسح منتج؛ رؤيته يظهر في الفاتورة فوراً؛ ثم إتمام البيع.
-3.  **الشفافية**: "هذا Prototype سريع جداً لنضمن ملاءمة التجربة لاحتياجاتكم؛ النسخة النهائية ستكون سحابية بنفس هذه السرعة".
+## 🛠️ 3. Technology Stack & Tech Decisions
 
----
-
-## ⚡ ملخص القرارات التقنية (Frontend)
-| الميزة | الأداة | السبب |
+### ⚡ 3.1 Core Stack
+| Feature | Tool | Reason |
 |---|---|---|
-| **التصميم** | TailwindCSS | مرونة وعصرانية التصميم (Glassmorphism). |
-| **المكونات** | PrimeVue | أفضل DataTables للـ ERP. |
-| **الداتا بيز** | Dexie.js | أقوى مكتبة للتعامل مع IndexedDB. |
-| **إدارة الحالة** | Pinia | خفة الوزن والربط السريع بين POS و Dashboard. |
-| **التنبيهات** | Vue Toastification | مظهر احترافي عند نجاح العمليات. |
+| **Framework** | Vue 3 (Composition API) | Modern, fast development. |
+| **State** | Pinia (Persisted) | Lightweight, persistent state between POS & Dashboard. |
+| **Styling** | Tailwind CSS | Flexibility & Premium Glassmorphism design. |
+| **Database** | Dexie.js (IndexedDB) | Powerful client-side storage for thousands of records. |
+| **Components**| PrimeVue | Best-in-class DataTables for ERP. |
+| **Icons** | Lucide-Vue / Heroicons | Consistent iconography. |
+| **Math** | Big.js | **MANDATORY** for all financial/tax calculations to avoid JS precision errors. |
+| **Alerts** | Vue Toastification | Professional feedback for interactions. |
+
+### 🌍 3.2 Modular Localization (i18n)
+- **Strict Translation**: Never use hardcoded strings. Use `{{ t('module.key') }}`.
+- **Modular Structure**: Organize `src/i18n/index.js` into namespaces:
+    - `common`: Global terms.
+    - `validation`: Error messages.
+    - `auth`, `inventory`, `pos`, `dashboard`: Module-specific keys.
 
 ---
 
-## 🏗️ 5. الهيكل المعماري والمعايير البرمجية (Architecture & Standards)
+## 🏗️ 4. Architecture & Technical Standards
 
-يجب الالتزام بالمعايير التالية لضمان جودة الكود وسهولة صيانته:
-
-### 📁 1. هيكلة المجلدات (Folder Structure)
-نعتمد تقسيم **Feature-based Architecture**:
+### 📁 4.1 Folder Structure (Feature-based)
 ```plaintext
 src/
-├── api/             # ملفات Axios لكل موديول (مشتريات، مبيعات، حسابات)
-├── assets/          # الصور، الأيقونات، وملفات الـ CSS (Tailwind مثلاً)
-├── components/      # المكونات العامة (Shared UI)
-│   ├── AppButton.vue
-│   └── AppButton.test.js      # اختبار الـ props والـ emits
-├── composables/     # الـ Logic المشترك
-│   ├── useFinancials.js
-│   └── useFinancials.test.js  # اختبار العمليات الحسابية ( Edge Cases)
-├── stores/          # ملفات Pinia لكل قطاع
-│   ├── cart.js
-│   └── cart.test.js           # اختبار تحديث الـ State والـ Getters
-├── views/           # الصفحات الأساسية مقسمة حسب الموديول
-└── utils/           # دوال مساعدة (Format Currency, Date Helpers)
+├── api/             # Axios modules per feature.
+├── assets/          # Images, Icons, global CSS.
+├── components/      # Shared UI (Dumb Components).
+├── composables/     # Shared Logic (Smart Logic/Financials).
+├── stores/          # Pinia stores per feature.
+├── views/           # Smart Components / Pages.
+└── utils/           # Formatters, Date Helpers.
 ```
 
-### 📏 2. القواعد البرمجية الصارمة:
-
-*   **القاعدة الأولى: منطق الحسابات (Composables)**
-    "أي عملية حسابية (مثل حساب الضريبة، صافي الفاتورة، أو خصم الصنف) لا تُكتب داخل الـ Component. بل تُكتب في ملف مستقل في مجلد `composables/` (مثلاً `useFinancials.js`) لتكون قابلة للاستخدام في شاشة البيع، الشراء، والمرتجع بنفس الدقة."
-
-*   **القاعدة الثانية: إدارة البيانات (Pinia Store)**
-    "بيانات الجلسة الحالية (مثل المستخدم، الفرع النشط، الخزينة المختارة، أو سلة المشتريات الحالية) تُخزن في Pinia. لا نعتمد على الـ Local Storage مباشرة داخل المكونات، بل يتم التعامل مع Store مخصص لكل قطاع (مثل `useTreasuryStore` أو `useAuthStore`)."
-
-*   **القاعدة الثالثة: المكونات الذكية والغباء (Smart vs Dumb Components)**
-    "الـ Components الموجودة في مجلد `components/` يجب أن تكون **Dumb Components**؛ أي أنها تستقبل بيانات عبر props وترسل أحداثاً عبر emits فقط، ولا تتصل بالـ API مباشرة. أما الـ Views فهي الـ **Smart Components** التي تتعامل مع الـ API والـ Stores وتوزع البيانات على المكونات."
-
-*   **القاعدة الرابعة: توحيد شكل البيانات (API Layer)**
-    "كل موديول له ملف API خاص به في مجلد `api/`. يتم استخدام Axios Interceptors لمعالجة الأخطاء (مثل انتهاء الجلسة أو خطأ في الصلاحيات) بشكل موحد، مع التأكد من إرسال الـ Token في كل طلب."
-
-### 💡 3. مثال عملي للتنفيذ (فاتورة بيع):
-1.  **الـ API**: ملف `src/api/sales.js` يحتوي على دالة `createInvoice`.
-2.  **الـ Store**: ملف `src/stores/cart.js` يخزن الأصناف قبل الحفظ.
-3.  **الـ Composable**: ملف `src/composables/useVatCalculator.js` يحسب ضريبة الـ 14%.
-4.  **الـ Component**: مكون `AppTable.vue` يعرض الأصناف، ومكون `AppSearch.vue` يبحث بالباركود.
-5.  **الـ View**: صفحة `SalesInvoice.vue` تجمع كل ما سبق.
-
-### 🛡️ 4. الأنواع الصارمة (Strict Types)
-يفضل تعريف Interfaces لكل نموذج بيانات لتجنب الأخطاء في أسماء الحقول:
-```typescript
-interface Product { 
-  id: number; 
-  name: string;
-  price: number; 
-  vat: number; 
-}
-```
-هذا يضمن دقة التعامل مع الحقول (مثلاً استخدام `price` بدلاً من `unit_price`) من قبل الـ AI والمطورين.
-
-    3. **الوضع المظلم والمضيء**: استخدام `dark:` للتأكد من وضوح العناصر في كلتا الحالتين."
-
-*   **القاعدة السادسة: الجودة والاختبارات (Testing & QA)**
-    "يجب أن يرافق كل ملف منطق برمجي ملف اختبار `.test.js` باستخدام **Vitest**:
-    1. **Composables**: اختبار كافة الحالات (صفر، مبالغ ضخمة، أرقام عشرية، خصم أكبر من السعر).
-    2. **Stores**: اختبار أن الـ State يتحدث بشكل صحيح (مثلاً إضافة صنف للسلة) وأن الـ Getters تحسب الإجمالي بدقة.
-    3. **Components**: اختبار ظهور الـ props بشكل صحيح وانطلاق الـ emits عند التفاعل."
+### 📏 4.2 Strict Programming Rules
+1.  **Smart vs Dumb Components**: Components in `src/components/` must be "Dumb" (props/emits only). Views are "Smart" (API/Store interaction).
+2.  **Composables (Logic)**: All calculations (VAT, discounts, net totals) must reside in `composables/` for reuse across modules.
+3.  **State Management**: Use Pinia stores for session data (User, Branch, Cart). Do not access LocalStorage directly inside components.
+4.  **API Layer**: Use dedicated files in `src/api/` with Axios Interceptors for uniform error handling.
+5.  **Strict Types**: Define `Interfaces` (e.g., `interface Product`) for all data models to ensure field name accuracy.
 
 ---
 
-## 🧪 6. استراتيجية الاختبار (Testing Strategy)
+## 🏢 5. Unified Design System (Atomic Design) [STRICT MANDATORY]
 
-نحن نستخدم **Vitest** لضمان استقرار النظام:
-- **Business Logic**: أي منطق حسابي (مديونية، ضرائب، مخزون) يجب أن يكون له Unit Test يغطي الحالات العادية والشاذة (Edge Cases).
-- **TDD Approach**: عند الطلب، ابدأ بكتابة الاختبار أولاً قبل الكود البرمجي.
-- **Mocking**: يجب عمل Mocking لأي API calls لضمان سرعة الاختبارات واستقلاليتها عن الخوادم.
+### 🧩 5.1 Component-First Strategy
+- **Search Before Build**: Always check `src/components/base/` before creating new UI.
+- **Base Components**:
+    - `<BaseText>`: **MANDATORY** for all text. Tags like `h1`, `p`, `span`, `label` are forbidden.
+    - `<BaseSelect>`: For all selection/dropdown inputs (includes search/filter).
+    - `<BaseTable>`: For all data tables (includes Mobile/Card view).
+    - `<BaseModal>`: For all dialogs.
+- **Refactoring**: Create a `Base` component if a pattern repeats 2+ times.
+
+### 📏 5.2 Spacing & Typography
+- **Standardized Spacing**: All Modals **MUST** have **32px (8 units)** padding in Header, Body, and Footer.
+- **Gaps**: Use `gap-4` minimum between large interactive elements.
+- **Input Labels**: Must be large (`text-xs` to `text-sm`), bold, and high-contrast (`--text-main` with 80% opacity).
+
+### 🎨 5.3 Themes & Readability
+- **Light Mode Quality**: Ensure 100% Arabic readability in Light mode. Avoid faint grays.
+- **CSS Variables**: Use `--text-main` and `--text-title` via `BaseText` to handle themes automatically.
 
 ---
 
-## 🏛️ 7. معايير متقدمة لنظام الـ ERP (Advanced ERP Standards)
+## 🛡️ 6. UX & Interaction Standards [STRICT MANDATORY]
 
-يجب الالتزام بالمعايير التالية لضمان ملاءمة النظام لمتطلبات المؤسسات الكبرى (Enterprise Grade):
+### ✅ 6.1 Validation & Feedback
+- **Form Validation**: No form submission without reactive validation. Show clear red error messages under invalid fields.
+- **Loading States**: All action buttons (Save, Delete, Edit) **MUST** implement the `:loading` state.
+- **Toasts**: Always show a success/failure toast after interactive operations.
 
-### 🛡️ 1. نظام الصلاحيات الدقيق (RBAC)
-- التحكم في الصلاحيات يكون على مستوى **العملية (Action)** وليس فقط الدور.
-- **UI Masking**: استخدام Custom Directive `v-can="'permission-name'"` لإخفاء العناصر من الـ DOM تماماً إذا لم يملك المستخدم الصلاحية.
+### ⌨️ 6.2 Advanced Interaction
+- **Keyboard-First**: Support `F9` (Save), `F2` (Search), `Enter` (Navigation), `Esc` (Close).
+- **Search & Filtering**: Use Advanced Selects with filters and Global Search in the header.
+- **Universal Loading**: Use Progress Bars or Overlays during page transitions and heavy data fetching.
 
-### 📝 2. سجل العمليات (Audit Logs)
-- كل عملية حساسة (إضافة، تعديل، حذف) يجب أن تسجل في جدول مستقل.
-- يجب توفير واجهة لعرض "تاريخ العمليات" (Activity History) داخل صفحات التفاصيل.
+### 📱 6.3 Mobile & PWA
+- **Responsive Layout**: All tables/cards must adapt to mobile.
+- **Touch-Friendly**: Buttons and menus must be large enough for touch.
+- **PWA Capabilities**: Maintain splash screens, icons, and offline readiness.
 
-### 🔢 3. معالجة الأرقام العشرية (Precision Management)
-- **ممنوع** استخدام الحسابات التقليدية في JavaScript للعمليات المالية.
-- يجب استخدام مكتبة **Big.js** لضمان دقة الكسور وتجنب أخطاء Floating Point.
-- توحيد عدد الخانات العشرية (Rounding) في النظام بالكامل (غالباً خانتين).
+---
 
-### 📶 4. وضع الأوفلاين والمزامنة (Offline & Persistence)
-- الاعتماد على **Dexie.js** لتخزين البيانات الأساسية محلياً.
-- السماح بإجراء العمليات (مثل البيع) في حالة انقطاع الإنترنت، مع مزامنة البيانات تلقائياً عند عودة الاتصال (Background Sync).
+## 🏛️ 7. Advanced ERP Enterprise Standards
 
-### 🔔 5. التنبيهات اللحظية (Real-time Notifications)
-- استخدام **WebSockets** (مثل Laravel Echo/Reverb) لتمرير التنبيهات فوراً للمدير (نقص مخزون، تحصيل شيكات) بدون تحديث الصفحة.
+1.  **RBAC (Permissions)**: Use `v-can="'permission-name'"` to mask UI elements based on user rights.
+2.  **Audit Logs**: Record sensitive operations (Add/Edit/Delete) in dedicated tables/history views.
+3.  **Precision Math**: Use `Big.js` for all financial logic. Rounding must be unified system-wide.
+4.  **Offline Persistence**: Use Dexie.js for local data and Background Sync when connectivity returns.
+5.  **Printing Engine**: Professional CSS `@media print` templates for invoices and reports.
+6.  **Branch Switching**: Header-based branch selector that affects all visible data automatically.
 
-### 🖨️ 6. محرك الطباعة (Printing Engine)
-- بناء Template Engine مرن يسمح بتخصيص شكل الفاتورة (اللوجو، الهيدر، الفوتر).
-- استخدام CSS `@media print` لضمان خروج المطبوعات بشكل احترافي يحافظ على الهوية البصرية.
+---
 
-### ⌨️ 7. التفاعل السريع (Keyboard-First UI)
-- نظام الـ ERP يعتمد على سرعة مدخلي البيانات.
-- يجب دعم اختصارات الكيبورد بشكل كامل:
-    - `F9`: حفظ (Save/Post).
-    - `F2`: بحث (Search).
-    - `Enter`: التنقل بين الحقول.
-    - `Esc`: إغلاق النوافذ (Close/Cancel).
+## 🗺️ 8. Build Roadmap (4-Week MVP)
 
-### ⏳ 8. حالات التحميل الشاملة (Universal Loading States)
-- **Buttons**: أي زرار يقوم بعملية (حفظ، حذف، تعديل، أو طلب بيانات) **يجب** أن يحتوي على خاصية `:loading`.
-- **Page Transitions**: يجب إظهار مؤشر تحميل (Progress Bar أو Overlay) عند التنقل بين الصفحات لضمان عدم شعور المستخدم بتجمد النظام.
-- **Feedback**: لا يُترك المستخدم أبداً بدون استجابة بصرية عند الضغط على أي عنصر تفاعلي.
+### الأسبوع 1: الهيكل والمصادقة الوهمية
+- الـ Layouts (Auth, App, POS) و Fake Auth مع Router Guards.
 
-### 📏 10. التباعد والترجمه (Spacing & i18n)
-- **Interactive Spacing**: يجب ترك مسافة (Padding/Gap) كافية بين الأزرار، الـ Selects، والـ Dropdowns (على الأقل `gap-3` أو `gap-4`). لا تترك العناصر ملتصقة أبداً.
-- **Strict Translation**: يُمنع منعاً باتاً كتابة أي نصوص ثابتة (Hardcoded Strings). يجب استخدام `{{ t('key') }}` لجميع النصوص بدون استثناء.
-- **Audit Requirement**: عند تعديل أي ملف، يجب التأكد من مطابقة الملف لكافة القواعد (RBAC, Mobile, Spacing, Translation).
+### الأسبوع 2: الداتا بيز المحلية والمخزون
+- Dexie.js Setup وشاشات المخزون مع ميزة توليد البيانات العشوائية.
 
-### 📱 9. واجهة متوافقة مع الجوال (PWA & Mobile Ready)
-- **Responsive Layout**: يجب أن تكون جميع الجداول والبطاقات متوافقة مع شاشات الهاتف.
-- **Touch-Friendly**: الأزرار والقوائم يجب أن تكون كبيرة كفاية للمس.
-- **PWA Capabilities**: تهيئة النظام ليعمل كتطبيق مستقل عند تثبيته على الهاتف (Splash screen, Icons).
+### الأسبوع 3: وحش النظام — شاشة الـ POS
+- سلة المشتريات (Pinia)، Barcode Logic، ونافذة الطباعة الوهمية.
 
-### 🔍 10. البحث المتقدم والفلترة (Advanced Selection)
-- **Advanced Select**: استخدام مكونات `MultiSelect` أو `Dropdown` مع خاصية البحث (`filter`) والفرز.
-- **Global Search**: توفير شريط بحث سريع في الهيدر للوصول السريع للمنتجات أو الفواتير.
+### الأسبوع 4: لوحة التحكم والتقارير
+- إحصائيات الأرباح، الرسوم البيانية (Charts)، وسجل الفواتير.
 
-### 🏢 11. نظام الفروع المتعددة (Branch Switching)
-- يجب توفير سليكت (Select) في الهيدر يسمح بتبديل "الفرع النشط".
-- جميع البيانات (المخزن، المبيعات) يجب أن تتأثر تلقائياً بالفرع المختار.
+---
+
+## 🧪 9. Quality Assurance (Testing Strategy)
+
+- **Tool**: Vitest.
+- **Business Logic**: 100% test coverage for calculations and state updates (Composables/Stores).
+- **TDD Approach**: Write tests before logic for critical financial functions.
+- **Mocking**: Mock all API calls to ensure test independence.
