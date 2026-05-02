@@ -1,4 +1,9 @@
 <script setup>
+/**
+ * @file POS.vue
+ * @description Smart component for the Point of Sale system. 
+ * Follows ERP standards: Big.js (via store), Modular i18n, Base Components, Keyboard-First.
+ */
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useCartStore } from '../../stores/cart'
 import { useRouter } from 'vue-router'
@@ -7,8 +12,9 @@ import { useUIStore } from '../../stores/ui'
 import { useToast } from 'primevue/usetoast'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
-import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
+import BaseText from '../../components/base/BaseText.vue'
+import BaseTable from '../../components/base/BaseTable.vue'
 import { ShoppingCart, ScanLine, Trash2, CreditCard, ArrowLeft, Sun, Moon, Languages } from 'lucide-vue-next'
 import { useKeyboardShortcuts } from '../../utils/keyboard'
 
@@ -28,9 +34,9 @@ const handleScan = async () => {
   try {
     await cartStore.addItemBySerial(serialInput.value)
     serialInput.value = ''
-    toast.add({ severity: 'success', summary: t('pos'), detail: t('loading'), life: 1000 })
+    toast.add({ severity: 'success', summary: t('common.pos'), detail: t('common.loading'), life: 1000 })
   } catch (err) {
-    toast.add({ severity: 'error', summary: t('error'), detail: err.message, life: 3000 })
+    toast.add({ severity: 'error', summary: t('common.error'), detail: err.message, life: 3000 })
   }
 }
 
@@ -40,7 +46,7 @@ const handlePayment = async () => {
   // Simulate API call
   setTimeout(() => {
     isProcessing.value = false
-    toast.add({ severity: 'success', summary: t('success'), detail: t('pos_success'), life: 3000 })
+    toast.add({ severity: 'success', summary: t('common.success'), detail: t('pos.pos_success'), life: 3000 })
     cartStore.clearCart()
   }, 2000)
 }
@@ -75,10 +81,10 @@ onUnmounted(() => {
       <div class="flex items-center gap-6">
         <Button @click="router.push('/')" text class="!text-slate-400 hover:!bg-white/5 !px-4 !py-2 !rounded-xl">
           <ArrowLeft class="w-5 h-5" :class="uiStore.isRTL ? 'rotate-180' : ''" />
-          <span class="mx-2 font-bold">{{ t('dashboard') }}</span>
+          <BaseText weight="bold" class="mx-2 !text-slate-400">{{ t('common.dashboard') }}</BaseText>
         </Button>
         <div class="h-8 w-[1px]" :class="uiStore.isDark ? 'bg-white/10' : 'bg-slate-200'"></div>
-        <h1 class="text-2xl font-black text-gradient">{{ t('pos') }}</h1>
+        <BaseText type="h1" class="text-gradient">{{ t('common.pos') }}</BaseText>
       </div>
       
       <div class="flex items-center gap-4">
@@ -88,14 +94,14 @@ onUnmounted(() => {
           <Moon v-else class="w-5 h-5" />
         </Button>
         <Button @click="toggleLocale" text rounded class="!text-slate-400 font-bold uppercase">
-          {{ locale === 'ar' ? 'EN' : 'عربي' }}
+          <BaseText weight="black" size="text-xs" class="!text-slate-400">{{ locale === 'ar' ? 'EN' : 'عربي' }}</BaseText>
         </Button>
 
         <div class="h-8 w-[1px] mx-2" :class="uiStore.isDark ? 'bg-white/10' : 'bg-slate-200'"></div>
 
         <div class="text-right hidden sm:block">
-          <p class="text-sm font-bold" :class="uiStore.isDark ? 'text-white' : 'text-slate-900'">{{ t('cashier') }} #01</p>
-          <p class="text-xs text-emerald-400 font-bold uppercase tracking-widest">{{ t('active_session') }}</p>
+          <BaseText type="body" weight="bold">{{ t('pos.cashier') }} #01</BaseText>
+          <BaseText size="text-[10px]" weight="bold" color="emerald">{{ t('pos.active_session') }}</BaseText>
         </div>
         <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
           <ShoppingCart class="w-6 h-6 text-emerald-400" />
@@ -114,39 +120,37 @@ onUnmounted(() => {
             ref="inputRef"
             v-model="serialInput" 
             @keyup.enter="handleScan"
-            :placeholder="t('scan_placeholder')" 
+            :placeholder="t('pos.scan_placeholder')" 
             class="w-full !pl-16 !p-6 !text-2xl !bg-white/5 !border-white/10 !rounded-3xl focus:!border-primary-500/50 shadow-2xl relative z-10 transition-all"
             :class="uiStore.isDark ? '!text-white !bg-white/5' : '!text-slate-900 !bg-white !border-slate-200'"
           />
         </div>
 
         <!-- Cart Table -->
-        <div class="flex-1 glass rounded-3xl overflow-hidden border flex flex-col shadow-inner" :class="uiStore.isDark ? 'border-white/5' : 'border-slate-200'">
-          <DataTable 
+        <div class="flex-1 overflow-hidden">
+          <BaseTable 
             :value="cartStore.items" 
-            scrollable 
-            scrollHeight="flex"
-            class="!bg-transparent"
-            :pt="{
-              table: { class: 'w-full text-left border-collapse' },
-              thead: { class: uiStore.isDark ? 'bg-white/5 sticky top-0 z-10' : 'bg-slate-50 sticky top-0 z-10' },
-              column: {
-                headerCell: { class: '!bg-transparent !text-slate-400 !font-bold !p-5 !border-b !border-white/10 uppercase text-xs' },
-                bodyCell: { class: '!p-5 !border-b !border-white/5' }
-              }
-            }"
+            :emptyMessage="t('pos.no_products')"
+            class="h-full"
           >
-            <template #empty>
-              <div class="flex flex-col items-center justify-center py-32 text-slate-500">
-                <ShoppingCart class="w-20 h-20 mb-6 opacity-10" />
-                <p class="text-xl font-bold opacity-30 italic">{{ t('no_products') }}</p>
-              </div>
-            </template>
-            <Column field="name" :header="t('add_product')"></Column>
-            <Column field="serial_number" :header="t('serial')"></Column>
-            <Column field="price" :header="t('estimated_value')">
+            <Column field="name" :header="t('inventory.add_product')">
+               <template #body="slotProps">
+                 <BaseText weight="bold">{{ slotProps.data.name }}</BaseText>
+               </template>
+            </Column>
+            <Column field="serial_number" :header="t('inventory.sku')">
+               <template #body="slotProps">
+                 <BaseText type="label" size="text-xs">{{ slotProps.data.serial_number }}</BaseText>
+               </template>
+            </Column>
+            <Column field="price" :header="t('pos.price')">
               <template #body="slotProps">
-                <span class="font-black text-lg" :class="uiStore.isDark ? 'text-white' : 'text-slate-900'">{{ slotProps.data.price }} <small class="text-[10px] text-slate-500">{{ t('egp') }}</small></span>
+                <div class="flex items-baseline gap-1">
+                  <BaseText type="h3" size="text-lg">
+                    {{ slotProps.data.price }} 
+                  </BaseText>
+                  <BaseText type="label" size="text-[10px]">{{ t('common.egp') }}</BaseText>
+                </div>
               </template>
             </Column>
             <Column class="w-20">
@@ -156,11 +160,30 @@ onUnmounted(() => {
                   text rounded severity="danger" 
                   class="hover:!bg-red-500/10 !p-3"
                 >
-                  <Trash2 class="w-5 h-5" />
+                  <Trash2 class="w-5 h-5 text-red-500" />
                 </Button>
               </template>
             </Column>
-          </DataTable>
+
+            <template #mobile-card="{ data: item }">
+               <div class="flex justify-between items-start">
+                  <div>
+                    <BaseText type="body" weight="black">{{ item.name }}</BaseText>
+                    <BaseText type="label" size="text-[10px]">{{ item.serial_number }}</BaseText>
+                  </div>
+                  <Button @click="cartStore.removeItem(item.serial_number)" text rounded severity="danger">
+                    <Trash2 class="w-4 h-4" />
+                  </Button>
+               </div>
+               <div class="flex justify-between items-center mt-2">
+                  <BaseText type="label">{{ t('pos.price') }}</BaseText>
+                  <div class="flex items-baseline gap-1">
+                    <BaseText type="h3" color="primary">{{ item.price }}</BaseText>
+                    <BaseText type="label" size="text-[10px]">{{ t('common.egp') }}</BaseText>
+                  </div>
+               </div>
+            </template>
+          </BaseTable>
         </div>
       </div>
 
@@ -168,23 +191,29 @@ onUnmounted(() => {
       <aside class="w-[420px] glass-dark p-10 flex flex-col shadow-2xl relative z-20 border-white/5" :class="[uiStore.isRTL ? 'border-r' : 'border-l', uiStore.isDark ? 'bg-slate-900/50' : 'bg-white']">
         <div class="flex items-center gap-3 mb-10">
            <div class="w-2 h-8 bg-primary-500 rounded-full"></div>
-           <h2 class="text-3xl font-black" :class="uiStore.isDark ? 'text-white' : 'text-slate-900'">{{ t('invoice') }}</h2>
+           <BaseText type="h1">{{ t('pos.invoice') }}</BaseText>
         </div>
         
         <div class="space-y-6 flex-1">
-          <div class="flex justify-between items-center text-slate-400">
-            <span class="font-bold text-lg">{{ t('subtotal') }}</span>
-            <span class="font-black text-xl" :class="uiStore.isDark ? 'text-white' : 'text-slate-900'">{{ cartStore.subtotal }} <small class="text-[10px]">{{ t('egp') }}</small></span>
+          <div class="flex justify-between items-center">
+            <BaseText type="body" weight="bold" size="text-lg">{{ t('pos.subtotal') }}</BaseText>
+            <div class="flex items-baseline gap-1">
+              <BaseText type="h3">{{ cartStore.subtotal }}</BaseText>
+              <BaseText type="label" size="text-[10px]">{{ t('common.egp') }}</BaseText>
+            </div>
           </div>
-          <div class="flex justify-between items-center text-slate-400">
-            <span class="font-bold text-lg">{{ t('vat') }}</span>
-            <span class="font-black text-xl" :class="uiStore.isDark ? 'text-white' : 'text-slate-900'">{{ cartStore.tax.toFixed(2) }} <small class="text-[10px]">{{ t('egp') }}</small></span>
+          <div class="flex justify-between items-center">
+            <BaseText type="body" weight="bold" size="text-lg">{{ t('pos.vat') }}</BaseText>
+            <div class="flex items-baseline gap-1">
+              <BaseText type="h3">{{ cartStore.tax.toFixed(2) }}</BaseText>
+              <BaseText type="label" size="text-[10px]">{{ t('common.egp') }}</BaseText>
+            </div>
           </div>
           <div class="pt-8 border-t flex flex-col gap-2" :class="uiStore.isDark ? 'border-white/10' : 'border-slate-100'">
-            <span class="text-slate-500 font-bold uppercase tracking-widest text-xs">{{ t('total_due') }}</span>
+            <BaseText type="label">{{ t('pos.total_due') }}</BaseText>
             <div class="flex justify-between items-end">
-                <span class="text-5xl font-black text-primary-400 drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]">{{ cartStore.total.toFixed(0) }}</span>
-                <span class="text-2xl font-black text-slate-500 mb-1 ml-2">{{ t('egp') }}</span>
+                <BaseText type="h1" color="primary" size="text-5xl" class="drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]">{{ cartStore.total.toFixed(0) }}</BaseText>
+                <BaseText type="h3" size="text-2xl" class="mb-1 ml-2">{{ t('common.egp') }}</BaseText>
             </div>
           </div>
         </div>
@@ -198,7 +227,7 @@ onUnmounted(() => {
             class="w-full !bg-primary-500 hover:!bg-primary-600 !border-none !p-6 !rounded-3xl !font-black !text-white !text-2xl shadow-2xl shadow-primary-500/20 transition-all transform active:scale-95 flex items-center justify-center gap-4 disabled:!opacity-30"
           >
             <CreditCard class="w-8 h-8" />
-            <span>{{ t('pay_now') }}</span>
+            <BaseText weight="black" size="text-2xl" class="!text-white">{{ t('pos.pay_now') }}</BaseText>
           </Button>
           
           <Button 
@@ -206,7 +235,7 @@ onUnmounted(() => {
             text
             class="w-full !text-slate-500 hover:!text-red-400 !font-bold !py-4"
           >
-            {{ t('cancel_transaction') }}
+            <BaseText weight="bold" class="!text-slate-500 hover:!text-red-500">{{ t('pos.cancel_transaction') }}</BaseText>
           </Button>
         </div>
       </aside>
@@ -215,5 +244,5 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-:deep(.p-datatable-header) { background: transparent !important; border: none !important; }
+/* BaseTable already handles internal layout */
 </style>
