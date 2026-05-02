@@ -174,13 +174,23 @@ src/
 
 ## 📱 10. Mobile-First & Touch UX Protocol [STRICT]
 
-### 👆 10.1 Touch-Target Excellence (Affordance)
-- **The Finger Rule**: Every interactive element (Button, Link, Tab) MUST have a minimum touch target of **44x44px**.
+### 👆 10.1 Touch-Target & Interaction Excellence
+- **The Finger Rule**: Every interactive element (Button, Link, Tab) MUST have a minimum touch target of **48x48px** (upgraded from 44x44px for high-traffic accessibility).
 - **Visual Cues (Clickability)**: Never use "Naked Text" for primary actions.
-    - Interactive elements must be enclosed in a **Container (Box/Card)** with a subtle border or background color (e.g., `bg-gray-50` or `border-slate-200`) to signal to the user: "You can tap here".
-    - Add `active:scale-95` and `transition-all` to all clickable boxes to provide tactile visual feedback.
+    - Interactive elements must be enclosed in a **Container (Box/Card)** with a subtle border or background color to signal clickability.
+    - Add `active:scale-95` and `transition-all` to all clickable elements for tactile feedback.
+- **Icon + Text Rule**: Never use an icon alone for primary actions (Delete, Edit, Save). Always accompany icons with clear text labels (e.g., `🗑️ حذف` instead of just `🗑️`) to ensure clarity for all user levels.
+- **Action Proximity**: Primary actions (Edit/Transfer) should be positioned near the primary data identifier (e.g., next to the Product Name) rather than hidden at the far end of a row.
 
-### 🃏 10.2 Table-to-Card Transformation
+### 🎨 10.2 Semantic & Visual Hierarchy
+- **Semantic Color Rule**: strictly follow the logic:
+    - 🔴 **Danger/Error**: Red (#EF4444) + Alert Icon.
+    - 🟠 **Warning/Low**: Orange (#F97316) + Warning Icon.
+    - 🟢 **Success/Normal**: Green (#22C55E) + Check Icon.
+- **Priority of Data**: Critical business data (Stock Quantities, Total Amounts, Prices) MUST be displayed in **Large, Bold Typography** (minimum 18px) to stand out from secondary information.
+- **Actionable Overviews**: All overview/stat cards (Top dashboard cards) MUST be clickable and act as shortcuts to their respective filtered views.
+
+### 🃏 10.3 Table-to-Card Transformation
 - **No Horizontal Scrolling**: Large DataTables are strictly forbidden on mobile screens (<768px).
 - **Card View Pattern**: Implement a responsive logic that switches `BaseTable` into a **Vertical Card List**.
     - Each row becomes a card.
