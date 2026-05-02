@@ -110,7 +110,7 @@ const prevPage = () => {
 }
 
 const btnClass = (disabled) => [
-  'w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center transition-all border border-white/5',
+  'w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center transition-all border border-white/5',
   disabled ? 'opacity-10 grayscale cursor-not-allowed pointer-events-none' : 'active:scale-95 hover:bg-white/10 hover:border-white/10'
 ]
 </script>
@@ -144,16 +144,16 @@ const btnClass = (disabled) => [
           <tr 
             v-for="(item, idx) in paginatedItems" 
             :key="idx"
-            class="hover:bg-white/5 transition-colors group cursor-pointer"
+            class="hover:bg-white/5 transition-colors group cursor-pointer border-b border-white/5 last:border-0"
           >
             <td 
               v-for="col in columns" 
               :key="col.key"
-              class="px-8 py-6 text-sm font-bold"
+              class="px-8 py-7 text-sm font-bold"
               :class="col.class"
             >
               <slot :name="`cell(${col.key})`" :item="item" :value="item[col.key]">
-                <BaseText size="text-sm" weight="bold">{{ item[col.key] }}</BaseText>
+                <BaseText :weight="col.key === 'name' ? 'black' : 'bold'" :size="col.key === 'name' ? 'text-[15px]' : 'text-sm'">{{ item[col.key] }}</BaseText>
               </slot>
             </td>
           </tr>
@@ -230,7 +230,7 @@ const btnClass = (disabled) => [
                :key="p"
                v-show="totalPages <= 5 || (p >= currentPage - 1 && p <= currentPage + 1) || p === 1 || p === totalPages"
                @click="currentPage = p"
-               class="w-11 h-11 rounded-xl flex items-center justify-center cursor-pointer transition-all font-black text-xs border border-white/5"
+               class="w-12 h-12 rounded-xl flex items-center justify-center cursor-pointer transition-all font-black text-xs border border-white/5"
                :class="p === currentPage ? 'bg-primary-500 text-white shadow-xl shadow-primary-500/30 scale-110 active:scale-95' : 'hover:bg-white/10 opacity-40 hover:opacity-100 active:scale-90'"
              >
                 {{ p }}
