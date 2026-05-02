@@ -22,11 +22,15 @@ import {
   ArrowRightLeft, 
   Edit2, 
   Trash2,
-  X
+  X,
+  CheckCircle2,
+  AlertTriangle,
+  Info
 } from 'lucide-vue-next'
 import BaseText from '../../components/base/BaseText.vue'
 import BaseTable from '../../components/base/BaseTable.vue'
 import BaseSelect from '../../components/base/BaseSelect.vue'
+import BaseModal from '../../components/base/BaseModal.vue'
 import BaseFilterSidebar from '../../components/base/BaseFilterSidebar.vue'
 import AddProductModal from '../../components/AddProductModal.vue'
 import Sidebar from 'primevue/sidebar'
@@ -37,9 +41,12 @@ const inventoryStore = useInventoryStore()
 const authStore = useAuthStore()
 
 const searchQuery = ref('')
-const selectedCategory = ref(null) // Applied filter
-const selectedStatus = ref(null)   // Applied filter
+const selectedCategory = ref(null) 
+const selectedStatus = ref(null)   
 const showAddModal = ref(false)
+const showDeleteModal = ref(false)
+const productToDelete = ref(null)
+const isDeleting = ref(false)
 const showFilterSidebar = ref(false)
 const searchInput = ref(null)
 
@@ -74,6 +81,17 @@ const handleFilterReset = () => {
   searchQuery.value = ''
 }
 
+const handleStatClick = (label) => {
+  if (label === t('inventory.low_stock')) {
+    selectedStatus.value = 'low'
+  } else if (label === t('inventory.out_of_stock')) {
+     selectedStatus.value = 'out'
+  } else {
+    selectedStatus.value = null
+    selectedCategory.value = null
+  }
+}
+
 // Data fetching
 onMounted(async () => {
   await inventoryStore.loadWarehouses()
@@ -106,12 +124,11 @@ watch(() => uiStore.selectedBranchId, async () => {
 })
 
 const columns = [
-  { key: 'name', label: t('inventory.product_name'), class: 'min-w-[250px]', sortable: true },
-  { key: 'sku', label: t('inventory.sku'), class: 'font-mono text-xs opacity-60', sortable: true },
-  { key: 'category', label: t('inventory.category'), sortable: true },
+  { key: 'status', label: t('inventory.stock_status'), class: 'w-40', sortable: true },
+  { key: 'name', label: t('inventory.product_name'), class: 'min-w-[200px]', sortable: true },
+  { key: 'actions', label: t('common.actions'), class: 'w-fit', headerClass: 'text-right', sortable: false },
   { key: 'stock', label: t('inventory.stock_count'), class: 'text-center', sortable: true },
   { key: 'sell_price', label: t('pos.price'), class: 'text-left font-black', headerClass: 'text-left', sortable: true },
-  { key: 'actions', label: t('common.actions'), class: 'text-left', headerClass: 'text-left', sortable: false },
 ]
 
 const filteredProducts = computed(() => {
@@ -145,19 +162,43 @@ const filteredProducts = computed(() => {
 const stats = computed(() => [
   { label: t('inventory.total_items'), value: inventoryStore.totalStockItems, icon: Package, color: 'text-primary-500' },
   { label: t('inventory.estimated_value'), value: inventoryStore.totalEstimatedValue.toLocaleString() + ' ' + t('common.egp'), icon: TrendingUp, color: 'text-emerald-500' },
-  { label: t('inventory.low_stock'), value: inventoryStore.products.filter(p => p.stock <= p.reorder_point).length, icon: AlertCircle, color: 'text-amber-500' }
+  { label: t('inventory.low_stock'), value: inventoryStore.products.filter(p => p.stock > 0 && p.stock <= p.reorder_point).length, icon: AlertTriangle, color: 'text-amber-500' }
 ])
 
+const deleteProduct = (product) => {
+  productToDelete.value = product
+  showDeleteModal.value = true
+}
+
+const handleConfirmDelete = async () => {
+  if (!productToDelete.value) return
+  isDeleting.value = true
+  try {
+    await inventoryStore.deleteProduct(productToDelete.value.id)
+    await inventoryStore.fetchInventory()
+    showDeleteModal.value = false
+    productToDelete.value = null
+  } finally {
+    isDeleting.value = false
+  }
+}
+
 const getStatusColor = (stock, reorder) => {
-  if (stock === 0) return 'text-red-500 bg-red-500/10'
-  if (stock <= reorder) return 'text-amber-500 bg-amber-500/10'
-  return 'text-emerald-500 bg-emerald-500/10'
+  if (stock === 0) return 'text-[#E24B4A] bg-[#FCEBEB] border-[#E24B4A]/20'
+  if (stock <= reorder) return 'text-[#BA7517] bg-[#FAEEDA] border-[#BA7517]/20'
+  return 'text-[#3B6D11] bg-[#EAF3DE] border-[#3B6D11]/20'
 }
 
 const getStatusLabel = (stock, reorder) => {
   if (stock === 0) return t('inventory.out_of_stock')
   if (stock <= reorder) return t('inventory.low_stock')
   return t('inventory.stock')
+}
+
+const getStatusIcon = (stock, reorder) => {
+  if (stock === 0) return AlertCircle
+  if (stock <= reorder) return AlertTriangle
+  return CheckCircle2
 }
 
 const glassClass = computed(() => {
@@ -209,13 +250,16 @@ const glassClass = computed(() => {
 
     <!-- Inventory Overview Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-       <div v-for="stat in stats" :key="stat.label" :class="glassClass" class="p-6 md:p-8 rounded-[2.5rem] flex items-center gap-6 active:scale-[0.98] transition-all cursor-pointer">
-          <div :class="[stat.color, 'w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/5 shadow-inner']">
-             <component :is="stat.icon" class="w-7 h-7" />
+       <div v-for="stat in stats" :key="stat.label" @click="handleStatClick(stat.label)" :class="glassClass" class="p-6 md:p-8 rounded-[2.5rem] flex flex-col items-center justify-center gap-4 active:scale-95 transition-all cursor-pointer border border-white/5 hover:border-white/20 group">
+          <div :class="[stat.color, 'w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/5 shadow-inner group-hover:scale-110 transition-transform']">
+             <component :is="stat.icon" class="w-8 h-8" />
           </div>
-          <div>
+          <div class="text-center">
              <BaseText type="muted" size="text-[10px]" class="uppercase font-black opacity-40 mb-1 tracking-widest">{{ stat.label }}</BaseText>
-             <BaseText weight="black" size="text-2xl">{{ stat.value }}</BaseText>
+             <BaseText weight="black" size="text-3xl" :class="stat.color" class="block">{{ stat.value }}</BaseText>
+             <BaseText size="text-[10px]" class="mt-2 text-primary-500 font-black uppercase opacity-0 group-hover:opacity-100 transition-opacity">
+               {{ t('common.click_to_view') }} →
+             </BaseText>
           </div>
        </div>
     </div>
@@ -231,8 +275,8 @@ const glassClass = computed(() => {
           ref="searchInput"
           v-model="searchQuery"
           type="text" 
-          :placeholder="t('common.search_placeholder')"
-          class="w-full bg-white/5 border border-white/10 rounded-[2rem] py-6 pr-16 pl-8 text-base focus:outline-none focus:border-primary-500/50 focus:ring-8 focus:ring-primary-500/5 transition-all font-bold placeholder:opacity-30"
+          :placeholder="'🔍 ' + (t('inventory.search_placeholder_detailed') || 'ابحث باسم المنتج أو الكود...')"
+          class="w-full h-12 bg-white/5 border border-white/10 rounded-2xl py-6 pr-16 pl-8 text-[15px] focus:outline-none focus:border-primary-500/50 focus:ring-8 focus:ring-primary-500/5 transition-all font-bold placeholder:opacity-40"
         />
       </div>
 
@@ -251,6 +295,13 @@ const glassClass = computed(() => {
 
     <!-- Main Table -->
     <BaseTable :columns="columns" :items="filteredProducts" :loading="inventoryStore.loading">
+      <template #cell(status)="{ item }">
+        <div :class="[getStatusColor(item.stock, item.reorder_point), 'flex items-center gap-2 px-4 py-2 rounded-xl border font-black uppercase text-xs w-fit']">
+           <component :is="getStatusIcon(item.stock, item.reorder_point)" class="w-4 h-4" />
+           <span>{{ getStatusLabel(item.stock, item.reorder_point) }}</span>
+        </div>
+      </template>
+
       <template #cell(name)="{ item }">
         <div class="flex items-center gap-5">
            <div class="w-14 h-14 rounded-2xl bg-primary-500/10 flex items-center justify-center text-primary-500 border border-primary-500/10 shadow-inner overflow-hidden relative">
@@ -259,34 +310,55 @@ const glassClass = computed(() => {
            </div>
            <div>
               <BaseText weight="black" size="text-base" class="block">{{ item.name }}</BaseText>
-              <div class="flex items-center gap-2 mt-2">
-                 <BaseText type="muted" size="text-[10px]" class="font-black uppercase tracking-tighter">{{ item.brand }}</BaseText>
-                 <div :class="[getStatusColor(item.stock, item.reorder_point), 'px-2 py-0.5 rounded-lg text-[9px] font-black uppercase']">
-                    <BaseText size="text-[9px]" weight="black">{{ getStatusLabel(item.stock, item.reorder_point) }}</BaseText>
-                 </div>
-              </div>
+              <BaseText type="muted" size="text-[10px]" class="font-black uppercase tracking-tighter mt-1">{{ item.brand }}</BaseText>
            </div>
+        </div>
+      </template>
+
+      <template #cell(stock)="{ item }">
+        <div class="flex flex-col items-center">
+          <BaseText weight="black" size="text-2xl" :class="item.stock <= item.reorder_point ? 'text-amber-500' : ''">
+            {{ item.stock }}
+          </BaseText>
+          <BaseText size="text-[10px]" type="muted" class="opacity-30 font-bold uppercase tracking-widest">{{ t('inventory.stock_count') }}</BaseText>
         </div>
       </template>
 
       <template #cell(sell_price)="{ value }">
          <div class="flex flex-col items-end">
-            <BaseText weight="black" size="text-base">{{ value.toLocaleString() }} {{ t('common.egp') }}</BaseText>
-            <BaseText size="text-[10px]" type="muted" class="opacity-30 font-bold uppercase">{{ t('pos.price') }}</BaseText>
+            <BaseText weight="black" size="text-2xl">{{ value.toLocaleString() }} {{ t('common.egp') }}</BaseText>
+            <BaseText size="text-[10px]" type="muted" class="opacity-30 font-bold uppercase tracking-widest">{{ t('pos.price') }}</BaseText>
          </div>
       </template>
 
       <template #cell(actions)="{ item }">
-         <div class="flex items-center justify-end gap-2">
-            <button v-if="authStore.hasPermission('edit_inventory')" class="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all border border-white/5 text-primary-500">
-               <Edit2 class="w-5 h-5" />
-            </button>
-            <button v-if="authStore.hasPermission('manage_warehouses')" class="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all border border-white/5 text-emerald-500">
-               <ArrowRightLeft class="w-5 h-5" />
-            </button>
-            <button v-if="authStore.hasPermission('delete_inventory')" class="w-11 h-11 rounded-xl bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 active:scale-95 transition-all border border-red-500/10 text-red-500">
-               <Trash2 class="w-5 h-5" />
-            </button>
+         <div class="flex items-center gap-6">
+            <!-- Primary Actions Group -->
+            <div class="flex items-center gap-3">
+               <button v-if="authStore.hasPermission('edit_inventory')" class="h-12 px-5 rounded-2xl bg-primary-500/5 hover:bg-primary-500/10 active:scale-95 transition-all border border-primary-500/10 text-primary-500 flex items-center gap-2">
+                  <Edit2 class="w-5 h-5" />
+                  <BaseText size="text-xs" weight="black" class="uppercase">{{ t('common.edit') }}</BaseText>
+               </button>
+               <button v-if="authStore.hasPermission('manage_warehouses')" class="h-12 px-5 rounded-2xl bg-emerald-500/5 hover:bg-emerald-500/10 active:scale-95 transition-all border border-emerald-500/10 text-emerald-500 flex items-center gap-2">
+                  <ArrowRightLeft class="w-5 h-5" />
+                  <BaseText size="text-xs" weight="black" class="uppercase">{{ t('inventory.transfer') }}</BaseText>
+               </button>
+            </div>
+            
+            <!-- Safe Separator -->
+            <div class="h-8 w-px bg-white/10 mx-2"></div>
+            
+            <!-- Destructive Action -->
+            <div class="pl-2">
+               <button 
+                  v-if="authStore.hasPermission('delete_inventory')" 
+                  @click="deleteProduct(item)"
+                  class="h-12 px-4 rounded-2xl bg-red-500/5 hover:bg-red-500/10 active:scale-95 transition-all border border-red-500/10 text-red-500 flex items-center gap-2"
+               >
+                  <Trash2 class="w-5 h-5" />
+                  <BaseText size="text-xs" weight="black" class="uppercase">{{ t('common.delete') }}</BaseText>
+               </button>
+            </div>
          </div>
       </template>
 
@@ -307,20 +379,26 @@ const glassClass = computed(() => {
       </template>
 
       <template #card-actions="{ item }">
-         <div class="flex items-center gap-2 w-full">
-            <button v-if="authStore.hasPermission('edit_inventory')" class="flex-1 h-12 bg-white/5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 border border-white/5">
-               <Edit2 class="w-4 h-4 opacity-40 text-primary-500" />
+         <div class="flex flex-wrap items-center gap-2 w-full">
+            <button v-if="authStore.hasPermission('edit_inventory')" class="flex-1 min-w-[100px] h-12 bg-white/5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 border border-white/5 text-primary-500">
+               <Edit2 class="w-4 h-4" />
                <BaseText size="text-[10px]" weight="black" class="uppercase">{{ t('common.edit') }}</BaseText>
             </button>
-            <button v-if="authStore.hasPermission('manage_warehouses')" class="flex-1 h-12 bg-white/5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 border border-white/5">
-               <ArrowRightLeft class="w-4 h-4 opacity-40 text-emerald-500" />
-               <BaseText size="text-[10px]" weight="black" class="uppercase">{{ t('inventory.stock_transfer') }}</BaseText>
+            <button v-if="authStore.hasPermission('manage_warehouses')" class="flex-1 min-w-[100px] h-12 bg-white/5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 border border-white/5 text-emerald-500">
+               <ArrowRightLeft class="w-4 h-4" />
+               <BaseText size="text-[10px]" weight="black" class="uppercase">{{ t('inventory.transfer') }}</BaseText>
             </button>
-            <button v-if="authStore.hasPermission('delete_inventory')" class="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl flex items-center justify-center active:scale-95 transition-all border border-red-500/10">
-               <Trash2 class="w-5 h-5" />
+            <button 
+               v-if="authStore.hasPermission('delete_inventory')" 
+               @click="deleteProduct(item)"
+               class="flex-1 min-w-[100px] h-12 bg-red-500/10 text-red-500 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all border border-red-500/10"
+            >
+               <Trash2 class="w-4 h-4" />
+               <BaseText size="text-[10px]" weight="black" class="uppercase">{{ t('common.delete') }}</BaseText>
             </button>
-            <button v-if="authStore.hasPermission('view_reports')" class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center active:scale-95 transition-all border border-white/5">
-               <History class="w-5 h-5 opacity-40" />
+            <button v-if="authStore.hasPermission('view_reports')" class="flex-1 min-w-[100px] h-12 bg-white/5 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all border border-white/5 opacity-60">
+               <History class="w-4 h-4" />
+               <BaseText size="text-[10px]" weight="black" class="uppercase">{{ t('common.history') }}</BaseText>
             </button>
          </div>
       </template>
@@ -347,5 +425,47 @@ const glassClass = computed(() => {
     />
 
     <AddProductModal v-model:visible="showAddModal" @saved="inventoryStore.fetchInventory" />
+
+    <!-- Delete Confirmation Modal -->
+    <BaseModal 
+      v-model:visible="showDeleteModal" 
+      :title="t('inventory.confirm_delete_title')"
+      width="max-w-md"
+    >
+      <div class="space-y-6">
+        <div class="flex flex-col items-center text-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
+             <Trash2 class="w-8 h-8" />
+          </div>
+          <div class="space-y-2">
+            <BaseText weight="black" size="text-xl" class="block">
+              {{ t('inventory.confirm_delete_msg', { name: productToDelete?.name }) }}
+            </BaseText>
+            <BaseText type="muted" size="text-sm" class="block">
+              {{ t('inventory.confirm_delete_hint') }}
+            </BaseText>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="flex gap-4 w-full">
+           <button 
+            @click="showDeleteModal = false"
+            class="flex-1 h-14 bg-white/5 hover:bg-white/10 rounded-2xl transition-all font-black uppercase text-xs tracking-widest border border-white/10"
+          >
+            {{ t('common.cancel') }}
+          </button>
+          <button 
+            @click="handleConfirmDelete"
+            :disabled="isDeleting"
+            class="flex-[1.5] h-14 bg-red-600 hover:bg-red-700 text-white rounded-2xl transition-all shadow-xl shadow-red-500/30 flex items-center justify-center gap-2"
+          >
+             <span v-if="isDeleting" class="animate-spin w-5 h-5 border-2 border-white/30 border-t-white rounded-full"></span>
+             <BaseText v-else weight="black" class="text-white uppercase tracking-widest">{{ t('common.confirm_delete_btn') }}</BaseText>
+          </button>
+        </div>
+      </template>
+    </BaseModal>
   </div>
 </template>
