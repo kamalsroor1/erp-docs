@@ -68,13 +68,17 @@ const sendMessage = () => {
         <div 
           v-if="isOpen"
           class="fixed lg:absolute inset-0 lg:inset-auto lg:bottom-24 lg:w-[420px] lg:h-[600px] bg-slate-950 lg:glass-dark lg:rounded-[2.5rem] lg:border lg:border-white/10 lg:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col z-[1001]"
-          :class="uiStore.isRTL ? 'lg:right-0' : 'lg:left-0'"
+          :class="uiStore.isRTL ? 'lg:left-0' : 'lg:right-0'"
         >
           <!-- Header (Responsive) -->
           <div class="p-8 bg-gradient-to-br from-primary-600 via-primary-500 to-indigo-700 text-white relative overflow-hidden shrink-0">
-            <!-- Mobile Back Button -->
-            <button @click="isOpen = false" class="lg:hidden absolute top-8 left-8 text-white/50 hover:text-white">
-               <component :is="uiStore.isRTL ? ArrowRight : ArrowLeft" class="w-6 h-6" />
+            <!-- Universal Close Button -->
+            <button 
+              @click="isOpen = false" 
+              class="absolute top-6 z-20 w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all active:scale-95 border border-white/10"
+              :class="uiStore.isRTL ? 'left-6' : 'right-6'"
+            >
+               <X class="w-5 h-5 text-white" />
             </button>
 
             <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
