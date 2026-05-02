@@ -16,6 +16,7 @@ import {
 } from 'lucide-vue-next'
 import Button from 'primevue/button'
 import ProgressBar from 'primevue/progressbar'
+import BaseText from '../components/base/BaseText.vue'
 
 const router = useRouter()
 const uiStore = useUIStore()
@@ -28,10 +29,10 @@ const branches = ref([
 ])
 
 const menuItems = computed(() => [
-  { name: t('dashboard'), path: '/', icon: LayoutDashboard },
-  { name: t('pos'), path: '/pos', icon: ShoppingCart },
-  { name: t('inventory'), path: '/inventory', icon: Package },
-  { name: t('customers'), path: '/customers', icon: Users },
+  { name: t('common.dashboard'), path: '/', icon: LayoutDashboard },
+  { name: t('common.pos'), path: '/pos', icon: ShoppingCart },
+  { name: t('common.inventory'), path: '/inventory', icon: Package },
+  { name: t('common.customers'), path: '/customers', icon: Users },
 ])
 
 const toggleLocale = () => {
@@ -75,7 +76,7 @@ const logoSrc = computed(() => {
           active-class="bg-primary-500/10 text-primary-500 border border-primary-500/20 !text-primary-600 dark:!text-primary-400"
         >
           <component :is="item.icon" class="w-5 h-5 group-hover:scale-110 transition-transform" />
-          <span class="font-bold">{{ item.name }}</span>
+          <BaseText weight="bold">{{ item.name }}</BaseText>
         </router-link>
       </nav>
       
@@ -87,7 +88,7 @@ const logoSrc = computed(() => {
           :class="uiStore.isDark ? 'text-slate-400 hover:bg-red-500/10 hover:text-red-400' : 'text-slate-500 hover:bg-red-50 hover:text-red-600'"
         >
           <LogOut class="w-5 h-5" />
-          <span class="font-medium">{{ t('logout') }}</span>
+          <BaseText weight="bold" size="text-sm">{{ t('common.logout') }}</BaseText>
         </button>
       </div>
     </aside>
@@ -105,15 +106,15 @@ const logoSrc = computed(() => {
           <Button @click="isSidebarOpen = !isSidebarOpen" text class="!text-slate-400 dark:!text-slate-500">
             <Menu class="w-6 h-6" />
           </Button>
-          <h2 class="text-sm font-medium text-slate-400 hidden md:block">
-            {{ t('platform_version') }}
-          </h2>
+          <BaseText type="muted" size="text-xs" class="hidden md:block">
+            {{ t('common.platform_version') }}
+          </BaseText>
         </div>
         
         <div class="flex items-center gap-3">
           <!-- Branch Switcher -->
           <div class="hidden md:flex items-center gap-2 mr-4">
-             <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">{{ t('branch') }}:</span>
+             <BaseText type="label">{{ t('common.branch') }}:</BaseText>
              <select 
                v-model="uiStore.selectedBranchId" 
                @change="uiStore.setBranch($event.target.value)"
@@ -132,15 +133,15 @@ const logoSrc = computed(() => {
           <!-- Language Toggle -->
           <Button @click="toggleLocale" text rounded class="!text-slate-400 dark:!text-slate-500 hover:!bg-white/5 flex items-center gap-2">
             <Languages class="w-5 h-5" />
-            <span class="text-xs font-bold uppercase">{{ locale === 'ar' ? 'EN' : 'عربي' }}</span>
+            <BaseText weight="black" size="text-xs" class="uppercase">{{ locale === 'ar' ? 'EN' : 'عربي' }}</BaseText>
           </Button>
 
           <div class="h-8 w-[1px] bg-slate-200 dark:bg-white/5 mx-2"></div>
 
           <div class="flex items-center gap-4">
             <div class="text-right hidden sm:block">
-              <p class="text-sm font-bold" :class="uiStore.isDark ? 'text-white' : 'text-slate-900'">{{ t('welcome') }}</p>
-              <p class="text-xs text-slate-500">{{ t('admin') }}</p>
+              <BaseText weight="bold" size="text-sm">{{ t('common.welcome') }}</BaseText>
+              <BaseText type="muted" size="text-[10px]">{{ t('common.admin') }}</BaseText>
             </div>
             <div class="w-10 h-10 rounded-full bg-primary-500/10 border border-primary-500/20 flex items-center justify-center overflow-hidden">
               <Users class="w-6 h-6 text-primary-500" />

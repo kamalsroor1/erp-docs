@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useUIStore } from '../../stores/ui'
@@ -7,6 +7,7 @@ import { LogIn, ShieldCheck, Sun, Moon, Languages } from 'lucide-vue-next'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
+import BaseText from '../../components/base/BaseText.vue'
 
 const router = useRouter()
 const { t, locale } = useI18n()
@@ -17,11 +18,39 @@ const email = ref('demo@ebraa.com')
 const password = ref('password')
 const loading = ref(false)
 
+const errors = reactive({
+  email: '',
+  password: ''
+})
+
+const validate = () => {
+  let isValid = true
+  errors.email = ''
+  errors.password = ''
+
+  if (!email.value) {
+    errors.email = t('validation.field_required')
+    isValid = false
+  } else if (!email.value.includes('@')) {
+    errors.email = t('validation.invalid_email')
+    isValid = false
+  }
+
+  if (!password.value) {
+    errors.password = t('validation.field_required')
+    isValid = false
+  }
+
+  return isValid
+}
+
 const handleLogin = () => {
+  if (!validate()) return
+
   loading.value = true
   setTimeout(() => {
     localStorage.setItem('auth_token', 'fake_token_for_demo')
-    toast.add({ severity: 'success', summary: t('login'), detail: t('welcome'), life: 3000 })
+    toast.add({ severity: 'success', summary: t('auth.login'), detail: t('common.welcome'), life: 3000 })
     router.push('/')
     loading.value = false
   }, 1000)
@@ -51,36 +80,44 @@ const toggleLocale = () => {
       <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary-500/10 border border-primary-500/20 mb-6 shadow-inner">
         <ShieldCheck class="w-10 h-10 text-primary-400" />
       </div>
-      <h1 class="text-4xl font-bold text-white mb-2 tracking-tight">Ebraa ERP</h1>
-      <p class="text-slate-400 font-medium">{{ t('demo_notice') }}</p>
+      <BaseText type="h1" class="!text-white mb-2">Ebraa ERP</BaseText>
+      <BaseText type="muted" class="!text-slate-400">{{ t('auth.demo_notice') }}</BaseText>
     </div>
 
     <form @submit.prevent="handleLogin" class="space-y-6">
       <div class="space-y-2">
-        <label class="text-sm font-semibold text-slate-400 px-1">{{ t('email') }}</label>
+        <BaseText type="label" class="px-1">{{ t('auth.email') }}</BaseText>
         <InputText 
           v-model="email" 
           type="email" 
-          class="w-full !bg-white/5 !border-white/10 !text-white !p-4 !rounded-2xl focus:!border-primary-500/50 transition-all" 
+          :class="[
+            'w-full !bg-white/5 !text-white !p-4 !rounded-2xl transition-all',
+            errors.email ? '!border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]' : '!border-white/10 focus:!border-primary-500/50'
+          ]"
         />
+        <BaseText v-if="errors.email" color="danger" size="text-[10px]" weight="bold" class="px-2 animate-pulse">{{ errors.email }}</BaseText>
       </div>
 
       <div class="space-y-2">
-        <label class="text-sm font-semibold text-slate-400 px-1">{{ t('password') }}</label>
+        <BaseText type="label" class="px-1">{{ t('auth.password') }}</BaseText>
         <InputText 
           v-model="password" 
           type="password" 
-          class="w-full !bg-white/5 !border-white/10 !text-white !p-4 !rounded-2xl focus:!border-primary-500/50 transition-all" 
+          :class="[
+            'w-full !bg-white/5 !text-white !p-4 !rounded-2xl transition-all',
+            errors.password ? '!border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]' : '!border-white/10 focus:!border-primary-500/50'
+          ]"
         />
+        <BaseText v-if="errors.password" color="danger" size="text-[10px]" weight="bold" class="px-2 animate-pulse">{{ errors.password }}</BaseText>
       </div>
 
       <Button 
         type="submit" 
         :loading="loading"
-        class="w-full !bg-primary-500 hover:!bg-primary-600 !border-none !p-5 !rounded-2xl !font-black !text-white !text-lg shadow-xl shadow-primary-500/20 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3"
+        class="w-full !bg-primary-500 hover:!bg-primary-600 !border-none !p-5 !rounded-2xl shadow-xl shadow-primary-500/20 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3"
       >
-        <LogIn v-if="!loading" class="w-6 h-6" />
-        <span>{{ t('login') }}</span>
+        <LogIn v-if="!loading" class="w-6 h-6 text-white" />
+        <BaseText weight="black" size="text-lg" class="!text-white">{{ t('auth.login') }}</BaseText>
       </Button>
     </form>
 
