@@ -46,6 +46,8 @@ const messages = {
       employees: 'Employees',
       stock_transfer: 'Stock Transfer',
       quick_search: 'Quick Search (F2)',
+      confirm_delete_btn: 'Confirm Delete',
+      click_to_view: 'Click to view',
     },
     validation: {
       field_required: 'This field is required',
@@ -117,6 +119,11 @@ const messages = {
       stock_status: 'Stock Status',
       all_categories: 'All Categories',
       all_statuses: 'All Statuses',
+      search_placeholder_detailed: 'Search by name, SKU or category...',
+      transfer: 'Transfer',
+      confirm_delete_title: 'Confirm Delete',
+      confirm_delete_msg: 'Are you sure you want to delete "{name}"?',
+      confirm_delete_hint: 'This action cannot be undone and will permanently remove the product data.',
     },
     pos: {
       new_sale: 'New Sale',
@@ -214,6 +221,8 @@ const messages = {
       employees: 'الموظفين',
       stock_transfer: 'تحويل مخزني',
       quick_search: 'بحث سريع (F2)',
+      confirm_delete_btn: 'نعم، احذف',
+      click_to_view: 'اضغط للعرض',
     },
     validation: {
       field_required: 'هذا الحقل مطلوب',
@@ -285,6 +294,11 @@ const messages = {
       stock_status: 'حالة المخزون',
       all_categories: 'كل التصنيفات',
       all_statuses: 'كل الحالات',
+      search_placeholder_detailed: 'ابحث باسم المنتج، الكود أو التصنيف...',
+      transfer: 'نقل مخزني',
+      confirm_delete_title: 'تأكيد الحذف',
+      confirm_delete_msg: 'هل تريد حذف "{name}"؟',
+      confirm_delete_hint: 'لا يمكن التراجع عن هذا الإجراء، سيتم مسح بيانات المنتج نهائياً.',
     },
     pos: {
       new_sale: 'عملية بيع جديدة',
