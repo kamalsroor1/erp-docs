@@ -1,70 +1,121 @@
 <script setup>
 /**
  * @file BaseTable.vue
- * @description Unified Data Presentation component.
- * Features: Mobile Cards View, Glassmorphism, Dynamic Columns.
+ * @description Smart Responsive Table component with automatic Card Transformation on mobile.
+ * Fixed: Tailwind v4 utility reference issues.
  */
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import { computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useUIStore } from '../../stores/ui'
-import { Package } from 'lucide-vue-next'
+import BaseText from './BaseText.vue'
+import { ChevronRight, MoreVertical } from 'lucide-vue-next'
 
 const props = defineProps({
-  value: Array,
-  loading: Boolean,
-  rows: { type: Number, default: 10 },
-  emptyMessage: String
+  columns: { type: Array, required: true },
+  items: { type: Array, required: true },
+  loading: { type: Boolean, default: false }
 })
 
 const uiStore = useUIStore()
+const isMobile = ref(false)
 
-const ptOptions = {
-  root: { class: 'glass rounded-[2rem] overflow-hidden border border-[var(--border-color)] shadow-2xl bg-[var(--card-bg)]' },
-  table: { class: 'w-full text-left border-collapse' },
-  thead: { class: 'bg-slate-50 dark:bg-white/5' },
-  headerRow: { class: '!border-b !border-[var(--border-color)]' },
-  column: {
-    headerCell: { class: '!bg-transparent !text-[var(--text-muted)] !font-bold !p-6 uppercase text-[10px] tracking-widest' },
-    bodyCell: { class: '!p-6 !border-b !border-[var(--border-color)] !text-[var(--text-main)]' }
-  },
-  paginator: {
-    root: { class: '!bg-slate-50 dark:!bg-white/5 !border-t !border-[var(--border-color)] !p-4' }
-  }
+const updateIsMobile = () => {
+  isMobile.value = window.innerWidth < 768
 }
+
+onMounted(() => {
+  updateIsMobile()
+  window.addEventListener('resize', updateIsMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateIsMobile)
+})
+
+const glassClass = computed(() => {
+  return [
+    'backdrop-blur-xl shadow-2xl border border-white/10',
+    uiStore.isDark ? 'bg-slate-900/40' : 'bg-white/5'
+  ]
+})
 </script>
 
 <template>
-  <div class="base-table-container">
-    <!-- Desktop View -->
-    <DataTable 
-      :value="value" 
-      :loading="loading"
-      paginator 
-      :rows="rows" 
-      class="hidden md:block !bg-transparent"
-      responsiveLayout="scroll"
-      :pt="ptOptions"
-    >
-      <template #empty>
-        <div class="py-32 text-center text-slate-500 italic flex flex-col items-center gap-4">
-          <Package class="w-16 h-16 opacity-10" />
-          <p class="text-xl font-bold opacity-30">{{ emptyMessage || 'No records found' }}</p>
-        </div>
-      </template>
-      <slot />
-    </DataTable>
+  <div class="w-full">
+    <!-- Desktop Table View -->
+    <div v-if="!isMobile" :class="glassClass" class="overflow-hidden rounded-[2rem]">
+      <table class="w-full text-right border-collapse">
+        <thead class="bg-white/5 border-b border-white/10">
+          <tr>
+            <th 
+              v-for="col in columns" 
+              :key="col.key"
+              class="px-8 py-6 text-xs font-black uppercase tracking-widest opacity-40 text-right"
+              :class="col.headerClass"
+            >
+              {{ col.label }}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          <tr 
+            v-for="(item, idx) in items" 
+            :key="idx"
+            class="hover:bg-white/5 transition-colors group cursor-pointer"
+          >
+            <td 
+              v-for="col in columns" 
+              :key="col.key"
+              class="px-8 py-6 text-sm font-bold"
+              :class="col.class"
+            >
+              <slot :name="`cell(${col.key})`" :item="item" :value="item[col.key]">
+                {{ item[col.key] }}
+              </slot>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <!-- Mobile View: Slots can be used here to build custom card layouts -->
-    <div class="md:hidden divide-y divide-[var(--border-color)] glass rounded-[2rem] overflow-hidden border border-[var(--border-color)]">
-      <div v-if="loading" class="p-10 text-center text-[var(--text-muted)] font-bold">
-        {{ $t('common.loading') }}
-      </div>
-      <div v-else-if="!value || value.length === 0" class="p-20 text-center opacity-30 italic font-bold">
-        {{ emptyMessage || 'No records' }}
-      </div>
-      <div v-for="(item, index) in value" :key="index" class="p-6 active:bg-slate-50 dark:active:bg-white/5 transition-colors">
-        <slot name="mobile-card" :data="item" />
+    <!-- Mobile Card View -->
+    <div v-else class="space-y-4">
+      <div 
+        v-for="(item, idx) in items" 
+        :key="idx"
+        :class="glassClass"
+        class="p-6 rounded-[2rem] active:scale-[0.98] transition-all duration-300"
+      >
+        <!-- Card Header -->
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
+          <div class="flex items-center gap-3">
+             <slot name="card-header" :item="item"></slot>
+          </div>
+          <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5">
+             <MoreVertical class="w-5 h-5 opacity-40" />
+          </button>
+        </div>
+
+        <!-- Card Body -->
+        <div class="grid grid-cols-2 gap-y-4 gap-x-2">
+           <div v-for="col in columns.slice(1)" :key="col.key" class="flex flex-col gap-1">
+              <BaseText size="text-[10px]" class="uppercase font-black opacity-30 tracking-tighter">{{ col.label }}</BaseText>
+              <div class="text-sm font-bold truncate">
+                 <slot :name="`cell(${col.key})`" :item="item" :value="item[col.key]">
+                   {{ item[col.key] }}
+                 </slot>
+              </div>
+           </div>
+        </div>
+
+        <!-- Card Footer -->
+        <div class="mt-6 pt-4 border-t border-white/5 flex justify-end">
+           <slot name="card-actions" :item="item">
+              <button class="flex items-center gap-2 text-primary-500 font-black text-xs uppercase tracking-widest">
+                 التفاصيل
+                 <ChevronRight class="w-4 h-4" />
+              </button>
+           </slot>
+        </div>
       </div>
     </div>
   </div>

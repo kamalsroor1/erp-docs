@@ -1,322 +1,252 @@
 <script setup>
 /**
  * @file Inventory.vue
- * @description Smart component for managing inventory. 
- * Follows ERP standards: i18n (Modular), RBAC, Keyboard-First, Base Components.
+ * @description Full-featured Inventory Management with RBAC, Mobile UX Protocol, and Store Integration.
+ * Implements Section 10: Card transformation, Sticky actions, and Finger rule.
  */
-import { onMounted, watch, onUnmounted, computed, ref } from 'vue'
-import { useInventoryStore } from '../../stores/inventory'
-import { useUIStore } from '../../stores/ui'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import AddProductModal from '../../components/AddProductModal.vue'
-import InputText from 'primevue/inputtext'
-import BaseTable from '../../components/base/BaseTable.vue'
-import BaseSelect from '../../components/base/BaseSelect.vue'
-import BaseText from '../../components/base/BaseText.vue'
-import Column from 'primevue/column'
-import Button from 'primevue/button'
+import { useUIStore } from '../../stores/ui'
+import { useInventoryStore } from '../../stores/inventory'
+import { useAuthStore } from '../../stores/auth'
 import { 
   Package, 
-  RefreshCw, 
   Plus, 
-  Truck, 
-  BarChart3, 
   Search, 
-  FileText, 
-  Filter,
-  MoreVertical,
-  History,
+  Filter, 
+  Download, 
+  MoreHorizontal,
+  ArrowUpDown,
   Smartphone,
-  Laptop
+  Laptop,
+  Watch,
+  Headphones,
+  Warehouse,
+  AlertCircle,
+  TrendingUp,
+  History,
+  ArrowRightLeft,
+  Edit2
 } from 'lucide-vue-next'
-import { useKeyboardShortcuts } from '../../utils/keyboard'
-import { db } from '../../database/db'
-import { useToast } from 'primevue/usetoast'
+import BaseText from '../../components/base/BaseText.vue'
+import BaseTable from '../../components/base/BaseTable.vue'
+import AddProductModal from '../../components/AddProductModal.vue'
+import Dropdown from 'primevue/dropdown'
 
 const { t } = useI18n()
-const toast = useToast()
-const inventoryStore = useInventoryStore()
 const uiStore = useUIStore()
+const inventoryStore = useInventoryStore()
+const authStore = useAuthStore()
 
-const showAddModal = ref(false)
-const isSaving = ref(false)
 const searchQuery = ref('')
+const showAddModal = ref(false)
 
-// Filtered products for search
-const filteredProducts = computed(() => {
-  if (!searchQuery.value) return inventoryStore.products
-  const q = searchQuery.value.toLowerCase()
-  return inventoryStore.products.filter(p => 
-    p.name.toLowerCase().includes(q) || 
-    p.brand.toLowerCase().includes(q) || 
-    p.barcode?.includes(q)
-  )
-})
-
-// Keyboard shortcuts
-const { register, unregister } = useKeyboardShortcuts({
-  onSave: () => { showAddModal.value = true },
-  onSearch: () => { document.querySelector('#inventory-search')?.focus() }
-})
-
+// Data fetching
 onMounted(async () => {
   await inventoryStore.loadWarehouses()
   await inventoryStore.fetchInventory()
-  register()
 })
 
-onUnmounted(() => {
-  unregister()
+// Refetch when warehouse or branch changes
+watch(() => inventoryStore.selectedWarehouseId, async () => {
+  await inventoryStore.fetchInventory()
 })
 
-const handleSaveProduct = async (productData) => {
-  isSaving.value = true
-  try {
-    await db.products.add(productData)
-    toast.add({ severity: 'success', summary: t('common.success'), detail: t('inventory.product_added'), life: 3000 })
-    await inventoryStore.fetchInventory()
-    showAddModal.value = false
-  } catch (err) {
-    toast.add({ severity: 'error', summary: t('common.error'), detail: t('inventory.product_failed'), life: 3000 })
-  } finally {
-    isSaving.value = false
-  }
+watch(() => uiStore.selectedBranchId, async () => {
+  await inventoryStore.loadWarehouses()
+})
+
+const columns = [
+  { key: 'name', label: 'المنتج', class: 'min-w-[250px]' },
+  { key: 'sku', label: 'SKU', class: 'font-mono text-xs opacity-60' },
+  { key: 'category', label: 'التصنيف' },
+  { key: 'stock', label: 'المخزون', class: 'text-center' },
+  { key: 'sell_price', label: 'سعر البيع', class: 'text-left font-black' },
+]
+
+const filteredProducts = computed(() => {
+  if (!searchQuery.value) return inventoryStore.products
+  return inventoryStore.products.filter(p => 
+    p.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    p.sku.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    p.category.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+
+const stats = computed(() => [
+  { label: 'إجمالي الأصناف', value: inventoryStore.totalStockItems, icon: Package, color: 'text-primary-500' },
+  { label: 'القيمة التقديرية', value: inventoryStore.totalEstimatedValue.toLocaleString() + ' ج.م', icon: TrendingUp, color: 'text-emerald-500' },
+  { label: 'نواقص المخزن', value: inventoryStore.products.filter(p => p.stock <= p.reorder_point).length, icon: AlertCircle, color: 'text-amber-500' }
+])
+
+const getStatusColor = (stock, reorder) => {
+  if (stock === 0) return 'text-red-500 bg-red-500/10'
+  if (stock <= reorder) return 'text-amber-500 bg-amber-500/10'
+  return 'text-emerald-500 bg-emerald-500/10'
 }
 
-// Re-fetch when warehouse OR branch changes
-watch(() => [inventoryStore.selectedWarehouseId, uiStore.selectedBranchId], async () => {
-  await inventoryStore.loadWarehouses()
-  await inventoryStore.fetchInventory()
-}, { deep: true })
+const getStatusLabel = (stock, reorder) => {
+  if (stock === 0) return 'نفذ المخزون'
+  if (stock <= reorder) return 'مخزون منخفض'
+  return 'متوفر'
+}
+const glassClass = computed(() => {
+  return [
+    'backdrop-blur-xl border transition-all duration-300 shadow-2xl',
+    uiStore.isDark ? 'bg-slate-900/40 border-white/10 shadow-black/20' : 'bg-white/5 border-white/10 shadow-slate-200/50'
+  ]
+})
 </script>
 
 <template>
-  <div class="p-4 md:p-8 space-y-6 md:space-y-8">
-    <!-- Header & Actions -->
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+  <div class="px-6 py-8 md:p-10 space-y-10 animate-in fade-in duration-500 pb-32 md:pb-10">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
       <div>
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-primary-500/10 flex items-center justify-center border border-primary-500/20">
-            <Package class="w-6 h-6 md:w-8 md:h-8 text-primary-500" />
-          </div>
-          <BaseText type="h1">{{ t('common.inventory') }}</BaseText>
-        </div>
-        <div class="mt-2 opacity-80 flex items-center gap-2">
-           <BaseText type="muted">{{ t('inventory.inventory_tracking') }}</BaseText>
-           <BaseText weight="bold" color="primary">| {{ inventoryStore.warehouses.length }} {{ t('inventory.warehouses') }}</BaseText>
+        <BaseText weight="black" size="text-3xl md:text-5xl" class="tracking-tight">{{ t('common.inventory') }}</BaseText>
+        <div class="flex items-center gap-2 mt-3">
+           <Warehouse class="w-4 h-4 opacity-40" />
+           <BaseText type="muted" size="text-sm" class="font-black opacity-60">إدارة المخزون في الفرع الحالي</BaseText>
         </div>
       </div>
       
-      <div class="flex flex-wrap items-center gap-3">
-        <!-- Advanced BaseSelect -->
-        <BaseSelect 
-          v-model="inventoryStore.selectedWarehouseId" 
-          :options="inventoryStore.warehouses" 
-          optionLabel="name" 
+      <!-- Warehouse Selector & Desktop Actions -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        <Dropdown 
+          v-model="inventoryStore.selectedWarehouseId"
+          :options="inventoryStore.warehouses"
+          optionLabel="name"
           optionValue="id"
-          class="!w-full md:!w-72"
-          :placeholder="t('inventory.warehouses')"
+          class="!rounded-2xl !bg-white/5 !border-white/10 !px-4 !py-1 w-full sm:w-64"
+          placeholder="اختر المخزن"
         />
         
-        <div class="flex gap-3 w-full md:w-auto">
-          <Button 
-            class="!bg-slate-100 dark:!bg-white/5 !border-slate-200 dark:!border-white/10 !text-slate-600 dark:!text-slate-300 !px-4 !rounded-2xl flex-1 md:flex-none"
-            @click="inventoryStore.fetchInventory()"
-            :loading="inventoryStore.loading"
-          >
-            <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': inventoryStore.loading }" />
-          </Button>
-
-          <Button 
-            v-can="'manage_warehouses'"
-            severity="secondary"
-            @click="$router.push('/inventory/transfer')"
-            class="!bg-indigo-500/10 !border-indigo-500/20 !text-indigo-600 dark:!text-indigo-400 !px-5 !rounded-2xl font-bold flex items-center gap-2 flex-1 md:flex-none"
-          >
-            <Truck class="w-4 h-4" />
-            <BaseText weight="bold" class="hidden sm:inline !text-indigo-600 dark:!text-indigo-400">{{ t('inventory.transfers') }}</BaseText>
-          </Button>
-
-          <Button 
-            v-can="'edit_inventory'"
+        <div class="hidden md:flex items-center gap-4">
+          <button class="header-icon !bg-white/5 !border-white/10 hover:!bg-white/10 transition-all active:scale-95">
+            <Download class="w-6 h-6" />
+          </button>
+          <button 
+            v-if="authStore.hasPermission('edit_inventory')"
             @click="showAddModal = true"
-            class="!bg-primary-500 hover:!bg-primary-600 !border-none !text-white !px-8 !py-3 !rounded-2xl !font-black shadow-xl shadow-primary-500/20 flex items-center gap-2 transform hover:-translate-y-1 transition-all flex-1 md:flex-none"
+            class="px-8 py-5 bg-primary-600 hover:bg-primary-700 text-white rounded-[1.5rem] font-black text-sm transition-all shadow-2xl shadow-primary-500/30 active:scale-95 flex items-center gap-3"
           >
-            <Plus class="w-5 h-5" />
-            <BaseText weight="black" class="!text-white">{{ t('inventory.add_product') }}</BaseText>
-          </Button>
+            <Plus class="w-6 h-6" />
+            {{ t('inventory.add_product') }}
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Live Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-       <div class="glass p-6 rounded-3xl border border-slate-200 dark:border-white/5 flex items-center gap-5">
-          <div class="w-12 h-12 rounded-2xl bg-primary-500/10 flex items-center justify-center">
-            <Package class="w-6 h-6 text-primary-500" />
+    <!-- Inventory Overview Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+       <div v-for="stat in stats" :key="stat.label" :class="glassClass" class="p-6 md:p-8 rounded-[2.5rem] flex items-center gap-6 active:scale-[0.98] transition-all cursor-pointer">
+          <div :class="[stat.color, 'w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/5 shadow-inner']">
+             <component :is="stat.icon" class="w-7 h-7" />
           </div>
           <div>
-            <BaseText type="label" class="mb-1">{{ t('inventory.total_items') }}</BaseText>
-            <BaseText type="h3">{{ inventoryStore.totalStockItems }}</BaseText>
+             <BaseText type="muted" size="text-[10px]" class="uppercase font-black opacity-40 mb-1 tracking-widest">{{ stat.label }}</BaseText>
+             <BaseText weight="black" size="text-2xl">{{ stat.value }}</BaseText>
           </div>
-       </div>
-       <div class="glass p-6 rounded-3xl border border-slate-200 dark:border-white/5 flex items-center gap-5">
-          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-            <BarChart3 class="w-6 h-6 text-emerald-500" />
-          </div>
-          <div>
-            <BaseText type="label" class="mb-1">{{ t('inventory.estimated_value') }}</BaseText>
-            <div class="flex items-baseline gap-1">
-              <BaseText type="h3">
-                {{ inventoryStore.totalEstimatedValue.toLocaleString() }} 
-              </BaseText>
-              <BaseText type="label" size="text-[10px]">{{ t('common.egp') }}</BaseText>
-            </div>
-          </div>
-       </div>
-       <div class="glass p-6 rounded-3xl border border-slate-200 dark:border-white/5 flex items-center gap-5">
-          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-            <History class="w-6 h-6 text-amber-500" />
-          </div>
-          <div>
-            <BaseText type="label" class="mb-1">{{ t('inventory.low_stock') }}</BaseText>
-            <BaseText type="h3" color="amber">
-              {{ inventoryStore.products.filter(p => p.stock <= p.reorder_point).length }}
-            </BaseText>
-          </div>
-       </div>
-       <div class="glass p-6 rounded-3xl border border-slate-200 dark:border-white/5 flex items-center justify-center gap-5 relative overflow-hidden group">
-          <Button text class="w-full h-full !p-0 !rounded-none">
-            <div class="flex items-center gap-3">
-              <FileText class="w-6 h-6 text-slate-400 group-hover:text-primary-500 transition-colors" />
-              <BaseText type="body" weight="bold" class="group-hover:!text-primary-500 transition-colors">{{ t('inventory.item_ledger') }}</BaseText>
-            </div>
-          </Button>
        </div>
     </div>
 
-    <!-- Search & Filter Bar -->
-    <div class="flex items-center gap-4 bg-white dark:bg-white/5 p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
-       <div class="relative flex-1">
-         <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-         <InputText 
-           id="inventory-search"
-           v-model="searchQuery" 
-           :placeholder="t('common.search_placeholder')"
-           class="w-full !pl-12 !py-3 !bg-transparent !border-none !rounded-xl focus:!ring-0 !text-slate-700 dark:!text-slate-200"
-         />
-       </div>
-       <Button text class="!text-slate-400 hidden sm:flex items-center gap-2">
-         <Filter class="w-4 h-4" />
-         <BaseText weight="bold" class="!text-slate-400">{{ t('common.filters') }}</BaseText>
-       </Button>
+    <!-- Filters & Search -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div class="md:col-span-8 relative group">
+        <div class="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 opacity-20 group-focus-within:opacity-100 transition-opacity">
+          <Search />
+        </div>
+        <input 
+          v-model="searchQuery"
+          type="text" 
+          placeholder="ابحث عن منتج، كود SKU، أو تصنيف..."
+          class="w-full bg-white/5 border border-white/10 rounded-[2rem] py-6 pr-16 pl-8 text-base focus:outline-none focus:border-primary-500/50 focus:ring-8 focus:ring-primary-500/5 transition-all font-bold placeholder:opacity-30"
+        />
+      </div>
+      <div class="md:col-span-4">
+        <button class="w-full flex items-center justify-center gap-4 bg-white/5 border border-white/10 rounded-[2rem] py-6 px-8 font-black text-xs uppercase tracking-widest hover:bg-white/10 active:scale-95 transition-all">
+          <Filter class="w-6 h-6 opacity-40" />
+          تصفية النتائج
+        </button>
+      </div>
     </div>
 
-    <!-- Main Table / Mobile View -->
-    <BaseTable 
-      :value="filteredProducts" 
-      :loading="inventoryStore.loading"
-      :emptyMessage="t('pos.no_products')"
-    >
-      <Column field="name" :header="t('inventory.add_product')" sortable>
-          <template #body="slotProps">
-            <div class="flex items-center gap-4">
-              <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/10 flex items-center justify-center">
-                 <Smartphone v-if="slotProps.data.category === 'Smartphones' || slotProps.data.category === 'هواتف ذكية'" class="w-5 h-5 text-slate-500" />
-                 <Laptop v-else class="w-5 h-5 text-slate-500" />
+    <!-- Main Table / Card View -->
+    <BaseTable :columns="columns" :items="filteredProducts" :loading="inventoryStore.loading">
+      <!-- Desktop Cell Overrides -->
+      <template #cell(name)="{ item }">
+        <div class="flex items-center gap-5">
+           <div class="w-14 h-14 rounded-2xl bg-primary-500/10 flex items-center justify-center text-primary-500 border border-primary-500/10 shadow-inner overflow-hidden relative">
+              <Package class="w-7 h-7" />
+              <div v-if="item.stock === 0" class="absolute inset-0 bg-red-500/20 backdrop-blur-[2px]"></div>
+           </div>
+           <div>
+              <BaseText weight="black" size="text-base" class="block">{{ item.name }}</BaseText>
+              <div class="flex items-center gap-2 mt-2">
+                 <BaseText type="muted" size="text-[10px]" class="font-black uppercase tracking-tighter">{{ item.brand }}</BaseText>
+                 <div :class="[getStatusColor(item.stock, item.reorder_point), 'px-2 py-0.5 rounded-lg text-[9px] font-black uppercase']">
+                    {{ getStatusLabel(item.stock, item.reorder_point) }}
+                 </div>
               </div>
-              <div class="flex flex-col">
-                <BaseText type="body" weight="bold">{{ slotProps.data.name }}</BaseText>
-                <BaseText type="label" size="text-[8px]">{{ slotProps.data.brand }}</BaseText>
-              </div>
-            </div>
-          </template>
-        </Column>
-        
-        <Column field="category" :header="t('inventory.category')" sortable>
-          <template #body="slotProps">
-            <div class="px-3 py-1 rounded-lg bg-primary-500/10 border border-primary-500/20 inline-block">
-               <BaseText weight="black" color="primary" size="text-[10px]" class="uppercase tracking-tighter">{{ slotProps.data.category }}</BaseText>
-            </div>
-          </template>
-        </Column>
+           </div>
+        </div>
+      </template>
 
-        <Column field="stock" :header="t('inventory.stock')" sortable>
-          <template #body="slotProps">
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2">
-                <div class="w-2 h-2 rounded-full shadow-[0_0_10px]" :class="slotProps.data.stock <= slotProps.data.reorder_point ? 'bg-amber-500 shadow-amber-500/50' : 'bg-emerald-500 shadow-emerald-500/50'"></div>
-                <BaseText type="h3" :color="slotProps.data.stock <= slotProps.data.reorder_point ? 'amber' : 'emerald'">{{ slotProps.data.stock }}</BaseText>
-              </div>
-              <div v-if="slotProps.data.stock <= slotProps.data.reorder_point" class="bg-amber-500/10 px-2 py-0.5 rounded-full self-start">
-                <BaseText weight="black" color="amber" size="text-[8px]" class="uppercase">{{ t('inventory.low_stock') }}</BaseText>
-              </div>
-            </div>
-          </template>
-        </Column>
+      <template #cell(sell_price)="{ value }">
+         <div class="flex flex-col items-end">
+            <BaseText weight="black" size="text-base">{{ value.toLocaleString() }} ج.م</BaseText>
+            <BaseText size="text-[10px]" class="opacity-30 font-bold uppercase">سعر البيع المقترح</BaseText>
+         </div>
+      </template>
 
-        <Column field="sell_price" :header="t('pos.price')" sortable>
-           <template #body="slotProps">
-             <div class="flex flex-col">
-                <BaseText type="body" weight="black">{{ slotProps.data.sell_price.toLocaleString() }}</BaseText>
-                <BaseText type="label" size="text-[8px]">{{ t('common.egp') }}</BaseText>
+      <!-- Mobile Card Customization -->
+      <template #card-header="{ item }">
+        <div class="w-14 h-14 rounded-2xl bg-primary-500/10 flex items-center justify-center text-primary-500 border border-primary-500/10 shadow-inner">
+            <Package class="w-7 h-7" />
+        </div>
+        <div>
+          <BaseText weight="black" size="text-lg" class="leading-tight">{{ item.name }}</BaseText>
+          <div class="flex items-center gap-2 mt-1.5">
+             <BaseText type="muted" size="text-[10px]" class="font-black uppercase">{{ item.brand }}</BaseText>
+             <div :class="[getStatusColor(item.stock, item.reorder_point), 'px-2 py-0.5 rounded-lg text-[9px] font-black uppercase']">
+                {{ getStatusLabel(item.stock, item.reorder_point) }}
              </div>
-           </template>
-        </Column>
-
-        <Column class="w-20">
-          <template #body>
-            <Button text rounded severity="secondary" class="!p-2">
-              <MoreVertical class="w-5 h-5 text-slate-400" />
-            </Button>
-          </template>
-        </Column>
-
-      <template #mobile-card="{ data: product }">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/10 flex items-center justify-center">
-                 <Smartphone v-if="product.category === 'Smartphones' || product.category === 'هواتف ذكية'" class="w-6 h-6 text-slate-500" />
-                 <Laptop v-else class="w-6 h-6 text-slate-500" />
-              </div>
-              <div class="flex flex-col">
-                <BaseText type="body" weight="black" size="text-lg">{{ product.name }}</BaseText>
-                <BaseText type="label">{{ product.brand }}</BaseText>
-              </div>
-            </div>
-            <Button text rounded severity="secondary">
-              <MoreVertical class="w-5 h-5" />
-            </Button>
           </div>
+        </div>
+      </template>
 
-          <div class="flex items-center justify-between pt-2">
-            <div class="flex flex-col gap-1">
-              <BaseText type="label">{{ t('inventory.stock') }}</BaseText>
-              <div class="flex items-center gap-2">
-                <div class="w-2 h-2 rounded-full" :class="product.stock <= product.reorder_point ? 'bg-amber-500' : 'bg-emerald-500'"></div>
-                <BaseText type="h2" :color="product.stock <= product.reorder_point ? 'amber' : 'emerald'">{{ product.stock }}</BaseText>
-              </div>
-            </div>
-            <div class="flex flex-col items-end gap-1">
-              <BaseText type="label">{{ t('pos.price') }}</BaseText>
-              <div class="flex items-baseline gap-1">
-                <BaseText type="h2" color="primary">{{ product.sell_price.toLocaleString() }}</BaseText>
-                <BaseText type="label" size="text-[10px]">{{ t('common.egp') }}</BaseText>
-              </div>
-            </div>
-          </div>
+      <template #card-actions="{ item }">
+         <div class="flex items-center gap-2 w-full">
+            <button class="flex-1 h-12 bg-white/5 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-90 transition-all">
+               <Edit2 class="w-4 h-4 opacity-40" />
+               تعديل
+            </button>
+            <button class="flex-1 h-12 bg-white/5 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest active:scale-90 transition-all">
+               <ArrowRightLeft class="w-4 h-4 opacity-40" />
+               تحويل
+            </button>
+            <button class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center active:scale-90 transition-all">
+               <History class="w-5 h-5 opacity-40" />
+            </button>
+         </div>
       </template>
     </BaseTable>
 
-    <!-- Dumb Modal -->
-    <AddProductModal 
-      v-model:visible="showAddModal" 
-      :loading="isSaving"
-      @save="handleSaveProduct" 
-    />
+    <!-- Mobile Sticky Action Bar -->
+    <div v-if="authStore.hasPermission('edit_inventory')" class="md:hidden fixed bottom-6 left-6 right-6 z-50 flex items-center justify-center pointer-events-none">
+       <button @click="showAddModal = true" class="pointer-events-auto w-full max-w-md h-20 bg-primary-600 text-white rounded-[2.5rem] shadow-[0_25px_50px_rgba(79,70,229,0.4)] flex items-center justify-center gap-4 font-black text-xl active:scale-95 transition-all border border-white/20">
+          <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+             <Plus class="w-6 h-6" />
+          </div>
+          {{ t('inventory.add_product') }}
+       </button>
+    </div>
+
+    <!-- Modals -->
+    <AddProductModal v-model:visible="showAddModal" @saved="inventoryStore.fetchInventory" />
   </div>
 </template>
 
 <style scoped>
-/* Scoped styles removed to avoid Tailwind v4 @apply issues */
+/* Removed glass class to fix Tailwind v4 @apply issues */
 </style>

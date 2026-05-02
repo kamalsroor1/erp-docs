@@ -169,3 +169,34 @@ src/
 - **Business Logic**: 100% test coverage for calculations and state updates (Composables/Stores).
 - **TDD Approach**: Write tests before logic for critical financial functions.
 - **Mocking**: Mock all API calls to ensure test independence.
+
+---
+
+## 📱 10. Mobile-First & Touch UX Protocol [STRICT]
+
+### 👆 10.1 Touch-Target Excellence (Affordance)
+- **The Finger Rule**: Every interactive element (Button, Link, Tab) MUST have a minimum touch target of **44x44px**.
+- **Visual Cues (Clickability)**: Never use "Naked Text" for primary actions.
+    - Interactive elements must be enclosed in a **Container (Box/Card)** with a subtle border or background color (e.g., `bg-gray-50` or `border-slate-200`) to signal to the user: "You can tap here".
+    - Add `active:scale-95` and `transition-all` to all clickable boxes to provide tactile visual feedback.
+
+### 🃏 10.2 Table-to-Card Transformation
+- **No Horizontal Scrolling**: Large DataTables are strictly forbidden on mobile screens (<768px).
+- **Card View Pattern**: Implement a responsive logic that switches `BaseTable` into a **Vertical Card List**.
+    - Each row becomes a card.
+    - Key data (e.g., Total Price, Status) should be highlighted in the card header.
+    - Secondary data (e.g., SKU, Date) should be in a smaller, dimmer font.
+
+### 🛠️ 10.3 Mobile Navigation & Actions
+- **Sticky Action Bars**: On mobile forms (e.g., adding a product), the "Save/Submit" button MUST be pinned to the bottom of the viewport in a **sticky container** to be reachable by the thumb.
+- **Swipe Actions**: For list items (Inventory/Orders), implement (or simulate) swipe-to-delete or swipe-to-edit where intuitive.
+- **Bottom Sheets over Modals**: Use "Bottom Sheets" (sliding up from the bottom) instead of centered Modals for selection menus and quick filters on mobile.
+
+### 📏 10.4 Adaptive Layout Rules
+- **Padding Harmony**: Increase side padding to `px-6` on mobile to prevent content from hitting the screen edges.
+- **Typography Scaling**: Scale down headers (e.g., `text-2xl` becomes `text-xl`) but keep body text at **16px minimum** to ensure readability without zooming.
+- **Input Optimization**:
+    - Use `inputmode="decimal"` for numeric fields (Price, Qty) to trigger the numeric keypad automatically.
+    - Labels must always stay **Above** the input, never to the side.
+
+---

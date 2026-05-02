@@ -1,270 +1,250 @@
 <script setup>
 /**
  * @file Dashboard.vue
- * @description High-fidelity dashboard for Ebraa ERP.
- * Follows ERP standards: Modular i18n, BaseText, Premium UX, Dexie.js.
+ * @description ERP Dashboard with RBAC (Role-Based Access Control) and Full-Screen Analysis.
+ * Implements Section 10 Protocol: active:scale-95 and px-6 padding.
  */
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useUIStore } from '../../stores/ui'
-import { db } from '../../database/db'
+import { useAuthStore } from '../../stores/auth'
 import { 
   TrendingUp, 
   Users, 
   Package, 
-  DollarSign, 
+  ShoppingCart, 
   ArrowUpRight, 
-  ArrowDownRight,
-  Clock,
-  ChevronRight,
-  RefreshCcw
+  ArrowDownLeft,
+  Plus,
+  BarChart3,
+  Settings,
+  Truck,
+  CreditCard,
+  History,
+  ClipboardCheck,
+  UserPlus,
+  Maximize2,
+  Download
 } from 'lucide-vue-next'
-import Button from 'primevue/button'
 import BaseText from '../../components/base/BaseText.vue'
-import { Line } from 'vue-chartjs'
-import { 
-  Chart as ChartJS, 
-  Title, 
-  Tooltip, 
-  Legend, 
-  LineElement, 
-  LinearScale, 
-  PointElement, 
-  CategoryScale,
-  Filler
-} from 'chart.js'
-import { generateRealisticData } from '../../services/dataGenerator'
-import { useToast } from 'primevue/usetoast'
-
-ChartJS.register(Title, Tooltip, Legend, LineElement, LinearScale, PointElement, CategoryScale, Filler)
+import Chart from 'primevue/chart'
+import Dialog from 'primevue/dialog'
 
 const { t } = useI18n()
 const uiStore = useUIStore()
-const toast = useToast()
+const authStore = useAuthStore()
 
-const stats = ref({
-  totalSales: 0,
-  customersCount: 0,
-  productsCount: 0,
-  todayProfit: 0
-})
+const showAnalysisModal = ref(false)
 
-const loading = ref(true)
-
-const fetchDashboardStats = async () => {
-  loading.value = true
-  const branchId = parseInt(uiStore.selectedBranchId)
-  
-  // 1. Get total products
-  stats.value.productsCount = await db.products.count()
-  
-  // 2. Get total customers
-  stats.value.customersCount = await db.customers.count()
-  
-  // 3. Get Sales & Profit (Simulated from invoices tied to branch)
-  const invoices = await db.invoices.where('branch_id').equals(branchId).toArray()
-  stats.value.totalSales = invoices.reduce((acc, inv) => acc + inv.total, 0)
-  stats.value.todayProfit = stats.value.totalSales * 0.15 // Simulate 15% profit
-  
-  loading.value = false
-}
-
-const handleResetData = async () => {
-  await generateRealisticData()
-  toast.add({ severity: 'success', summary: t('common.success'), detail: t('common.loading'), life: 3000 })
-  await fetchDashboardStats()
-}
-
-onMounted(() => {
-  fetchDashboardStats()
-})
-
-watch(() => uiStore.selectedBranchId, () => {
-  fetchDashboardStats()
-})
-
-const chartData = computed(() => ({
-  labels: [t('dashboard.sun'), t('dashboard.mon'), t('dashboard.tue'), t('dashboard.wed'), t('dashboard.thu'), t('dashboard.fri'), t('dashboard.sat')],
-  datasets: [
-    {
-      label: t('dashboard.revenue'),
-      data: [30, 45, 25, 60, 40, 85, 50],
-      borderColor: '#10b981',
-      backgroundColor: 'rgba(16, 185, 129, 0.1)',
-      fill: true,
-      tension: 0.4,
-      pointRadius: 0
+// Statistics mapping
+const stats = computed(() => {
+  const allStats = [
+    { 
+      title: t('dashboard.revenue'), 
+      value: '45,230 ج.م', 
+      change: '+12.5%', 
+      up: true, 
+      icon: TrendingUp, 
+      color: 'bg-emerald-500',
+      permission: 'view_reports'
+    },
+    { 
+      title: t('dashboard.orders'), 
+      value: '124', 
+      change: '+8.2%', 
+      up: true, 
+      icon: ShoppingCart, 
+      color: 'bg-primary-500',
+      permission: 'make_sales'
+    },
+    { 
+      title: t('common.customers'), 
+      value: '1,240', 
+      change: '+4.1%', 
+      up: true, 
+      icon: Users, 
+      color: 'bg-indigo-500',
+      permission: 'view_customers'
+    },
+    { 
+      title: t('dashboard.stock_alerts'), 
+      value: '12', 
+      change: '-2', 
+      up: false, 
+      icon: Package, 
+      color: 'bg-amber-500',
+      permission: 'view_inventory'
     }
   ]
-}))
+  return allStats.filter(s => !s.permission || authStore.hasPermission(s.permission))
+})
 
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
+// Quick Access Grid with Permission check
+const quickActions = computed(() => {
+  const actions = [
+    { label: t('dashboard.new_sale'), icon: Plus, color: 'bg-emerald-500', path: '/pos', perm: 'make_sales' },
+    { label: t('common.inventory'), icon: Package, color: 'bg-primary-500', path: '/inventory', perm: 'view_inventory' },
+    { label: t('dashboard.reports'), icon: BarChart3, color: 'bg-indigo-500', path: '/reports', perm: 'view_reports' },
+    { label: t('dashboard.inventory_audit'), icon: ClipboardCheck, color: 'bg-amber-500', path: '/inventory/audit', perm: 'edit_inventory' },
+    { label: t('common.customers'), icon: UserPlus, color: 'bg-pink-500', path: '/customers', perm: 'view_customers' },
+    { label: t('dashboard.suppliers'), icon: Truck, color: 'bg-slate-500', path: '/suppliers', perm: 'view_inventory' },
+    { label: t('dashboard.expenses'), icon: CreditCard, color: 'bg-red-500', path: '/expenses', perm: 'view_reports' },
+    { label: t('dashboard.stock_transfer'), icon: ArrowUpRight, color: 'bg-cyan-500', path: '/inventory/transfer', perm: 'edit_inventory' },
+    { label: t('dashboard.history'), icon: History, color: 'bg-purple-500', path: '/history', perm: 'view_reports' },
+    { label: t('dashboard.settings'), icon: Settings, color: 'bg-slate-700', path: '/settings', perm: 'manage_system' },
+    { label: t('dashboard.employees'), icon: Users, color: 'bg-blue-600', path: '/employees', perm: 'manage_system' }
+  ]
+  return actions.filter(a => authStore.hasPermission(a.perm))
+})
+
+const chartData = ref({
+  labels: ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+  datasets: [
+    {
+      label: 'المبيعات الأسبوعية',
+      data: [65000, 59000, 80000, 81000, 56000, 55000, 40000],
+      fill: true,
+      borderColor: '#6366f1',
+      backgroundColor: 'rgba(99, 102, 241, 0.1)',
+      tension: 0.4,
+      pointRadius: 6,
+      pointBackgroundColor: '#6366f1'
+    }
+  ]
+})
+
+const chartOptions = computed(() => ({
   plugins: {
-    legend: { display: false },
-    tooltip: { mode: 'index', intersect: false }
+    legend: { display: false }
   },
   scales: {
-    x: { display: false },
-    y: { display: false }
-  }
-}
+    y: { 
+      display: true, 
+      grid: { color: uiStore.isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+      ticks: { color: uiStore.isDark ? '#94a3b8' : '#64748b' }
+    },
+    x: { 
+      grid: { display: false },
+      ticks: { color: uiStore.isDark ? '#94a3b8' : '#64748b' }
+    }
+  },
+  maintainAspectRatio: false
+}))
+
+const cardClass = computed(() => {
+  return [
+    'backdrop-blur-xl border transition-all duration-300 shadow-2xl rounded-[2.5rem]',
+    uiStore.isDark 
+      ? 'bg-slate-900/40 border-white/10 shadow-black/20' 
+      : 'bg-white/70 border-slate-200/50 shadow-slate-200/50'
+  ]
+})
 </script>
 
 <template>
-  <div class="p-4 md:p-8 space-y-6 md:space-y-10">
+  <div class="px-6 py-6 md:p-10 space-y-8 md:space-y-12 animate-in fade-in duration-700">
     <!-- Welcome Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
       <div>
-        <BaseText type="h1">{{ t('common.dashboard') }}</BaseText>
-        <div class="flex items-center gap-2 mt-2">
-          <Clock class="w-4 h-4 text-primary-500" />
-          <BaseText type="muted">{{ t('dashboard.performance_overview') }}</BaseText>
-        </div>
+        <BaseText weight="black" size="text-3xl md:text-5xl" class="tracking-tight">{{ t('common.welcome') }}, 👋</BaseText>
+        <BaseText type="muted" size="text-sm md:text-base" class="mt-2 font-black opacity-60">{{ t('dashboard.subtitle') }}</BaseText>
       </div>
-      <div class="flex gap-3">
-        <Button 
-          @click="handleResetData"
-          :loading="loading"
-          text class="!text-slate-400 hover:!bg-white/5 !px-4 !py-2 !rounded-xl !border !border-slate-200 dark:!border-white/10"
-        >
-          <RefreshCcw class="w-4 h-4 mr-2" />
-          <BaseText weight="bold" size="text-xs" class="!text-slate-400">{{ t('common.refresh_data') }}</BaseText>
-        </Button>
-        <div class="hidden md:flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
-          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-          <BaseText weight="black" color="emerald" size="text-[10px]" class="uppercase tracking-widest">{{ t('common.just_now') }}</BaseText>
-        </div>
+      <div v-if="authStore.hasPermission('make_sales')" class="flex items-center gap-4">
+        <button class="flex-1 md:flex-none px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white rounded-[1.5rem] font-black text-sm transition-all shadow-xl shadow-primary-500/30 active:scale-95 flex items-center justify-center gap-2">
+          <Plus class="w-6 h-6" />
+          {{ t('dashboard.new_sale') }}
+        </button>
       </div>
     </div>
 
-    <!-- Stats Grid (PWA optimized) -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-      <div class="bg-white/5 backdrop-blur-lg border border-white/10 shadow-xl dark:bg-white/5 dark:border-white/10 p-5 md:p-8 rounded-3xl md:rounded-[2rem] transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl shadow-inner group bg-white/80 border-slate-200 shadow-sm dark:bg-white/5 dark:border-white/10">
-        <div class="flex items-start justify-between mb-4">
-          <div class="p-3 md:p-4 rounded-2xl bg-primary-500/10 border border-primary-500/20 group-hover:bg-primary-500 group-hover:text-white transition-all duration-500">
-            <TrendingUp class="w-6 h-6" />
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+      <div 
+        v-for="stat in stats" 
+        :key="stat.title"
+        :class="cardClass"
+        class="p-8 hover:translate-y-[-8px] active:scale-95 transition-all group relative overflow-hidden cursor-pointer"
+      >
+        <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors"></div>
+        
+        <div class="flex items-center justify-between mb-8">
+          <div :class="[stat.color, 'w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-black/10 transition-transform group-hover:rotate-12 group-hover:scale-110']">
+            <component :is="stat.icon" class="w-8 h-8" />
           </div>
-          <div class="flex items-center gap-1 text-emerald-500 font-bold text-[10px] md:text-xs">
-            <ArrowUpRight class="w-3 h-3 md:w-4 md:h-4" />
-            <BaseText weight="bold" color="emerald" size="text-xs">12%</BaseText>
-          </div>
-        </div>
-        <BaseText type="label" class="mb-1">{{ t('dashboard.revenue') }}</BaseText>
-        <div class="flex items-baseline gap-1">
-          <BaseText type="h2" class="!text-2xl md:!text-3xl">
-            {{ stats.totalSales.toLocaleString() }} 
-          </BaseText>
-          <BaseText type="label" size="text-[10px]">{{ t('common.egp') }}</BaseText>
-        </div>
-      </div>
-
-      <div class="bg-white/5 backdrop-blur-lg border border-white/10 shadow-xl dark:bg-white/5 dark:border-white/10 p-5 md:p-8 rounded-3xl md:rounded-[2rem] transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl shadow-inner group bg-white/80 border-slate-200 shadow-sm dark:bg-white/5 dark:border-white/10">
-        <div class="flex items-start justify-between mb-4">
-          <div class="p-3 md:p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-500">
-            <Users class="w-6 h-6" />
-          </div>
-          <div class="flex items-center gap-1 text-emerald-500 font-bold text-[10px] md:text-xs">
-            <ArrowUpRight class="w-3 h-3 md:w-4 md:h-4" />
-            <BaseText weight="bold" color="emerald" size="text-xs">5.2%</BaseText>
+          <div :class="[stat.up ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500', 'px-4 py-1.5 rounded-full text-[11px] font-black flex items-center gap-1.5 uppercase tracking-widest']">
+            {{ stat.change }}
+            <ArrowUpRight v-if="stat.up" class="w-3.5 h-3.5" />
+            <ArrowDownLeft v-else class="w-3.5 h-3.5" />
           </div>
         </div>
-        <BaseText type="label" class="mb-1">{{ t('common.customers') }}</BaseText>
-        <BaseText type="h2" class="!text-2xl md:!text-3xl">{{ stats.customersCount }}</BaseText>
-      </div>
-
-      <div class="bg-white/5 backdrop-blur-lg border border-white/10 shadow-xl dark:bg-white/5 dark:border-white/10 p-5 md:p-8 rounded-3xl md:rounded-[2rem] transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl shadow-inner group bg-white/80 border-slate-200 shadow-sm dark:bg-white/5 dark:border-white/10">
-        <div class="flex items-start justify-between mb-4">
-          <div class="p-3 md:p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 group-hover:bg-amber-500 group-hover:text-white transition-all duration-500">
-            <Package class="w-6 h-6" />
-          </div>
-          <div class="flex items-center gap-1 text-red-500 font-bold text-[10px] md:text-xs">
-            <ArrowDownRight class="w-3 h-3 md:w-4 md:h-4" />
-            <BaseText weight="bold" color="danger" size="text-xs">2.1%</BaseText>
-          </div>
-        </div>
-        <BaseText type="label" class="mb-1">{{ t('common.inventory') }}</BaseText>
-        <BaseText type="h2" class="!text-2xl md:!text-3xl">{{ stats.productsCount }}</BaseText>
-      </div>
-
-      <div class="bg-white/5 backdrop-blur-lg border border-white/10 shadow-xl dark:bg-white/5 dark:border-white/10 p-5 md:p-8 rounded-3xl md:rounded-[2rem] transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl shadow-inner group bg-white/80 border-slate-200 shadow-sm dark:bg-white/5 dark:border-white/10">
-        <div class="flex items-start justify-between mb-4">
-          <div class="p-3 md:p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-500">
-            <DollarSign class="w-6 h-6" />
-          </div>
-          <div class="flex items-center gap-1 text-emerald-500 font-bold text-[10px] md:text-xs">
-            <ArrowUpRight class="w-3 h-3 md:w-4 md:h-4" />
-            <BaseText weight="bold" color="emerald" size="text-xs">18%</BaseText>
-          </div>
-        </div>
-        <BaseText type="label" class="mb-1">{{ t('dashboard.profit') }}</BaseText>
-        <div class="flex items-baseline gap-1">
-          <BaseText type="h2" class="!text-2xl md:!text-3xl">
-            {{ stats.todayProfit.toLocaleString() }} 
-          </BaseText>
-          <BaseText type="label" size="text-[10px]">{{ t('common.egp') }}</BaseText>
-        </div>
+        
+        <BaseText weight="black" size="text-3xl" class="block leading-none">{{ stat.value }}</BaseText>
+        <BaseText type="muted" size="text-xs" class="mt-3 font-black uppercase tracking-widest opacity-40">{{ stat.title }}</BaseText>
       </div>
     </div>
 
     <!-- Main Content Area -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <!-- Sales Chart Tile -->
-      <div class="lg:col-span-2 glass-dark p-8 md:p-10 rounded-[2.5rem] border border-white/5 relative overflow-hidden group min-h-[400px] flex flex-col">
-        <div class="relative z-10 flex items-center justify-between mb-10">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+      <!-- Chart Preview Area -->
+      <div v-if="authStore.hasPermission('view_reports')" :class="cardClass" class="lg:col-span-7 p-8 md:p-12 flex flex-col group overflow-hidden active:scale-[0.99] transition-all cursor-pointer" @click="showAnalysisModal = true">
+        <div class="flex items-center justify-between mb-10">
           <div>
-            <BaseText type="h3" class="!text-white mb-2">{{ t('dashboard.sales_analysis') }}</BaseText>
-            <BaseText type="muted" class="!text-slate-400">{{ t('dashboard.weekly_performance') }}</BaseText>
+            <BaseText weight="black" size="text-2xl md:text-3xl">{{ t('dashboard.sales_chart') }}</BaseText>
+            <BaseText type="muted" size="text-xs" class="mt-2 font-black uppercase tracking-widest opacity-40">{{ t('dashboard.weekly_performance') }}</BaseText>
           </div>
-          <div class="flex gap-2">
-            <Button text class="!text-xs !font-bold !text-primary-400 !bg-primary-500/10 !px-4 !py-2 !rounded-xl">
-              <BaseText weight="black" color="primary" size="text-[10px]">7 {{ t('dashboard.days') }}</BaseText>
-            </Button>
-            <Button text class="!text-xs !font-bold !text-slate-500 !px-4 !py-2 !rounded-xl">
-              <BaseText weight="bold" size="text-[10px]" class="!text-slate-500">30 {{ t('dashboard.days') }}</BaseText>
-            </Button>
-          </div>
+          <button class="header-icon !bg-primary-500/10 !text-primary-500 hover:!bg-primary-500 hover:!text-white transition-all shadow-lg shadow-primary-500/10">
+             <Maximize2 class="w-6 h-6" />
+          </button>
         </div>
-        
-        <div class="flex-1 w-full mt-auto">
-          <Line :data="chartData" :options="chartOptions" />
+        <div class="h-64 md:h-80 w-full relative">
+          <Chart type="line" :data="chartData" :options="chartOptions" class="h-full" />
         </div>
       </div>
 
-      <!-- Quick Action Tiles -->
-      <div class="grid grid-cols-1 gap-6">
-        <div @click="$router.push('/pos')" class="p-8 md:p-10 rounded-[2.5rem] flex flex-col justify-between transition-all duration-500 transform hover:-translate-y-2 hover:shadow-2xl bg-gradient-to-br from-primary-600 to-indigo-700 cursor-pointer group">
-          <div class="flex items-center justify-between w-full">
-            <div class="p-4 rounded-2xl bg-white/10 border border-white/10 group-hover:scale-110 transition-transform">
-              <TrendingUp class="w-8 h-8 text-white" />
-            </div>
-            <ChevronRight class="w-6 h-6 text-white/50" />
-          </div>
-          <div>
-            <BaseText type="h3" class="!text-white mb-1">{{ t('common.pos') }}</BaseText>
-            <BaseText type="muted" class="!text-white/60">{{ t('common.new_transaction') }}</BaseText>
-          </div>
+      <!-- Quick Access Area -->
+      <div :class="[cardClass, !authStore.hasPermission('view_reports') ? 'lg:col-span-12' : 'lg:col-span-5']" class="p-8 md:p-12">
+        <div class="mb-10">
+          <BaseText weight="black" size="text-2xl md:text-3xl">{{ t('dashboard.quick_access') }}</BaseText>
+          <BaseText type="muted" size="text-xs" class="mt-2 font-black uppercase tracking-widest opacity-40">{{ t('dashboard.quick_access_desc') }}</BaseText>
         </div>
-
-        <div @click="$router.push('/inventory')" class="p-8 md:p-10 rounded-[2.5rem] flex flex-col justify-between transition-all duration-500 transform hover:-translate-y-2 hover:shadow-2xl bg-slate-900 border border-white/5 group cursor-pointer overflow-hidden">
-          <div class="absolute -right-10 -top-10 w-40 h-40 bg-primary-500/5 rounded-full blur-3xl"></div>
-          <div class="flex items-center justify-between w-full relative z-10">
-            <div class="p-4 rounded-2xl bg-primary-500/10 border border-primary-500/20 group-hover:rotate-12 transition-transform">
-              <Package class="w-8 h-8 text-primary-400" />
+        
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6" :class="!authStore.hasPermission('view_reports') ? 'lg:grid-cols-6' : 'lg:grid-cols-4'">
+          <router-link 
+            v-for="action in quickActions" 
+            :key="action.label" 
+            :to="action.path"
+            class="flex flex-col items-center gap-4 p-5 md:p-6 rounded-[2rem] transition-all hover:bg-white/5 border border-transparent hover:border-white/10 active:scale-95 group"
+          >
+            <div :class="[action.color, 'w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-xl group-hover:rotate-6 transition-transform shadow-black/10']">
+              <component :is="action.icon" class="w-7 h-7" />
             </div>
-            <ChevronRight class="w-6 h-6 text-slate-600" />
-          </div>
-          <div class="relative z-10">
-            <BaseText type="h3" class="!text-white mb-1">{{ t('common.inventory') }}</BaseText>
-            <BaseText type="muted" class="!text-slate-400">{{ t('inventory.stock_audit') }}</BaseText>
-          </div>
+            <BaseText weight="black" size="text-[11px]" class="text-center font-black uppercase tracking-tighter leading-tight">{{ action.label }}</BaseText>
+          </router-link>
         </div>
       </div>
     </div>
+
+    <!-- Sales Analysis Detailed Modal -->
+    <Dialog v-model:visible="showAnalysisModal" modal :header="t('dashboard.sales_chart')" class="!max-w-[95vw] !w-[1000px] !rounded-[3rem] overflow-hidden" :breakpoints="{ '1024px': '90vw', '768px': '100vw' }">
+      <template #header>
+        <div class="flex items-center justify-between w-full pr-8">
+           <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-primary-500/10 rounded-2xl flex items-center justify-center text-primary-500">
+                 <BarChart3 class="w-7 h-7" />
+              </div>
+              <div>
+                 <BaseText weight="black" size="text-2xl">{{ t('dashboard.sales_chart') }}</BaseText>
+                 <BaseText type="muted" size="text-[10px]" class="uppercase font-black opacity-40">تحليل تفصيلي للفترة الحالية</BaseText>
+              </div>
+           </div>
+        </div>
+      </template>
+
+      <div class="space-y-10">
+        <div class="h-[450px] w-full">
+           <Chart type="line" :data="chartData" :options="{ ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, display: true } } }" class="h-full" />
+        </div>
+      </div>
+    </Dialog>
   </div>
 </template>
-
-<style scoped>
-/* No more complex @apply rules here to avoid Tailwind v4 build issues */
-</style>
